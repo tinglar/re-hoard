@@ -22,5 +22,7 @@ Wait...
 
 # CONTROLS
 ←↓↑→: move
+
 Z: Breathe fire
+
 X: (not used)
