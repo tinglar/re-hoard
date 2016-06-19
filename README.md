@@ -8,6 +8,7 @@ This game is licensed under the GPLv3. This game uses material under a CC-BY lic
 
 # CREDITS
 The music comes from 0xabad1dea's Glorytales (https://github.com/0xabad1dea/glorytales/).
+The dungeon generator comes from here: http://www.dangerousru.in/p8/p8gen.html
 The rest of the game comes from Tinglar, that is, me.
 
 # USAGE
