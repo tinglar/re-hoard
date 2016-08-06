@@ -7,7 +7,8 @@ Restore your hard-earned hoard from the knights! (Pico-8)
 This game is licensed under the GPLv3. This game uses material under a CC-BY license.
 
 # CREDITS
-The music comes from 0xabad1dea's Glorytales (https://github.com/0xabad1dea/glorytales/).
+The title music comes from 0xabad1dea's "Glorytales" (https://github.com/0xabad1dea/glorytales/).
+The gameplay music comes from Robby Duguay's "Nine Songs in Pico-8" (http://www.lexaloffle.com/bbs/?tid=2619).
 
 The dungeon generator comes from here: http://www.dangerousru.in/p8/p8gen.html
 
