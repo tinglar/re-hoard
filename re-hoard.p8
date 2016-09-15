@@ -6,7 +6,9 @@ __lua__
 --license gplv3 (gnu.org/licenses/gpl.html)
 --revision 0
 
+--
 -- parameters
+--
 currentlevel = 1
 
 floortile = 65
@@ -25,9 +27,15 @@ goalspot = nil
 
 startplaying = true
 
+Opponent = {}
+emotion = {'joy', 'sadness', 'fear', 'disgust', 'anger', 'surprise', 'knight'}
 
 
+
+
+--
 --basic pico-8 stuff
+--
 function _init()
 	generate_dungeon()
 end
@@ -44,7 +52,9 @@ end
 
 
 
+--
 --dungeon generator
+--
 function irnd(mn,mx)
 	return mn + flr(rnd(mx-mn+1))
 end
@@ -214,7 +224,9 @@ end
 
 
 
+--
 --character movement
+--
 
 -- make an actor
 -- and add to global collection
@@ -386,21 +398,53 @@ end
 
 
 
+--
 --my functions
+--
 function music_selection()
 	if not startplaying then
 		music(0)
 	end
 
-	if (not start_playing and btn(4) or btn(5)) then
+	if (not startplaying and btn(4) or btn(5)) then
 		music(-1)
-		startplaying = true
+		startplaying=true
 	end
 	
-	--if startplaying = true
+	--if startplaying==true
 		--music(1)
 	--end
 end
+
+--generate opponents
+function Opponent:new(newOpponent)
+	newOpponent={emotion = 'joy'}
+	setmetatable(newObj, self) 
+	self.__index=self
+	return newOpponent
+end
+
+function Opponent:patrol()
+	--if self.emotion=='joy' then
+	--end
+end
+
+function Opponent:hunt()
+	--if self.emotion=='joy' then
+	--end
+end
+
+function generateOpponents
+--	if mget(i,j)==floortile then
+--		pl=make_actor(entryspot[1],entryspot[2])
+--		pl.spr=16
+--	end
+end
+
+--newOpponent=Opponent:new()
+--newOpponent:patrol()
+
+
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
