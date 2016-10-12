@@ -183,7 +183,7 @@ function draw_new_dungeon()
 	map(0,0,0,0,mapdim,mapdim)
 	
 	for i=0,mapdim do
-		for j=0, mapdim do
+		for j=0,mapdim do
 			if mget(i,j)~=walltile and mget(i,j)~=floortile then
 				mset(i,j,grasstile)
 			end
@@ -191,18 +191,18 @@ function draw_new_dungeon()
 	end
 	
 	for i=2,mapdim do
-		for j=2,mapdim do
+		for j=2,mapdim do --from within the dungeon walls
 			if mget(i,j)==floortile
 			and mget(i-1,j)==walltile
 			and mget(i, j-1)==walltile
-			and entryspot==nil
+			and entryspot==nil --find the northwest corner
 			then
 				entryspot={i,j}
 				mset(i-1,j,grasstile)
 				mset(i,j-1,grasstile)
-				mset(i-1,j-1,grasstile)
-				pl=make_actor(entryspot[1],entryspot[2])
-				pl.spr=16
+				mset(i-1,j-1,grasstile) --open the dungeon here
+				--pl=make_actor(entryspot[1],entryspot[2])
+				--pl.spr=16 --place the dragon here
 			end
 		end
 	end
@@ -214,7 +214,7 @@ function draw_new_dungeon()
 			if mget(i,j)==floortile
 			and mget(i+1,j)==walltile
 			and mget(i, j+1)==walltile
-			and goalspot==nil
+			and goalspot==nil --find a southeast corner
 			then
 				goalspot={i,j}
 			end
