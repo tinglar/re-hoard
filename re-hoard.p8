@@ -418,19 +418,23 @@ end
 
 --generate opponents
 function Opponent:new(newOpponent)
-	newOpponent={emotion = 'joy'}
+	newOpponent={emotion = 'anger', ownAccel = 0.1}
 	setmetatable(newObj, self) 
 	self.__index=self
 	return newOpponent
 end
 
 function Opponent:patrol()
-	--if self.emotion=='joy' then
+	--if self.emotion=='anger' then
+		--accel = 0.1
+		--pl.dx -= accel
+		--pl.dy += accel
+		--making sure that I can know how to move these characters
 	--end
 end
 
 function Opponent:hunt()
-	--if self.emotion=='joy' then
+	--if self.emotion=='anger' then
 	--end
 end
 
