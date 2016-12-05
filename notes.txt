@@ -1,0 +1,110 @@
+Notes on Re-Hoard
+
+OPPONENTS
+
+	Joy
+		Patrol: Regular wander, turning occasionally
+		Hunt: Regular direct pursuit
+		Class: 
+		Weapon: Whip
+
+	Sadness
+		Patrol: Stay still
+		Hunt: Slow direct pursuit
+		Class: 
+		Weapon: Knife
+
+	Fear
+		Patrol: Slow walk keeping close to the treasure
+		Hunt: Slow pursuit, yet stay one block away
+		Class: 
+		Weapon: Lance
+
+	Disgust
+		Patrol: Slow walk, but keeping one block away from others
+		Hunt: Regular Pursuit, yet stay one block away
+		Class: 
+		Weapon: Arrow
+
+	Anger
+		Patrol: Slow wander
+		Hunt: Fast direct pursuit
+		Class: 
+		Weapon: Axe
+
+	Surprise
+		Patrol: Regular wander
+		Hunt: Stop, then fast direct pursuit
+		Class: 
+		Weapon: Bomb
+
+	Knight
+		Patrol: Fast walk in front of treasure
+		Hunt: Fast direct pursuit
+		Class: 
+		Weapon: Sword
+	
+		
+ALGORITHMIC NOTES
+	
+	There are, save the knight, round-up(level ÷ 3) opponents in the game, each with an associated emotion. The emotion declares:
+		• Sprites (Class, weapon)
+		• Patrol pattern
+		• Hunting pattern
+		
+	Normally, an opponent patrols. However, if the opponent faces the dragon while 3- sqares are between opponent and dragon, the opponent hunts. If the opponent ends up touching the dragon, the game freezes in 1/2 second, then the dragon gets embarrassed during 1/2 second, then the current stage resets (but the stage itself would stay the same).
+	
+	Try having the opponents at least half-way from the door.
+	
+	(2 walking sprites) × (4 directions) × (2 modes) = 16 sprites per emotion = 112 total sprites
+		
+		
+		
+	
+ATTEMPT AT PSEUDOCODE
+	opponentdistance = (flr (mapdim/2))
+	opponentcount = nil
+	opponentgenerator = (flr (currentlevel/3))
+	
+	
+	Generate corrrect opponent quantity.
+	Set opponent at random distance.
+	When the stage starts, have the opponent patrol.
+	If the opponent is at most 3 squares away, hunt.
+	If the opponent touches the dragon...
+		...the action freezes.
+		...the dragon gets embarrassed during half a second.
+		...play that embarrassed sound.
+		...reset the stage, but keep the specific opponents.
+	If the opponent get attacked...
+		...stop.
+		...make a warping animation.
+		...disappear.
+		...destroy its data.
+	
+		
+	PATROL ALGORITHM
+		Check if the cardinal tiles are floor tiles.
+		Order: left, down, right, up
+		Move preferrence: keep ging until touching a wall
+		Evaluate the boundaries in order.
+		Go to the next blank space.
+		
+	PLACEMENT
+		Take the boundaries.
+		Half the width or half the height.
+		Place in a random spot between the half and the boundary plus the boundaries of the other dimmension: flr(rnd(x))
+		
+
+
+ISSUES REMAINING:
+	What would be their character designs?
+	How should they move?
+	Where would they be located in the current stage?
+	How would you handle fake objects in Lua?
+	How would the opponents disappear if the dragon attacks them?
+	How would you randomly assign a class to an opponent?
+	What animations would the dragon have if the dragon retreats?
+	What treasure sprites would be necessary?
+	How would you display a title screeen?
+	How would you determine what song would be played?
