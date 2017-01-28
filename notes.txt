@@ -108,3 +108,6 @@ ISSUES REMAINING:
 	What treasure sprites would be necessary?
 	How would you display a title screeen?
 	How would you determine what song would be played?
+	
+CHARACTER DESIGN:
+	Due to the low resolution of the graphics, they would have simple human shapes, only their colors and weapons distinguishing them. The knight would have a slightly more elaborate design that outright tells that the character is a knight.
