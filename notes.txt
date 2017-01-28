@@ -95,6 +95,11 @@ ATTEMPT AT PSEUDOCODE
 		Half the width or half the height.
 		Place in a random spot between the half and the boundary plus the boundaries of the other dimmension: flr(rnd(x))
 		
+CHARACTER DESIGN:
+	Due to the low resolution of the graphics, they would have simple human shapes, only their colors and weapons distinguishing them. The knight would have a slightly more elaborate design that outright tells that the character is a knight.
+
+LICENSE: Because the game can be played online, the Afero GPL may be a better fit.
+		
 
 
 ISSUES REMAINING:
@@ -108,6 +113,3 @@ ISSUES REMAINING:
 	What treasure sprites would be necessary?
 	How would you display a title screeen?
 	How would you determine what song would be played?
-	
-CHARACTER DESIGN:
-	Due to the low resolution of the graphics, they would have simple human shapes, only their colors and weapons distinguishing them. The knight would have a slightly more elaborate design that outright tells that the character is a knight.
