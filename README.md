@@ -4,7 +4,7 @@ Restore your hard-earned hoard from the knights! (Pico-8)
 
 
 # LICENSE
-This game is licensed under the GPLv3. This game uses material under a CC-BY license or otherwise having permission explicitly given to me.
+This game is licensed under the Affero GPLv3. This game uses material under a CC-BY license or otherwise having permission explicitly given to me.
 
 # CREDITS
 The title music comes from 0xabad1dea's "Glorytales" (https://github.com/0xabad1dea/glorytales/).
