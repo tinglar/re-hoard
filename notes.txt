@@ -97,6 +97,10 @@ ATTEMPT AT PSEUDOCODE
 		
 CHARACTER DESIGN:
 	Due to the low resolution of the graphics, they would have simple human shapes, only their colors and weapons distinguishing them. The knight would have a slightly more elaborate design that outright tells that the character is a knight.
+		
+	You might be able to get away with using recolors, but they would also need to have their respective weapon equipped.
+
+
 
 LICENSE: Because the game can be played online, the Afero GPL may be a better fit.
 		
@@ -113,3 +117,9 @@ ISSUES REMAINING:
 	What treasure sprites would be necessary?
 	How would you display a title screeen?
 	How would you determine what song would be played?
+	
+
+
+The Pico-8 has a maximum map size. Please avoid using the shared sprite banks (2 and 3).
+What is the maximum map size? 
+	Because the map is intended to be a square, the maximum map size would be 32. If you dare use extended memory, the maximum size would be 64. That would possibly be too complicated, but the content would be rich.
