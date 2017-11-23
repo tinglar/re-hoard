@@ -9,8 +9,347 @@ __lua__
 --
 -- parameters
 --
+dungeon_initial_size_constant = 16
+wall_sprite_constant = 1
+floor_sprite_constant = 2
+door_sprite_constant = 3
+
+dungeon = {}
+level = 0
 
 
+--
+-- structures
+--
+--entity-component system code adapted from:
+--selfsame at lexaloffle bbs
+function _has(ecs_single_entity, ecs_component_value)
+  for ecs_component_name in all(ecs_component_value) do
+    if not ecs_single_entity[ecs_component_name] then
+      return false
+    end
+  end
+  return true
+end
+
+function ecs_system(ecs_component_value, ecs_entity_function)
+  return function(ecs_every_entity)
+    for ecs_single_entity in all(ecs_every_entity) do
+      if _has(ecs_single_entity, ecs_component_value) then
+        ecs_entity_function(ecs_single_entity)
+      end
+    end
+  end
+end
+
+
+-- queue code adapted from:
+-- deque implementation by pierre "catwell" chapuis
+plain_queue_new = function()
+  local queue_instance = {head = 0, tail = 0}
+  return setmetatable(plain_queue_instance, {__index = methods})
+end
+
+plain_queue_length = function(self)
+  return self.tail - self.head
+end
+
+plain_queue_push = function(self, item)
+  assert(item ~= nil)
+  self.tail = self.tail + 1
+  self[self.tail] = item
+end
+
+plain_queue_pop = function(self)
+  if self:queue_length() == 0 then return nil end
+  local queue_instance = self[self.tail]
+  self[self.tail] = nil
+  self.tail = self.tail - 1
+  return queue_instance
+end
+
+
+-- priority queue code adapted from:
+-- rosetta code
+priority_queue = {
+    __index = {
+        priority_queue_push = function(self, element_priority, element_value)
+            local current_queue = self[element_priority]
+            if not current_queue then
+                current_queue = {first = 1, last = 0}
+                self[element_priority] = current_queue
+            end	
+            current_queue.last = current_queue.last + 1
+            current_queue[current_queue.last] = element_value
+        end,
+		
+        priority_queue_pop = function(self)
+            for element_priority, current_queue in pairs(self) do
+                if current_queue.first <= current_queue.last then
+                    local element_value = current_queue[current_queue.first]
+                    current_queue[current_queue.first] = nil
+                    current_queue.first = current_queue.first + 1
+                    return element_priority, element_value
+                else
+                    self[element_priority] = nil
+                end
+            end
+        end, --please do not forget the commas!
+		
+        priority_queue_pour = function(self) --returns value without the priority
+            for element_priority, current_queue in pairs(self) do
+                if current_queue.first <= current_queue.last then
+                    local element_value = current_queue[current_queue.first]
+                    current_queue[current_queue.first] = nil
+                    current_queue.first = current_queue.first + 1
+                    return element_value
+                else
+                    self[element_priority] = nil
+                end
+            end
+        end,
+		
+		priority_queue_length = function(self)
+			return self.last - self.first + 1
+		end
+
+    },
+    __call = function(cls)
+        return setmetatable({}, cls)
+    end
+}
+ 
+setmetatable(priority_queue, priority_queue)
+
+-- usage:
+-- declare = priority_queue()
+-- declare:priority_queue_push(priority, value)
+-- for priority, value in declare.pop, declare
+
+
+--
+-- algorithms
+--
+build_dungeon = function()
+  local dungeon_size = dungeon_initial_size_constant + flr(level/3)
+
+  local travelled_cells = plain_queue_new()
+  local immediate_cells = plain_queue_new()
+  local current_cell = nil
+
+  local cell_content_above = dungeon[current_cell[1]][current_cell[2] - 1]
+  local cell_content_below = dungeon[current_cell[1]][current_cell[2] + 1]
+  local cell_content_back  = dungeon[current_cell[1] - 1][current_cell[2]]
+  local cell_content_front = dungeon[current_cell[1] + 1][current_cell[2]]
+  local cell_location_above = {current_cell[1], current_cell[2] - 1}
+  local cell_location_below = {current_cell[1], current_cell[2] + 1}
+  local cell_location_back  = {current_cell[1] - 1, current_cell[2]}
+  local cell_location_front = {current_cell[1] + 1, current_cell[2]}
+
+
+  for x = 1, dungeon_size do
+    dungeon[x] = {}
+    for y = 1, dungeon_size do
+      if y == (1 or dungeon_size) then
+        dungeon[x][y] = false
+      end
+    end
+    if x == (1 or dungeon_size) then
+      dungeon[x][y] = false
+    end
+  end
+
+  -- this hard-coded section of the dungeon builder
+  -- is an optimization of the cases of the cells
+  -- that surround the north-west corner.
+  dungeon[2][2] = true
+  travelled_cells:plain_queue_push({2,2})
+
+  if flr(rnd(1)) then
+    dungeon[2][3] = true
+    current_cell = {2,3}
+    travelled_cells:plain_queue_push({2,3})
+    dungeon[3][2] = false
+  else
+    dungeon[3][2] = true
+    current_cell = {3,2}
+    travelled_cells:plain_queue_push({3,2})
+    dungeon[2][3] = false
+  end
+
+  repeat
+    -- if current_cell holds {x,y}, then
+    -- current_cell[1] holds x while current_cell[2] holds y.
+    if cell_content_back ~= nil then
+      immediate_cells:plain_queue_push(cell_location_back)
+      -- immediate_cells is a queue that holds tables.
+      -- after all, immediate_cells needs the locations, not their contents.
+    end
+    if cell_content_above ~= nil then
+      immediate_cells:plain_queue_push(cell_location_above)
+    end
+    if cell_content_front ~= nil then
+      immediate_cells:plain_queue_push(cell_location_front)
+    end
+    if cell_content_below ~= nil then
+      immediate_cells:plain_queue_push(cell_location_below)
+    end
+
+    if immediate_cells:plain_queue_length() == 0 then
+      current_cell = travelled_cells:plain_queue_pop()
+    else
+      local randomly = flr(rdm(immediate_cells:plain_queue_length())) + 1
+
+      -- the program goes to the randomly-picked cell.
+      current_cell = {immediate_cells.randomly}
+
+      -- if the program travelled horizontally...
+      if randomly % 2 == 1 then
+        if cell_content_above == nil then
+          cell_content_above = false
+        end
+        if cell_content_below == nil then
+          cell_content_below = false
+        end
+      else
+        if cell_content_back == nil then
+          cell_content_back = false
+        end
+        if cell_content_front == nil then
+          cell_content_front = false
+        end
+      end
+
+      travelled_cells:plain_queue_push({current_cell[1], current_cell[2]})
+      -- travelled_cells is a queue that holds tables.
+      dungeon[current_cell] = true
+    end
+  until travelled_cells:plain_queue_length() == 0
+end
+
+
+draw_dungeon = function()
+  cls()
+  for x in all(dungeon[1]) do
+    for y in all(dungeon[1][2]) do
+    -- lua can iterate over only one dimension at a time.
+      if dungeon(x,y) == false then
+        spr(wall_sprite_constant, x, y)
+      else
+        spr(floor_sprite_constant, x, y)
+      end
+    end
+  end
+  spr(door_sprite_constant, 2, 1)
+end
+
+
+--a* code adapted from:
+--richard "richy486" adem
+
+--dungeon is a table of tables that have the x and y integers.
+--keep this in mind when reviewing the a* code.
+my_start_location = nil
+my_goal_location = nil
+
+astar_heuristic = function(a, b)
+	return abs(a[1] - b[1]) + abs(a[2]- b[2])
+end
+
+astar_get_special_tile = function(astar_tile_id)
+	local astar_tile_x = nil
+	local astar_tile_y = nil
+	for astar_tile_x = 0, 15 do
+		for astar_tile_y = 0, 15 do
+			local astar_inspected_tile = mget(astar_tile_x, astar_tile_y) --contents
+			if astar_inspected_tile == astar_tile_id then
+				return {astar_tile_x, astar_tile_y} --location
+			end
+		end
+	end
+end
+
+astar_map_to_index = function(astar_map_x, astar_map_y)
+	return ( (astar_map_x + 1) * dungeon_initial_size_constant ) + astar_map_y
+end
+
+astar_index_to_map = function(astar_argued_index)
+	local astar_map_x = (astar_argued_index - 1) / dungeon_initial_size_constant
+	--the constant took the place of 16.
+	local astar_map_y = astar_argued_index - (astar_map_x * dungeon_initial_size_constant)
+	--the constant took the place of w.
+	return {astar_map_x, astar_map_y}
+end
+
+astar_vector_to_index = function(astar_argued_vector)
+	return astar_map_to_index(astar_argued_vector[1], astar_argued_vector[2])
+end
+
+astar_get_neighbor_locations = function(astar_your_location)
+	local astar_all_neighbor_locations = {}
+	local astar_your_x = astar_your_location[1]
+	local astar_your_y = astar_your_location[2]
+	
+	local astar_neighbor_content_above = mget(astar_your_x, astar_your_y - 1)
+	local astar_neighbor_content_below = mget(astar_your_x, astar_your_y + 1)
+	local astar_neighbor_content_back = mget(astar_your_x - 1, astar_your_y)
+	local astar_neighbor_content_front = mget(astar_your_x + 1, astar_your_y)
+	local astar_neighbor_location_above = {astar_your_x, astar_your_y - 1}
+	local astar_neighbor_location_below = {astar_your_x, astar_your_y + 1}
+	local astar_neighbor_location_back = {astar_your_x - 1, astar_your_y}
+	local astar_neighbor_location_front = {astar_your_x + 1, astar_your_y}
+	
+	if astar_your_x > 0 and (astar_neighbor_content_back != wall_sprite_constant) then
+		add(astar_all_neighbor_locations, {astar_neighbor_location_back})
+	end
+	if astar_your_y < 15 and (astar_neighbor_content_below != wall_sprite_constant) then
+	--is the number 15 artificially restricting the capacity of the a*?
+		add(astar_all_neighbor_locations, {astar_neighbor_location_below})
+	end
+	if astar_your_y > 0 and (astar_neighbor_content_above != wall_sprite_constant) then
+		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
+	end
+	if astar_your_x < 15 and (astar_neighbor_content_front != wall_sprite_constant) then
+		add(astar_all_neighbor_locations, {astar_neighbor_location_front})
+	end
+	
+	return astar_all_neighbor_locations
+end
+
+astar_algorithm = function()
+	local astar_start_location = astar_get_special_tile[my_start_location]
+	local astar_goal_location = astar_get_special_tile[my_goal_location]
+	local astar_frontier = priority_queue_new()
+	astar_frontier:priority_queue_push(0, astar_start_location)
+	local astar_came_from = {}
+	astar_came_from[astar_vector_to_index(astar_start_location)] = nil
+	local astar_cost_so_far = {}
+	astar_cost_so_far [astar_vector_to_index(astar_start_location)] = 0
+	
+	local astar_current_location = nil
+	local astar_current_neighbors = nil
+	local astar_next_index = nil
+	local astar_new_cost = nil
+	local astar_new_priority = nil
+
+	while astar_frontier:priority_queue_length() > 0 do
+		astar_current_location = astar_frontier:priority_queue_pop()
+		if astar_vector_to_index(astar_current_location) == astar_vector_to_index(astar_goal_location) then
+			break
+		end
+		astar_current_neighbors = astar_get_neighbor_locations(astar_current_location)
+		for next in all(astar_current_neighbors) do
+			astar_next_index = astar_vector_to_index(next)
+			astar_new_cost = astar_cost_so_far[astar_vector_to_index(astar_current_location)]
+			if (astar_cost_so_far[astar_next_index] == nil) or (astar_new_cost < astar_cost_so_far[astar_next_index]) then
+				astar_cost_so_far[astar_next_index] = astar_new_cost
+				astar_new_priority = astar_new_cost + astar_heuristic(astar_goal_location, next) --is the order reversed?
+				astar_frontier:priority_queue_push(astar_new_priority, next)
+				astar_came_from[astar_next_index] = astar_current_location
+			end
+		end
+	end
+end
 
 
 --
