@@ -69,6 +69,97 @@ plain_queue_pop = function(self)
 end
 
 
+--collision detection (based off the collide demo)
+solidity_flag = 0
+colliders = {}
+function make_collider(collider_x, collider_y)
+	actor = {}
+	actor.x_position = collider_x
+	actor.y_position = collider_y
+	actor.x_movement = 0
+	actor.y_movement = 0
+	actor.sprite = 16
+	actor.current_frame = 0
+	actor.time_advance = 0 --is this necessary?
+	actor.total_frames = 2
+	actor.width = 0.4
+	actor.height = 0.4
+
+	add(colliders, actor)
+	return actor
+end
+
+function is_solid(x, y)
+	value = mget(x, y)
+	return fget(value, solidity_flag)
+end
+
+function solid_area(x, y, w, h)
+	return is_solid(x - w, y - h) or is_solid(x + w, y - h) or is_solid(x - w, y + h) or is_solid(x + w, y + h)
+end
+
+function solid_collider(actor, x_movement, y_movement)
+	for toucher in all(colliders) do
+		if toucher != actor then
+			local x = (actor.x_position + x_movement) - toucher.x_position
+			local y = (actor.y_position + y_movement) - toucher.y_position
+			if ((abs(x) < (actor.width + toucher.width)) and (abs(y) < (actor.height + toucher.height)))
+			then
+				if (x_movement != 0 and abs(x) < abs(actor.x_position - toucher.x_position)) then
+					motion = actor.x_movement + toucher.y_movement
+					actor.x_movement = motion/2
+					toucher.x_movement = motion/2
+					return true
+				end
+				if (y_movement != 0 and abs(y) < abs(actor.y_position - toucher.y_position)) then
+					motion = actor.y_movement + toucher.y_movement
+					actor.y_movement = motion/2
+					toucher.y_movement = motion/2
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+function solid_actor(actor, x_movement, y_movement)
+	if solid_area(actor.x_position + x_movement, actor.y_position + y_movement, actor.width, actor.height) then
+		return true end
+	return solid_collider(actor, x_movement, y_movement)
+end
+
+function move_collider(actor)
+	if not solid_actor(actor, actor.x_movement, 0) then
+		actor.x_position += actor.x_movement
+	end
+	if not solid_actor(actor, 0, actor.y_movement) then
+		actor.y_position += actor.y_movement
+	end
+
+	actor.current_frame += abs(actor.x_movement) * 4
+	actor.current_frame += abs(actor.y_movement) * 4
+	actor.current_frame %= actor.total_frames
+	actor.time_advance += 1
+end
+
+function control_player(playable_actor)
+	acceleration = 0.1
+	if (btn(0)) playable_actor.x_movement -= acceleration
+	if (btn(1)) playable_actor.x_movement += acceleration
+	if (btn(2)) playable_actor.y_movement -= acceleration
+	if (btn(3)) playable_actor.y_movement += acceleration
+end
+
+function draw_collider(actor)
+	local sprite_x_position = (actor.x_position * 8) - 4
+	local sprite_y_position = (actor.y_position * 8) - 4
+	spr(actor.sprite + actor.current_frame, sprite_x_position, sprite_y_position)
+end
+--player = make_actor(32,32)
+--player.sprite = 1
+
+
 -- priority queue code adapted from:
 -- rosetta code
 priority_queue = {
