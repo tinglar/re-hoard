@@ -13,7 +13,7 @@ __lua__
 --
 title_screen = true
 
-dungeon_initial_size_constant = 16
+dungeon_initial_size_constant = 15
 wall_sprite_constant = 1
 floor_sprite_constant = 2
 door_sprite_constant = 3
@@ -447,11 +447,82 @@ astar_algorithm = function()
 end
 
 
+random_emotion = function()
+  local seed = flr(rnd(5))
+  if seed == 0 then
+    return joy
+  elseif seed = 1 then
+    return sadness
+  elseif seed == 2 then
+    return fear
+  elseif seed == 3 then
+    return disgust
+  elseif seed = 4 then
+    return anger
+  else
+    return surprise
+  end
+end
+
+place_knight = function()
+  if sget(dungeon_size - 2, dungeon_size - 1) then
+    return {dungeon_size - 2, dungeon_size - 1}
+  end
+end
+
+place_subordinate = function()
+  if sget(dungeon_size - 2, dungeon_size - 1) then
+    return {dungeon_size - 2, dungeon_size - 1}
+  end
+end
+
+--
+--entity-component system
+--
+
+--Entities:
+--	- dragon
+--	- knight
+--	- subordinates
+--	- chest
+--
+--Components:
+--	- emotion (includes dragon and knight)
+--  - position
+--
+--Systems:
+---	- user control
+--	- patrolling
+--	- hunting
+--	- pursuing
+--	- self-destruction
+--	- sprite
+
+world = {}
+
+populate = function()
+  add(world, { emotion = dragon, location = {2, 2} })
+  add(world, { emotion = treasure, location = {dungeon_size - 1, dungeon_size - 1} })
+  add(world, { emotion = knight, location = place_knight() })
+  local sentinel = 1
+  while (sentinel <= (flr(dungeon_size / 3) + 1) do
+    add(world, { emotion = random_emotion(), location = place_subordinate() })
+  end
+end
+
+patrol_system = ecs_system({}
+  function(ecs_single_entity)
+    --move
+  end)
+
+--patrol_system(world)
+
+
 --
 --basic pico-8 stuff
 --
 function _init()
-
+--patrol_system(world)
 end
 
 function _draw()
@@ -758,4 +829,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
