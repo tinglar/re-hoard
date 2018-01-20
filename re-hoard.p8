@@ -401,15 +401,28 @@ random_emotion = function()
   end
 end
 
+
 place_knight = function()
-  if sget(dungeon_size - 2, dungeon_size - 1) then
-    return {dungeon_size - 2, dungeon_size - 1}
-  end
+  local knight_location = opponent_setup_floor_locations.#opponent_setup_floor_locations
+
+  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
+
+  return knight_location
 end
 
+
 place_subordinate = function()
-  flr(dungeon_size/2)
+  local random_location = flr(rdm(#opponent_setup_floor_locations))
+  local subordinate_location = opponent_setup_floor_locations.random_location
+
+  for sentinel = random_location, #opponent_setup_floor_locations - 1 do
+    local next_location = sentinel + 1
+    opponent_setup_floor_locations.sentinel = opponent_setup_floor_locations.next_location
+  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
+
+  return subordinate_location
 end
+
 
 --
 --entity-component system
