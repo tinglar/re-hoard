@@ -7,6 +7,7 @@ __lua__
 --revision 0
 
 -- title music by 0xabad1dea
+-- gameplay music based on song by Tanner Helland
 
 --
 -- parameters
@@ -18,8 +19,12 @@ wall_sprite_constant = 1
 floor_sprite_constant = 2
 door_sprite_constant = 3
 
-dungeon = {}
 level = 0
+dungeon = {}
+total_floor_locations = {}
+opponent_setup_floor_locations = {}
+safe_floor_locations = {}
+
 
 
 --
@@ -323,6 +328,46 @@ build_dungeon = function()
 end
 
 
+collector_of_floor_cells = function()
+  local collector_key = 1
+
+  for x = 1, dungeon_size do
+    for y = 1, dungeon_size do
+      if dungeon[x][y] == true then
+        total_floor_locations.collector_key = {x,y}
+        collector_key = collector_key + 1
+      end
+    end
+  end
+end
+
+
+collector_of_opponent_setup_cells = function()
+  local collector_key = 1
+  local bottom_half_of_dungeon = flr(dungeon_size/2)
+  local current_location = nil
+
+  for x = 1, dungeon_size do
+    for y = 1, dungeon_size do
+      current_location = total_floor_locations.collector_key
+      if current_location.1 == bottom_half_of_dungeon or current_location.2 == bottom_half_of_dungeon then
+        opponent_setup_floor_locations.collector_key = current_location
+        collector_key = collector_key + 1
+      end
+    end
+  end
+end
+
+
+collector_of_safe_cells = function()
+  local collector_key = 1
+
+  repeat
+    safe_floor_locations.collector_key = total_floor_locations.collector_key
+  until total_floor_locations.collector_key == nil
+end
+
+
 draw_dungeon = function()
   cls()
   for x in all(dungeon[1]) do
@@ -337,6 +382,75 @@ draw_dungeon = function()
   end
   spr(door_sprite_constant, 2, 1)
 end
+
+
+random_emotion = function()
+  local seed = flr(rnd(5))
+  if seed == 0 then
+    return joy
+  elseif seed = 1 then
+    return sadness
+  elseif seed == 2 then
+    return fear
+  elseif seed == 3 then
+    return disgust
+  elseif seed = 4 then
+    return anger
+  else
+    return surprise
+  end
+end
+
+place_knight = function()
+  if sget(dungeon_size - 2, dungeon_size - 1) then
+    return {dungeon_size - 2, dungeon_size - 1}
+  end
+end
+
+place_subordinate = function()
+  flr(dungeon_size/2)
+end
+
+--
+--entity-component system
+--
+
+--entities:
+--	- dragon
+--	- knight
+--	- subordinates
+--	- chest
+--
+--components:
+--	- emotion (includes dragon and knight)
+--  - position
+--
+--systems:
+---	- user control
+--	- patrolling
+--	- hunting
+--	- pursuing
+--	- self-destruction
+--	- sprite
+
+world = {}
+
+populate = function()
+  add(world, { emotion = dragon, location = {2, 2} })
+  add(world, { emotion = treasure, location = {dungeon_size - 1, dungeon_size - 1} })
+  add(world, { emotion = knight, location = place_knight() })
+  local sentinel = 1
+  while (sentinel <= (flr(dungeon_size / 3) + 1) do
+    add(world, { emotion = random_emotion(), location = place_subordinate() })
+  end
+end
+
+patrol_system = ecs_system({}
+  function(ecs_single_entity)
+    --move
+  end)
+
+--patrol_system(world)
 
 
 --a* code adapted from:
@@ -446,76 +560,6 @@ astar_algorithm = function()
 	end
 end
 
-
-random_emotion = function()
-  local seed = flr(rnd(5))
-  if seed == 0 then
-    return joy
-  elseif seed = 1 then
-    return sadness
-  elseif seed == 2 then
-    return fear
-  elseif seed == 3 then
-    return disgust
-  elseif seed = 4 then
-    return anger
-  else
-    return surprise
-  end
-end
-
-place_knight = function()
-  if sget(dungeon_size - 2, dungeon_size - 1) then
-    return {dungeon_size - 2, dungeon_size - 1}
-  end
-end
-
-place_subordinate = function()
-  if sget(dungeon_size - 2, dungeon_size - 1) then
-    return {dungeon_size - 2, dungeon_size - 1}
-  end
-end
-
---
---entity-component system
---
-
---entities:
---	- dragon
---	- knight
---	- subordinates
---	- chest
---
---components:
---	- emotion (includes dragon and knight)
---  - position
---
---systems:
----	- user control
---	- patrolling
---	- hunting
---	- pursuing
---	- self-destruction
---	- sprite
-
-world = {}
-
-populate = function()
-  add(world, { emotion = dragon, location = {2, 2} })
-  add(world, { emotion = treasure, location = {dungeon_size - 1, dungeon_size - 1} })
-  add(world, { emotion = knight, location = place_knight() })
-  local sentinel = 1
-  while (sentinel <= (flr(dungeon_size / 3) + 1) do
-    add(world, { emotion = random_emotion(), location = place_subordinate() })
-  end
-end
-
-patrol_system = ecs_system({}
-  function(ecs_single_entity)
-    --move
-  end)
-
---patrol_system(world)
 
 
 --
@@ -829,4 +873,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
