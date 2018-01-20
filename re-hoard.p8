@@ -449,9 +449,25 @@ end
 world = {}
 
 populate = function()
-  add(world, { emotion = dragon, location = {2, 2} })
-  add(world, { emotion = treasure, location = {dungeon_size - 1, dungeon_size - 1} })
-  add(world, { emotion = knight, location = place_knight() })
+  add(world, {
+    emotion = dragon,
+    location = {2, 2},
+  })
+
+  add(world, {
+    emotion = treasure,
+    location = {dungeon_size - 1, dungeon_size - 1},
+    is_patrolling = false,
+    is_hunting = false
+  })
+
+  add(world, {
+    emotion = knight,
+    location = place_knight(),
+    is_patrolling = false,
+    is_hunting = false
+  })
+
   local sentinel = 1
   while (sentinel <= (flr(dungeon_size / 3) + 1) do
     add(world, { emotion = random_emotion(), location = place_subordinate() })
