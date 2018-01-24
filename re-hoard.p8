@@ -7,7 +7,7 @@ __lua__
 --revision 0
 
 -- title music by 0xabad1dea
--- gameplay music based 
+-- gameplay music based
 -- on song by tanner helland
 
 -- music
@@ -608,6 +608,12 @@ astar_algorithm = function()
 end
 
 
+selfdestruct_system = system({"location"},
+  function(ecs_single_entity)
+    del(world, {location == ecs_single_entity.location})
+  end)
+
+
 
 --
 --basic pico-8 stuff
@@ -920,4 +926,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
