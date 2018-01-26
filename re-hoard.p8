@@ -24,6 +24,7 @@ __lua__
 -- 61: warping
 -- 60: fire is blocked
 -- 59: obtained the treasure
+-- 58: retreating (not implemented)
 
 
 
@@ -129,18 +130,18 @@ end
 
 function solid_collider(actor, x_movement, y_movement)
 	for toucher in all(colliders) do
-		if toucher != actor then
+		if toucher ~= actor then
 			local x = (actor.x_position + x_movement) - toucher.x_position
 			local y = (actor.y_position + y_movement) - toucher.y_position
 			if ((abs(x) < (actor.width + toucher.width)) and (abs(y) < (actor.height + toucher.height)))
 			then
-				if (x_movement != 0 and abs(x) < abs(actor.x_position - toucher.x_position)) then
+				if (x_movement ~= 0 and abs(x) < abs(actor.x_position - toucher.x_position)) then
 					motion = actor.x_movement + toucher.y_movement
 					actor.x_movement = motion/2
 					toucher.x_movement = motion/2
 					return true
 				end
-				if (y_movement != 0 and abs(y) < abs(actor.y_position - toucher.y_position)) then
+				if (y_movement ~= 0 and abs(y) < abs(actor.y_position - toucher.y_position)) then
 					motion = actor.y_movement + toucher.y_movement
 					actor.y_movement = motion/2
 					toucher.y_movement = motion/2
@@ -472,11 +473,6 @@ world = {}
 
 populate = function()
   add(world, {
-    emotion = dragon,
-    location = {2, 2},
-  })
-
-  add(world, {
     emotion = treasure,
     location = {dungeon_size - 1, dungeon_size - 1},
   })
@@ -484,6 +480,7 @@ populate = function()
   add(world, {
     emotion = knight,
     location = place_knight(),
+    target = {},
     is_patrolling = false,
     is_hunting = false
   })
@@ -493,13 +490,27 @@ populate = function()
     add(world, {
       emotion = random_emotion(),
       location = place_subordinate(),
+      target = {},
       is_patrolling = false,
-      is_hunting = false
+      is_hunting = false,
+      is_hit = false
     })
   end
+
+  add(world, {
+    emotion = dragon,
+    location = {2, 2},
+  })
 end
 
+locate_dragon = system({"emotion"},
+  function(ecs_single_entity)
+    if emotion == dragon then
+      return ecs_single_entity.location
+    end
+  end
 --patrol_system(world)
+
 
 
 --a* code adapted from:
@@ -507,9 +518,6 @@ end
 
 --dungeon is a table of tables that have the x and y integers.
 --keep this in mind when reviewing the a* code.
-my_start_location = nil
-my_goal_location = nil
-
 astar_heuristic = function(a, b)
 	return abs(a[1] - b[1]) + abs(a[2]- b[2])
 end
@@ -557,26 +565,26 @@ astar_get_neighbor_locations = function(astar_your_location)
 	local astar_neighbor_location_back = {astar_your_x - 1, astar_your_y}
 	local astar_neighbor_location_front = {astar_your_x + 1, astar_your_y}
 
-	if astar_your_x > 0 and (astar_neighbor_content_back != wall_sprite_constant) then
+	if astar_your_x > 0 and (astar_neighbor_content_back ~= wall_sprite_constant) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_back})
 	end
-	if astar_your_y < 15 and (astar_neighbor_content_below != wall_sprite_constant) then
+	if astar_your_y < 15 and (astar_neighbor_content_below ~= wall_sprite_constant) then
 	--is the number 15 artificially restricting the capacity of the a*?
 		add(astar_all_neighbor_locations, {astar_neighbor_location_below})
 	end
-	if astar_your_y > 0 and (astar_neighbor_content_above != wall_sprite_constant) then
+	if astar_your_y > 0 and (astar_neighbor_content_above ~= wall_sprite_constant) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
 	end
-	if astar_your_x < 15 and (astar_neighbor_content_front != wall_sprite_constant) then
+	if astar_your_x < 15 and (astar_neighbor_content_front ~= wall_sprite_constant) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_front})
 	end
 
 	return astar_all_neighbor_locations
 end
 
-astar_algorithm = function()
-	local astar_start_location = astar_get_special_tile[my_start_location]
-	local astar_goal_location = astar_get_special_tile[my_goal_location]
+astar_search = function(my_location, my_target)
+	local astar_start_location = my_location
+	local astar_goal_location = my_target
 	local astar_frontier = priority_queue_new()
 	astar_frontier:priority_queue_push(0, astar_start_location)
 	local astar_came_from = {}
@@ -590,13 +598,17 @@ astar_algorithm = function()
 	local astar_new_cost = nil
 	local astar_new_priority = nil
 
+  local astar_final_path = plain_queue_new()
+  local next_x = nil
+  local next_y = nil
+
 	while astar_frontier:priority_queue_length() > 0 do
 		astar_current_location = astar_frontier:priority_queue_pop()
 		if astar_vector_to_index(astar_current_location) == astar_vector_to_index(astar_goal_location) then
 			break
 		end
 		astar_current_neighbors = astar_get_neighbor_locations(astar_current_location)
-		for next in all(astar_current_neighbors) do
+		for next_step in all(astar_current_neighbors) do
 			astar_next_index = astar_vector_to_index(next)
 			astar_new_cost = astar_cost_so_far[astar_vector_to_index(astar_current_location)]
 			if (astar_cost_so_far[astar_next_index] == nil) or (astar_new_cost < astar_cost_so_far[astar_next_index]) then
@@ -604,29 +616,103 @@ astar_algorithm = function()
 				astar_new_priority = astar_new_cost + astar_heuristic(astar_goal_location, next) --is the order reversed?
 				astar_frontier:priority_queue_push(astar_new_priority, next)
 				astar_came_from[astar_next_index] = astar_current_location
+
+        if (astar_next_index ~= astar_vector_to_index(astar_start_location)) then
+          next_x = next_step[1]
+          next_y = next_step[2]
+          astar_final_path:priority_queue_push = {next_x, next_y}
 			end
 		end
 	end
+
+  return astar_final_path
 end
 
 
-patrol_system = system({"is_patrolling", "location"},
+patrol_system = system({"emotion", "is_patrolling", "location", "target"},
   function(ecs_single_entity)
-    if ecs_single_entity.is_patrolling = true then
-      --
+    local picked_target = {}
+    local my_path = nil
+
+    if ecs_single_entity.is_patrolling == true then
+      --safe_floor_locations
+      if ecs_single_entity.emotion == joy then
+        if my_path:plain_queue_length{)} == 0 or my_path == nil then
+          random_pick = flr(rnd(#safe_floor_locations))
+          picked_target = safe_floor_locations.random_pick
+          my_path = astar_search(ecs_single_entity.location, picked_target)
+        else
+          ecs_single_entity.location = my_path:plain_queue_pop()
+        end
+      -- sadness stays still when "patrolling".
+      elseif ecs_single_entity.emotion == fear then
+        --
+      elseif ecs_single_entity.emotion == disgust then
+        --
+      elseif ecs_single_entity.emotion == anger then
+        --
+      elseif ecs_single_entity.emotion == surprise then
+        --
+      elseif ecs_single_entity.emotion == knight then
+        ---
+      end
     end
   end)
 
 
-hunt_system = system({"is_hunting", "location"},
+hunt_system = system({"emotion", "is_hunting", "location", "target"},
   function(ecs_single_entity)
-    if ecs_single_entity.is_hunting = true then
-      --
+    local picked_target = {}
+    local my_path = {}
+
+      if ecs_single_entity.is_hunting == true then
+        ecs_single_entity.is_patrolling = false
+
+        if ecs_single_entity.emotion == joy then
+          astar_search(ecs_single_entity.location, locate_dragon)
+          -- sadness stays still when "huntng".
+        elseif ecs_single_entity.emotion == fear then
+          --
+        elseif ecs_single_entity.emotion == disgust then
+          --
+        elseif ecs_single_entity.emotion == anger then
+          --
+        elseif ecs_single_entity.emotion == surprise then
+          --
+        elseif ecs_single_entity.emotion == knight then
+          ---
+        end
+      end
+    end)
+
+
+fight_system = system({"emotion", "is_hunting", "location", "target"},
+  function(ecs_single_entity)
+
+    if ecs_single_entity.is_hunting == true then
+      ecs_single_entity.is_patrolling = false
+
+      if ecs_single_entity.emotion == joy then
+        astar_search(ecs_single_entity.location, locate_dragon)
+
+      elseif ecs_single_entity.emotion == sadness then
+        --
+      elseif ecs_single_entity.emotion == fear then
+        --
+      elseif ecs_single_entity.emotion == disgust then
+        --
+      elseif ecs_single_entity.emotion == anger then
+        --
+      elseif ecs_single_entity.emotion == surprise then
+        --
+      elseif ecs_single_entity.emotion == knight then
+        ---
+      end
     end
   end)
 
 
-selfdestruct_system = system({"location"},
+selfdestruct_system = system({"is_hit", "location"},
   function(ecs_single_entity)
     del(world, {location == ecs_single_entity.location})
   end)
