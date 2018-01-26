@@ -88,7 +88,9 @@ plain_queue_push = function(self, item)
 end
 
 plain_queue_pop = function(self)
-  if self:queue_length() == 0 then return nil end
+  if self:queue_length() == 0 then
+    return nil
+  end
   local queue_instance = self[self.tail]
   self[self.tail] = nil
   self.tail = self.tail - 1
@@ -152,7 +154,9 @@ end
 
 function solid_actor(actor, x_movement, y_movement)
 	if solid_area(actor.x_position + x_movement, actor.y_position + y_movement, actor.width, actor.height) then
-		return true end
+		return true
+  end
+
 	return solid_collider(actor, x_movement, y_movement)
 end
 
@@ -172,10 +176,10 @@ end
 
 function control_player(playable_actor)
 	acceleration = 0.1
-	if (btn(0)) playable_actor.x_movement -= acceleration
-	if (btn(1)) playable_actor.x_movement += acceleration
-	if (btn(2)) playable_actor.y_movement -= acceleration
-	if (btn(3)) playable_actor.y_movement += acceleration
+	--if (btn(0)) playable_actor.x_movement -= acceleration then
+	--if (btn(1)) playable_actor.x_movement += acceleration then
+	--if (btn(2)) playable_actor.y_movement -= acceleration then
+	--if (btn(3)) playable_actor.y_movement += acceleration then
 end
 
 function draw_collider(actor)
@@ -475,8 +479,6 @@ populate = function()
   add(world, {
     emotion = treasure,
     location = {dungeon_size - 1, dungeon_size - 1},
-    is_patrolling = false,
-    is_hunting = false
   })
 
   add(world, {
@@ -488,14 +490,14 @@ populate = function()
 
   local sentinel = 1
   while (sentinel <= (flr(dungeon_size / 3) + 1) do
-    add(world, { emotion = random_emotion(), location = place_subordinate() })
+    add(world, {
+      emotion = random_emotion(),
+      location = place_subordinate(),
+      is_patrolling = false,
+      is_hunting = false
+    })
   end
 end
-
-patrol_system = ecs_system({}
-  function(ecs_single_entity)
-    --move
-  end)
 
 --patrol_system(world)
 
@@ -606,6 +608,22 @@ astar_algorithm = function()
 		end
 	end
 end
+
+
+patrol_system = system({"is_patrolling", "location"},
+  function(ecs_single_entity)
+    if ecs_single_entity.is_patrolling = true then
+      --
+    end
+  end)
+
+
+hunt_system = system({"is_hunting", "location"},
+  function(ecs_single_entity)
+    if ecs_single_entity.is_hunting = true then
+      --
+    end
+  end)
 
 
 selfdestruct_system = system({"location"},
