@@ -475,7 +475,8 @@ populate = function()
   add(world, {
     emotion = treasure,
     location = {dungeon_size - 1, dungeon_size - 1},
-  })
+    is_open = false
+  }) --the treasure should not be an entity.
 
   add(world, {
     emotion = knight,
@@ -503,14 +504,28 @@ populate = function()
   })
 end
 
+
 locate_dragon = system({"emotion"},
   function(ecs_single_entity)
     if emotion == dragon then
       return ecs_single_entity.location
     end
-  end
---patrol_system(world)
+  end)
 
+
+return_to_your_places = system({"emotion", "location"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == knight then
+      ecs_single_entity.location = place_knight()
+    elseif ecs_single_entity.emotion == dragon then
+      ecs_single_entity.location = {2, 2}
+    else
+      ecs_single_entity.location = place_subordinate()
+    end
+  end)
+
+
+--patrol_system(world)
 
 
 --a* code adapted from:
