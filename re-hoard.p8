@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 14
 __lua__
 --re-hoard
---copyright tinglar 2017
+--copyright tinglar 2017-2018
 --license gplv3 (gnu.org/licenses/gpl-3.0.en.html)
 --revision 0
 
@@ -24,7 +24,7 @@ __lua__
 -- 61: warping
 -- 60: fire is blocked
 -- 59: obtained the treasure
--- 58: retreating (not implemented)
+-- 58: retreating
 
 
 
@@ -33,10 +33,14 @@ __lua__
 --
 title_screen = true
 
+wall_sprite_constant = 64
+floor_sprite_constant = 65
+door_sprite_constant = 68
+closed_treasure_sprite_constant = 70
+open_treasure_sprite_constant = 71
+
 dungeon_initial_size_constant = 15
-wall_sprite_constant = 1
-floor_sprite_constant = 2
-door_sprite_constant = 3
+solidity_flag_constant = 0
 
 level = 0
 dungeon = {}
@@ -97,99 +101,6 @@ plain_queue_pop = function(self)
   self.tail = self.tail - 1
   return queue_instance
 end
-
-
---collision detection (based off the collide demo)
-solidity_flag = 0
-colliders = {}
-function make_collider(collider_x, collider_y)
-	actor = {}
-	actor.x_position = collider_x
-	actor.y_position = collider_y
-	actor.x_movement = 0
-	actor.y_movement = 0
-	actor.sprite = 16
-	actor.current_frame = 0
-	actor.time_advance = 0 --is this necessary?
-	actor.total_frames = 2
-	actor.width = 0.4
-	actor.height = 0.4
-
-	add(colliders, actor)
-	return actor
-end
-
-function is_solid(x, y)
-	value = mget(x, y)
-	return fget(value, solidity_flag)
-end
-
-function solid_area(x, y, w, h)
-	return is_solid(x - w, y - h) or is_solid(x + w, y - h) or is_solid(x - w, y + h) or is_solid(x + w, y + h)
-end
-
-function solid_collider(actor, x_movement, y_movement)
-	for toucher in all(colliders) do
-		if toucher ~= actor then
-			local x = (actor.x_position + x_movement) - toucher.x_position
-			local y = (actor.y_position + y_movement) - toucher.y_position
-			if ((abs(x) < (actor.width + toucher.width)) and (abs(y) < (actor.height + toucher.height)))
-			then
-				if (x_movement ~= 0 and abs(x) < abs(actor.x_position - toucher.x_position)) then
-					motion = actor.x_movement + toucher.y_movement
-					actor.x_movement = motion/2
-					toucher.x_movement = motion/2
-					return true
-				end
-				if (y_movement ~= 0 and abs(y) < abs(actor.y_position - toucher.y_position)) then
-					motion = actor.y_movement + toucher.y_movement
-					actor.y_movement = motion/2
-					toucher.y_movement = motion/2
-					return true
-				end
-			end
-		end
-	end
-	return false
-end
-
-function solid_actor(actor, x_movement, y_movement)
-	if solid_area(actor.x_position + x_movement, actor.y_position + y_movement, actor.width, actor.height) then
-		return true
-  end
-
-	return solid_collider(actor, x_movement, y_movement)
-end
-
-function move_collider(actor)
-	if not solid_actor(actor, actor.x_movement, 0) then
-		actor.x_position += actor.x_movement
-	end
-	if not solid_actor(actor, 0, actor.y_movement) then
-		actor.y_position += actor.y_movement
-	end
-
-	actor.current_frame += abs(actor.x_movement) * 4
-	actor.current_frame += abs(actor.y_movement) * 4
-	actor.current_frame %= actor.total_frames
-	actor.time_advance += 1
-end
-
-function control_player(playable_actor)
-	acceleration = 0.1
-	--if (btn(0)) playable_actor.x_movement -= acceleration then
-	--if (btn(1)) playable_actor.x_movement += acceleration then
-	--if (btn(2)) playable_actor.y_movement -= acceleration then
-	--if (btn(3)) playable_actor.y_movement += acceleration then
-end
-
-function draw_collider(actor)
-	local sprite_x_position = (actor.x_position * 8) - 4
-	local sprite_y_position = (actor.y_position * 8) - 4
-	spr(actor.sprite + actor.current_frame, sprite_x_position, sprite_y_position)
-end
---player = make_actor(32,32)
---player.sprite = 1
 
 
 -- priority queue code adapted from:
@@ -384,7 +295,6 @@ end
 
 collector_of_safe_cells = function()
   local collector_key = 1
-
   repeat
     safe_floor_locations.collector_key = total_floor_locations.collector_key
   until total_floor_locations.collector_key == nil
@@ -404,6 +314,7 @@ draw_dungeon = function()
     end
   end
   spr(door_sprite_constant, 2, 1)
+  spr(closed_treasure_sprite_constant, dungeon_size - 1, dungeon_size - 1)
 end
 
 
@@ -427,7 +338,6 @@ end
 
 place_knight = function()
   local knight_location = opponent_setup_floor_locations.#opponent_setup_floor_locations
-
   opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
 
   return knight_location
@@ -503,6 +413,99 @@ populate = function()
     location = {2, 2},
   })
 end
+
+
+--collision detection (based off the collide demo)
+colliders = {}
+function make_collider(collider_x, collider_y)
+	actor = {}
+	actor.x_position = collider_x
+	actor.y_position = collider_y
+	actor.x_movement = 0
+	actor.y_movement = 0
+	actor.sprite = 16
+	actor.current_frame = 0
+	actor.time_advance = 0 --is this necessary?
+	actor.total_frames = 2
+	actor.width = 0.4
+	actor.height = 0.4
+
+	add(colliders, actor)
+	return actor
+end
+
+function is_solid(x, y)
+	value = mget(x, y)
+	return fget(value, solidity_flag_constant)
+end
+
+function solid_area(x, y, w, h)
+	return is_solid(x - w, y - h) or is_solid(x + w, y - h) or is_solid(x - w, y + h) or is_solid(x + w, y + h)
+end
+
+function solid_collider(actor, x_movement, y_movement)
+	for toucher in all(colliders) do
+		if toucher ~= actor then
+			local x = (actor.x_position + x_movement) - toucher.x_position
+			local y = (actor.y_position + y_movement) - toucher.y_position
+			if ((abs(x) < (actor.width + toucher.width)) and (abs(y) < (actor.height + toucher.height)))
+			then
+				if (x_movement ~= 0 and abs(x) < abs(actor.x_position - toucher.x_position)) then
+					motion = actor.x_movement + toucher.y_movement
+					actor.x_movement = motion/2
+					toucher.x_movement = motion/2
+					return true
+				end
+				if (y_movement ~= 0 and abs(y) < abs(actor.y_position - toucher.y_position)) then
+					motion = actor.y_movement + toucher.y_movement
+					actor.y_movement = motion/2
+					toucher.y_movement = motion/2
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+function solid_actor(actor, x_movement, y_movement)
+	if solid_area(actor.x_position + x_movement, actor.y_position + y_movement, actor.width, actor.height) then
+		return true
+  end
+
+	return solid_collider(actor, x_movement, y_movement)
+end
+
+function move_collider(actor)
+	if not solid_actor(actor, actor.x_movement, 0) then
+		actor.x_position += actor.x_movement
+	end
+	if not solid_actor(actor, 0, actor.y_movement) then
+		actor.y_position += actor.y_movement
+	end
+
+	actor.current_frame += abs(actor.x_movement) * 4
+	actor.current_frame += abs(actor.y_movement) * 4
+	actor.current_frame %= actor.total_frames
+	actor.time_advance += 1
+end
+
+function control_player(playable_actor)
+	acceleration = 0.1
+	--if (btn(0)) playable_actor.x_movement -= acceleration then
+	--if (btn(1)) playable_actor.x_movement += acceleration then
+	--if (btn(2)) playable_actor.y_movement -= acceleration then
+	--if (btn(3)) playable_actor.y_movement += acceleration then
+end
+
+function draw_collider(actor)
+	local sprite_x_position = (actor.x_position * 8) - 4
+	local sprite_y_position = (actor.y_position * 8) - 4
+	spr(actor.sprite + actor.current_frame, sprite_x_position, sprite_y_position)
+end
+--player = make_actor(32,32)
+--player.sprite = 1
+
 
 
 locate_dragon = system({"emotion"},
@@ -974,7 +977,7 @@ __sfx__
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010800002873110731287001070028700107002870010700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011400001c55029550295550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011000002435500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011000001073128731107312873110731287311073128731107310070000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
