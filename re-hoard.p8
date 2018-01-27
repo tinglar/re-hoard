@@ -38,10 +38,10 @@ sprite_dragon_fire_left = 18
 sprite_dragon_fire_right = 22
 sprite_dragon_fire_up = 26
 sprite_dragon_fire_down = 30
-sprite_dragon_embarrass_left = 19
-sprite_dragon_embarrass_right = 23
-sprite_dragon_embarrass_up = 27
-sprite_dragon_embarrass_down = 31
+sprite_dragon_embarrassed_left = 19
+sprite_dragon_embarrassed_right = 23
+sprite_dragon_embarrassed_up = 27
+sprite_dragon_embarrassed_down = 31
 sprite_fireball_left = 12
 sprite_fireball_right = 13
 sprite_fireball_up = 14
@@ -128,6 +128,8 @@ dungeon = {}
 total_floor_locations = {}
 opponent_setup_floor_locations = {}
 safe_floor_locations = {}
+dragon_location = nil
+fireball_there = false
 
 
 
@@ -485,6 +487,7 @@ populate = function()
     x_movement = 0,
     y_movement = 0,
     has_collided = false
+    is_hit = false,
   })
 end
 
@@ -505,11 +508,6 @@ subordinate_sprite_system = system({"emotion", "sprite"},
       ecs_single_entity.sprite = sprite_surprise_walk1
   end)
 
-
-draw_collider_system = system({"emotion"},
-  function(ecs_single_entity)
-    return ecs_single_entity.location
-  end)
 
 --adapted from scathe
 collision_system = system({"x_position", "y_position"},
@@ -544,7 +542,7 @@ move_collider_system = system({"has_collided",
 
 control_dragon_system = system({"emotion", "x_movement", "y_movement"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == then
+    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hit == false hen
       if btn(0) then
         ecs_single_entity.x_movement = -0.2
       end
@@ -568,18 +566,80 @@ control_dragon_system = system({"emotion", "x_movement", "y_movement"},
       end
   end)
 
-function draw_collider(actor)
-	local sprite_x_position = (actor.x_position * 8) - 4
-	local sprite_y_position = (actor.y_position * 8) - 4
-	spr(actor.sprite + actor.current_frame, sprite_x_position, sprite_y_position)
-end
+draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "sprite"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == dragon then
+      if ecs_single_entity.x_movement < 0 then
+        if ecs_single_entity.sprite == sprite_dragon_fly2_left then
+          ecs_single_entity.sprite = sprite_dragon_fly1_left
+        else
+          ecs_single_entity.sprite == sprite_dragon_fly2_left
+        end
+      end
+      if ecs_single_entity.x_movement > 0 then
+        if ecs_single_entity.sprite == sprite_dragon_fly2_right then
+          ecs_single_entity.sprite = sprite_dragon_fly1_right
+        else
+          ecs_single_entity.sprite == sprite_dragon_fly2_right
+        end
+      end
+      if ecs_single_entity.y_movement < 0 then
+        if ecs_single_entity.sprite == sprite_dragon_fly2_up then
+          ecs_single_entity.sprite = sprite_dragon_fly1_up
+        else
+          ecs_single_entity.sprite == sprite_dragon_fly2_up
+        end
+      end
+      if ecs_single_entity.y_movement > 0 then
+        if ecs_single_entity.sprite == sprite_dragon_fly2_down then
+          ecs_single_entity.sprite = sprite_dragon_fly1_down
+        else
+          ecs_single_entity.sprite == sprite_dragon_fly2_down
+        end
+      end
+    end
+  end)
 
+
+fireball_system = system({"sprite"},
+  function(ecs_single_entity)
+    if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
+      --
+    end
+  end)
+
+embarrass_dragon_system = system({"emotion", "is_hit", "sprite"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hit == true then
+      if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_left
+      end
+      if ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right or sprite_dragon_fire_right then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_right
+      end
+      if ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up or sprite_dragon_fire_up then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_up
+      end
+      if ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down or sprite_dragon_fire_down then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_down
+      end
+
+      music music_failure
+      if stat 16 == nil then
+        repeat
+          ecs_single_entity.x_position = ecs_single_entity.x_position - 1
+          ecs_single_entity.y_position = ecs_single_entity.y_position - 1
+          sfx sound_effect_retreat 3
+        until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
+      end
+    end
+  end)
 
 
 locate_dragon_system = system({"emotion"},
   function(ecs_single_entity)
     if emotion == dragon then
-      return ecs_single_entity.location
+      dragon_location = ecs_single_entity.location
     end
   end)
 
