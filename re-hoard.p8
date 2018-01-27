@@ -385,7 +385,6 @@ draw_dungeon = function()
   cls()
   for x in all(dungeon[1]) do
     for y in all(dungeon[1][2]) do
-    -- lua can iterate over only one dimension at a time.
       if dungeon(x,y) == false then
         spr(wall_sprite_constant, x, y)
       else
@@ -393,8 +392,8 @@ draw_dungeon = function()
       end
     end
   end
-  spr(door_sprite_constant, 2, 1)
-  spr(closed_treasure_sprite_constant, dungeon_size - 1, dungeon_size - 1)
+  spr(sprite_closed_door_constant, 2, 1)
+  spr(sprite_closed_treasure_constant, dungeon_size - 1, dungeon_size - 1)
 end
 
 
@@ -448,13 +447,13 @@ populate = function()
     emotion = knight,
     sprite = sprite_knight_walk1_constant,
     location = place_knight(),
-    entity_x_position = location.1,
-    entity_y_position = location.2,
+    x_position = location.1,
+    y_position = location.2,
     target = {},
     is_patrolling = false,
     is_hunting = false,
-    entity_x_movement = 0,
-    entity_y_movement = 0,
+    x_movement = 0,
+    y_movement = 0,
     has_collided = false
   })
 
@@ -464,14 +463,14 @@ populate = function()
       emotion = random_emotion(),
       sprite = sprite_knight_walk1_constant,
       location = place_subordinate(),
-      entity_x_position = location.1,
-      entity_y_position = location.2,
+      x_position = location.1,
+      y_position = location.2,
       target = {},
       is_patrolling = false,
       is_hunting = false,
       is_hit = false,
-      entity_x_movement = 0,
-      entity_y_movement = 0,
+      x_movement = 0,
+      y_movement = 0,
       has_collided = false
     })
   end
@@ -480,10 +479,10 @@ populate = function()
     emotion = dragon,
     sprite = sprite_dragon_fly1_down_constant,
     location = {2, 2},
-    entity_x_position = location.1,
-    entity_y_position = location.2,
-    entity_x_movement = 0,
-    entity_y_movement = 0,
+    x_position = location.1,
+    y_position = location.2,
+    x_movement = 0,
+    y_movement = 0,
     has_collided = false
   })
 end
@@ -506,25 +505,18 @@ subordinate_sprite_system = system({"emotion", "sprite"},
   end)
 
 
-control_player_system = system({"emotion"},
-  function(ecs_single_entity)
-    return ecs_single_entity.location
-  end)
-
-
 draw_collider_system = system({"emotion"},
   function(ecs_single_entity)
     return ecs_single_entity.location
   end)
 
 --adapted from scathe
-collision_system = system({"entity_x_position", "entity_y_position"},
+collision_system = system({"x_position", "y_position"},
   function(ecs_single_entity)
-    local tile_collision = false
-    local x1 = ecs_single_entity.entity_x_position / 8
-    local y1 = ecs_single_entity.entity_y_position / 8
-    local x2 = (ecs_single_entity.entity_x_position + 7) / 8
-    local y2 = (ecs_single_entity.entity_y_position + 7) / 8
+    local x1 = ecs_single_entity.x_position / 8
+    local y1 = ecs_single_entity.y_position / 8
+    local x2 = (ecs_single_entity.x_position + 7) / 8
+    local y2 = (ecs_single_entity.y_position + 7) / 8
     local northwest_touch = fget( mget(x1, y1), solidity_flag_constant)
     local southwest_touch = fget( mget(x1, y2), solidity_flag_constant)
     local northeast_touch = fget( mget(x2, y2), solidity_flag_constant)
@@ -538,8 +530,8 @@ collision_system = system({"entity_x_position", "entity_y_position"},
 
 
 move_collider_system = system({"has_collided",
-                              "entity_x_position", "entity_y_position"
-                              "entity_x_movement", "entity_y_movement"},
+                              "x_position", "y_position"
+                              "x_movement", "y_movement"},
   function(ecs_single_entity)
     if ecs_single_entity.has_collided == false then
       ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
@@ -548,13 +540,32 @@ move_collider_system = system({"has_collided",
   end)
   --safe_floor_locations
 
-function control_player(playable_actor)
-	acceleration = 0.1
-	--if (btn(0)) playable_actor.x_movement -= acceleration then
-	--if (btn(1)) playable_actor.x_movement += acceleration then
-	--if (btn(2)) playable_actor.y_movement -= acceleration then
-	--if (btn(3)) playable_actor.y_movement += acceleration then
-end
+
+control_dragon_system = system({"emotion", "x_movement", "y_movement"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == then
+      if btn(0) then
+        ecs_single_entity.x_movement = -0.2
+      end
+      if btn(1) then
+        ecs_single_entity.x_movement = 0.2
+      end
+      if not btn(0) and not btn(1) then
+        ecs_single_entity.x_movement = 0
+      end
+      if btn(2) then
+        ecs_single_entity.x_movement = -0.2
+      end
+      if btn(3) then
+        ecs_single_entity.x_movement = 0.2
+      end
+      if not btn(2) and not btn(3) then
+        ecs_single_entity.x_movement = 0
+      end
+      if btnp(4) then
+        fireball_system()
+      end
+  end)
 
 function draw_collider(actor)
 	local sprite_x_position = (actor.x_position * 8) - 4
