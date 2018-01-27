@@ -19,108 +19,109 @@ title_screen = true
 
 --title screen: 64×16 starting from 0, 16
 
-sprite_wall_constant = 64
-sprite_floor_constant = 65
-sprite_closed_door_constant = 68
-sprite_open_door_constant = 69
-sprite_closed_treasure_constant = 70
-sprite_open_treasure_constant = 71
+sprite_wall = 64
+sprite_floor = 65
+sprite_closed_door = 68
+sprite_open_door = 69
+sprite_closed_treasure = 70
+sprite_open_treasure = 71
 
-sprite_dragon_fly1_left_constant = 16
-sprite_dragon_fly2_left_constant = 17
-sprite_dragon_fly1_right_constant = 20
-sprite_dragon_fly2_right_constant = 21
-sprite_dragon_fly1_up_constant = 24
-sprite_dragon_fly2_up_constant = 25
-sprite_dragon_fly1_down_constant = 28
-sprite_dragon_fly2_down_constant = 29
-sprite_dragon_fire_left_constant = 18
-sprite_dragon_fire_right_constant = 22
-sprite_dragon_fire_up_constant = 26
-sprite_dragon_fire_down_constant = 30
-sprite_dragon_embarrass_left_constant = 19
-sprite_dragon_embarrass_right_constant = 23
-sprite_dragon_embarrass_up_constant = 27
-sprite_dragon_embarrass_down_constant = 31
-sprite_fireball_left_constant = 12
-sprite_fireball_right_constant = 13
-sprite_fireball_up_constant = 14
-sprite_fireball_down_constant = 15
-sprite_knight_walk1_constant = 74
-sprite_knight_walk2_constant = 75
-sprite_knight_hunt1_constant = 76
-sprite_knight_hunt2_constant = 77
-sprite_knight_fight_constant = 78
-sprite_knight_got_hit_constant = 79
-sprite_joy_walk1_constant = 80
-sprite_joy_walk2_constant = 81
-sprite_joy_hunt1_constant = 82
-sprite_joy_hunt2_constant = 83
-sprite_joy_fight_constant = 84
-sprite_joy_got_hit_constant = 85
-sprite_sadness_walk1_constant = 86
-sprite_sadness_walk2_constant = 87
-sprite_sadness_hunt1_constant = 88
-sprite_sadness_hunt2_constant = 89
-sprite_sadness_fight_constant = 90
-sprite_sadness_got_hit_constant = 91
-sprite_fear_walk1_constant = 96
-sprite_fear_walk2_constant = 97
-sprite_fear_hunt1_constant = 98
-sprite_fear_hunt2_constant = 99
-sprite_fear_fight_constant = 100
-sprite_fear_got_hit_constant = 101
-sprite_disgust_walk1_constant = 102
-sprite_disgust_walk2_constant = 103
-sprite_disgust_hunt1_constant = 104
-sprite_disgust_hunt2_constant = 105
-sprite_disgust_fight_horizontal_constant = 106
-sprite_disgust_fight_vertical_constant = 124
-sprite_disgust_got_hit_constant = 107
-sprite_anger_walk1_constant = 112
-sprite_anger_walk2_constant = 113
-sprite_anger_hunt1_constant = 114
-sprite_anger_hunt2_constant = 115
-sprite_anger_fight_constant = 116
-sprite_anger_got_hit_constant = 117
-sprite_surprise_walk1_constant = 118
-sprite_surprise_walk2_constant = 119
-sprite_surprise_hunt1_constant = 120
-sprite_surprise_hunt2_constant = 121
-sprite_surprise_fight_constant = 122
-sprite_surprise_got_hit_constant = 123
-sprite_arrow_left_constant = 92
-sprite_arrow_right_constant = 93 --could you not simply use flip_x?
-sprite_arrow_up_constant = 94
-sprite_arrow_down_constant = 95
-sprite_lance_left_constant = 108
-sprite_lance_right_constant = 109
-sprite_lance_up_constant = 110
-sprite_lance_down_constant = 111
-sprite_explosive_off_constant = 126
-sprite_explosive_on_constant = 127
-sprite_warp1_constant = 72
-sprite_warp2_constant = 73
+sprite_dragon_fly1_left = 16
+sprite_dragon_fly2_left = 17
+sprite_dragon_fly1_right = 20
+sprite_dragon_fly2_right = 21
+sprite_dragon_fly1_up = 24
+sprite_dragon_fly2_up = 25
+sprite_dragon_fly1_down = 28
+sprite_dragon_fly2_down = 29
+sprite_dragon_fire_left = 18
+sprite_dragon_fire_right = 22
+sprite_dragon_fire_up = 26
+sprite_dragon_fire_down = 30
+sprite_dragon_embarrass_left = 19
+sprite_dragon_embarrass_right = 23
+sprite_dragon_embarrass_up = 27
+sprite_dragon_embarrass_down = 31
+sprite_fireball_left = 12
+sprite_fireball_right = 13
+sprite_fireball_up = 14
+sprite_fireball_down = 15
+sprite_knight_walk1 = 74
+sprite_knight_walk2 = 75
+sprite_knight_hunt1 = 76
+sprite_knight_hunt2 = 77
+sprite_knight_fight = 78
+sprite_knight_got_hit = 79
+sprite_joy_walk1 = 80
+sprite_joy_walk2 = 81
+sprite_joy_hunt1 = 82
+sprite_joy_hunt2 = 83
+sprite_joy_fight = 84
+sprite_joy_got_hit = 85
+sprite_sadness_walk1 = 86
+sprite_sadness_walk2 = 87
+sprite_sadness_hunt1 = 88
+sprite_sadness_hunt2 = 89
+sprite_sadness_fight = 90
+sprite_sadness_got_hit = 91
+sprite_fear_walk1 = 96
+sprite_fear_walk2 = 97
+sprite_fear_hunt1 = 98
+sprite_fear_hunt2 = 99
+sprite_fear_fight = 100
+sprite_fear_got_hit = 101
+sprite_disgust_walk1 = 102
+sprite_disgust_walk2 = 103
+sprite_disgust_hunt1 = 104
+sprite_disgust_hunt2 = 105
+sprite_disgust_fight_horizontal = 106
+sprite_disgust_fight_vertical = 124
+sprite_disgust_got_hit = 107
+sprite_anger_walk1 = 112
+sprite_anger_walk2 = 113
+sprite_anger_hunt1 = 114
+sprite_anger_hunt2 = 115
+sprite_anger_fight = 116
+sprite_anger_got_hit = 117
+sprite_surprise_walk1 = 118
+sprite_surprise_walk2 = 119
+sprite_surprise_hunt1 = 120
+sprite_surprise_hunt2 = 121
+sprite_surprise_fight = 122
+sprite_surprise_got_hit = 123
+sprite_arrow_left = 92
+sprite_arrow_right = 93 --could you not simply use flip_x?
+sprite_arrow_up = 94
+sprite_arrow_down = 95
+sprite_lance_left = 108
+sprite_lance_right = 109
+sprite_lance_up = 110
+sprite_lance_down = 111
+sprite_explosive_off = 126
+sprite_explosive_on = 127
+sprite_warp1 = 72
+sprite_warp2 = 73
 
-music_title_constant = 1
-music_gameplay_constant = 9
-music_panic_constant = 22
-music_failure_constant = 11
-music_success_constant = 13
-music_game_over_constant = 18
+music_title = 1
+music_gameplay = 9
+music_panic = 22
+music_failure = 11
+music_success = 13
+music_game_over = 18
 
-sound_effect_bump_constant = 63
-sound_effect_fire_constant = 62
-sound_effect_warp_constant = 61
-sound_effect_blocked_fire_constant = 60
-sound_effect_treasure_constant = 59
-sound_effect_retreat_constant = 58
+sound_effect_bump = 63
+sound_effect_fire = 62
+sound_effect_warp = 61
+sound_effect_blocked_fire = 60
+sound_effect_treasure = 59
+sound_effect_retreat = 58
 
-solidity_flag_constant = 0
-hurts_dragon_flag_constant = 1
-hurts_subordinate_flag_constant = 2
+flag_solidity = 0
+flag_hurts_dragon = 1
+flag_hurts_subordinate = 2
 
-dungeon_initial_size_constant = 15
+
+dungeon_initial_size = 15
 
 level = 0
 dungeon = {}
@@ -245,7 +246,7 @@ setmetatable(priority_queue, priority_queue)
 -- algorithms
 --
 build_dungeon = function()
-  local dungeon_size = dungeon_initial_size_constant + flr(level/3)
+  local dungeon_size = dungeon_initial_size + flr(level/3)
 
   local travelled_cells = plain_queue_new()
   local immediate_cells = plain_queue_new()
@@ -386,14 +387,14 @@ draw_dungeon = function()
   for x in all(dungeon[1]) do
     for y in all(dungeon[1][2]) do
       if dungeon(x,y) == false then
-        spr(wall_sprite_constant, x, y)
+        spr(sprite_wall, x, y)
       else
-        spr(floor_sprite_constant, x, y)
+        spr(sprite_floor, x, y)
       end
     end
   end
-  spr(sprite_closed_door_constant, 2, 1)
-  spr(sprite_closed_treasure_constant, dungeon_size - 1, dungeon_size - 1)
+  spr(sprite_closed_door, 2, 1)
+  spr(sprite_closed_treasure, dungeon_size - 1, dungeon_size - 1)
 end
 
 
@@ -445,7 +446,7 @@ world = {}
 populate = function()
   add(world, {
     emotion = knight,
-    sprite = sprite_knight_walk1_constant,
+    sprite = sprite_knight_walk1,
     location = place_knight(),
     x_position = location.1,
     y_position = location.2,
@@ -461,7 +462,7 @@ populate = function()
   while (sentinel <= (flr(dungeon_size / 3) + 1) do
     add(world, {
       emotion = random_emotion(),
-      sprite = sprite_knight_walk1_constant,
+      sprite = sprite_knight_walk1,
       location = place_subordinate(),
       x_position = location.1,
       y_position = location.2,
@@ -477,7 +478,7 @@ populate = function()
 
   add(world, {
     emotion = dragon,
-    sprite = sprite_dragon_fly1_down_constant,
+    sprite = sprite_dragon_fly1_down,
     location = {2, 2},
     x_position = location.1,
     y_position = location.2,
@@ -491,17 +492,17 @@ end
 subordinate_sprite_system = system({"emotion", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == joy then
-      ecs_single_entity.sprite = sprite_joy_walk1_constant
+      ecs_single_entity.sprite = sprite_joy_walk1
     elseif ecs_single_entity.emotion == sadness then
-      ecs_single_entity.sprite = sprite_sadness_walk1_constant
+      ecs_single_entity.sprite = sprite_sadness_walk1
     elseif ecs_single_entity.emotion == fear then
-      ecs_single_entity.sprite = sprite_fear_walk1_constant
+      ecs_single_entity.sprite = sprite_fear_walk1
     elseif ecs_single_entity.emotion == disgust then
-      ecs_single_entity.sprite = sprite_disgust_walk1_constant
+      ecs_single_entity.sprite = sprite_disgust_walk1
     elseif ecs_single_entity.emotion == anger then
-      ecs_single_entity.sprite = sprite_anger_walk1_constant
+      ecs_single_entity.sprite = sprite_anger_walk1
     elseif ecs_single_entity.emotion == surprise then
-      ecs_single_entity.sprite = sprite_surprise_walk1_constant
+      ecs_single_entity.sprite = sprite_surprise_walk1
   end)
 
 
@@ -517,10 +518,10 @@ collision_system = system({"x_position", "y_position"},
     local y1 = ecs_single_entity.y_position / 8
     local x2 = (ecs_single_entity.x_position + 7) / 8
     local y2 = (ecs_single_entity.y_position + 7) / 8
-    local northwest_touch = fget( mget(x1, y1), solidity_flag_constant)
-    local southwest_touch = fget( mget(x1, y2), solidity_flag_constant)
-    local northeast_touch = fget( mget(x2, y2), solidity_flag_constant)
-    local southeast_touch = fget( mget(x2, y1), solidity_flag_constant)
+    local northwest_touch = fget( mget(x1, y1), flag_solidity)
+    local southwest_touch = fget( mget(x1, y2), flag_solidity)
+    local northeast_touch = fget( mget(x2, y2), flag_solidity)
+    local southeast_touch = fget( mget(x2, y1), flag_solidity)
 
     ecs_single_entity.has_collided = northwest_touch
                   or southwest_touch
@@ -621,13 +622,13 @@ astar_get_special_tile = function(astar_tile_id)
 end
 
 astar_map_to_index = function(astar_map_x, astar_map_y)
-	return ( (astar_map_x + 1) * dungeon_initial_size_constant ) + astar_map_y
+	return ( (astar_map_x + 1) * dungeon_initial_size ) + astar_map_y
 end
 
 astar_index_to_map = function(astar_argued_index)
-	local astar_map_x = (astar_argued_index - 1) / dungeon_initial_size_constant
+	local astar_map_x = (astar_argued_index - 1) / dungeon_initial_size
 	--the constant took the place of 16.
-	local astar_map_y = astar_argued_index - (astar_map_x * dungeon_initial_size_constant)
+	local astar_map_y = astar_argued_index - (astar_map_x * dungeon_initial_size)
 	--the constant took the place of w.
 	return {astar_map_x, astar_map_y}
 end
@@ -650,17 +651,17 @@ astar_get_neighbor_locations = function(astar_your_location)
 	local astar_neighbor_location_back = {astar_your_x - 1, astar_your_y}
 	local astar_neighbor_location_front = {astar_your_x + 1, astar_your_y}
 
-	if astar_your_x > 0 and (astar_neighbor_content_back ~= wall_sprite_constant) then
+	if astar_your_x > 0 and (astar_neighbor_content_back ~= wall_sprite) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_back})
 	end
-	if astar_your_y < 15 and (astar_neighbor_content_below ~= wall_sprite_constant) then
+	if astar_your_y < 15 and (astar_neighbor_content_below ~= wall_sprite) then
 	--is the number 15 artificially restricting the capacity of the a*?
 		add(astar_all_neighbor_locations, {astar_neighbor_location_below})
 	end
-	if astar_your_y > 0 and (astar_neighbor_content_above ~= wall_sprite_constant) then
+	if astar_your_y > 0 and (astar_neighbor_content_above ~= wall_sprite) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
 	end
-	if astar_your_x < 15 and (astar_neighbor_content_front ~= wall_sprite_constant) then
+	if astar_your_x < 15 and (astar_neighbor_content_front ~= wall_sprite) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_front})
 	end
 
