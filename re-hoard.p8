@@ -441,74 +441,68 @@ end
 --entity-component system
 --
 
---systems:
----	- user control
---	- patrolling
---	- hunting
---	- pursuing
---	- self-destruction
---	- sprite
-
 world = {}
 
 populate = function()
   add(world, {
     emotion = knight,
-    sprite = nil
+    sprite = sprite_knight_walk1_constant,
     location = place_knight(),
-    entity_x_position = location.1
-    entity_y_position = location.2
+    entity_x_position = location.1,
+    entity_y_position = location.2,
     target = {},
     is_patrolling = false,
-    is_hunting = false
-    entity_x_movement = 0
-    entity_y_movement = 0
+    is_hunting = false,
+    entity_x_movement = 0,
+    entity_y_movement = 0,
+    has_collided = false
   })
 
   local sentinel = 1
   while (sentinel <= (flr(dungeon_size / 3) + 1) do
     add(world, {
       emotion = random_emotion(),
-      sprite = 0
+      sprite = sprite_knight_walk1_constant,
       location = place_subordinate(),
-      entity_x_position = location.1
-      entity_y_position = location.2
+      entity_x_position = location.1,
+      entity_y_position = location.2,
       target = {},
       is_patrolling = false,
       is_hunting = false,
-      is_hit = false
-      entity_x_movement = 0
-      entity_y_movement = 0
+      is_hit = false,
+      entity_x_movement = 0,
+      entity_y_movement = 0,
+      has_collided = false
     })
   end
 
   add(world, {
     emotion = dragon,
-    sprite = 0
+    sprite = sprite_dragon_fly1_down_constant,
     location = {2, 2},
-    entity_x_position = location.1
-    entity_y_position = location.2
-    entity_x_movement = 0
-    entity_y_movement = 0
+    entity_x_position = location.1,
+    entity_y_position = location.2,
+    entity_x_movement = 0,
+    entity_y_movement = 0,
+    has_collided = false
   })
 end
 
 
-solid_collider_system = system({"emotion"},
+subordinate_sprite_system = system({"emotion", "sprite"},
   function(ecs_single_entity)
-    return ecs_single_entity.location
-  end)
-
-
-solid_actor_system = system({"emotion"},
-  function(ecs_single_entity)
-    return ecs_single_entity.location
-  end)
-
-
-move_collider_system = system({"emotion"},
-  function(ecs_single_entity)
-    return ecs_single_entity.location
+    if ecs_single_entity.emotion == joy then
+      ecs_single_entity.sprite = sprite_joy_walk1_constant
+    elseif ecs_single_entity.emotion == sadness then
+      ecs_single_entity.sprite = sprite_sadness_walk1_constant
+    elseif ecs_single_entity.emotion == fear then
+      ecs_single_entity.sprite = sprite_fear_walk1_constant
+    elseif ecs_single_entity.emotion == disgust then
+      ecs_single_entity.sprite = sprite_disgust_walk1_constant
+    elseif ecs_single_entity.emotion == anger then
+      ecs_single_entity.sprite = sprite_anger_walk1_constant
+    elseif ecs_single_entity.emotion == surprise then
+      ecs_single_entity.sprite = sprite_surprise_walk1_constant
   end)
 
 
@@ -536,33 +530,23 @@ collision_system = system({"entity_x_position", "entity_y_position"},
     local northeast_touch = fget( mget(x2, y2), solidity_flag_constant)
     local southeast_touch = fget( mget(x2, y1), solidity_flag_constant)
 
-    tile_collision = northwest_touch
+    ecs_single_entity.has_collided = northwest_touch
                   or southwest_touch
                   or northeast_touch
                   or southeast_touch
-
-    return tile_collision
   end)
 
 
-function is_solid(x, y)
-	value = mget(x, y)
-	return fget(value, solidity_flag_constant)
-end
-
-function move_collider(actor)
-	if not solid_actor(actor, actor.x_movement, 0) then
-		actor.x_position += actor.x_movement
-	end
-	if not solid_actor(actor, 0, actor.y_movement) then
-		actor.y_position += actor.y_movement
-	end
-
-	actor.current_frame += abs(actor.x_movement) * 4
-	actor.current_frame += abs(actor.y_movement) * 4
-	actor.current_frame %= actor.total_frames
-	actor.time_advance += 1
-end
+move_collider_system = system({"has_collided",
+                              "entity_x_position", "entity_y_position"
+                              "entity_x_movement", "entity_y_movement"},
+  function(ecs_single_entity)
+    if ecs_single_entity.has_collided == false then
+      ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
+      ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
+    end
+  end)
+  --safe_floor_locations
 
 function control_player(playable_actor)
 	acceleration = 0.1
