@@ -119,17 +119,19 @@ sound_effect_retreat = 58
 flag_solidity = 0
 flag_hurts_dragon = 1
 flag_hurts_subordinate = 2
+flag_is_knight = 3
 
 
 dungeon_initial_size = 15
 
 level = 0
+opportunities = 3
 dungeon = {}
 total_floor_locations = {}
 opponent_setup_floor_locations = {}
 safe_floor_locations = {}
 dragon_location = nil
-fireball_there = false
+is_fireball_there = false
 
 
 
@@ -484,10 +486,10 @@ populate = function()
     location = {2, 2},
     x_position = location.1,
     y_position = location.2,
+    is_hit = false,
     x_movement = 0,
     y_movement = 0,
     has_collided = false
-    is_hit = false,
   })
 end
 
@@ -540,7 +542,7 @@ move_collider_system = system({"has_collided",
   --safe_floor_locations
 
 
-control_dragon_system = system({"emotion", "x_movement", "y_movement"},
+control_dragon_system = system({"emotion", "sprite", "x_movement", "y_movement"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hit == false hen
       if btn(0) then
@@ -562,7 +564,51 @@ control_dragon_system = system({"emotion", "x_movement", "y_movement"},
         ecs_single_entity.x_movement = 0
       end
       if btnp(4) then
-        fireball_system()
+        if ecs_single_entity.sprite == sprite_dragon_fire_left then
+          add(world, {
+            emotion = fireball,
+            sprite = sprite_fireball_left,
+            location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
+            x_position = location.1,
+            y_position = location.2,
+            x_movement = -2,
+            y_movement = 0,
+            has_collided = false
+          })
+        elseif ecs_single_entity.sprite == sprite_dragon_fire_right then
+          add(world, {
+            emotion = fireball,
+            sprite = sprite_fireball_right,
+            location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
+            x_position = location.1,
+            y_position = location.2,
+            x_movement = 2,
+            y_movement = 0,
+            has_collided = false
+          })
+        elseif ecs_single_entity.sprite == sprite_dragon_fire_up then
+          add(world, {
+            emotion = fireball,
+            sprite = sprite_fireball_up,
+            location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
+            x_position = location.1,
+            y_position = location.2,
+            x_movement = 0,
+            y_movement = -2,
+            has_collided = false
+          })
+        elseif ecs_single_entity.sprite == sprite_dragon_fire_down then
+          add(world, {
+            emotion = fireball,
+            sprite = sprite_fireball_down,
+            location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
+            x_position = location.1,
+            y_position = location.2,
+            x_movement = 0,
+            y_movement = 2,
+            has_collided = false
+          })
+        end
       end
   end)
 
@@ -595,6 +641,17 @@ draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "spri
           ecs_single_entity.sprite = sprite_dragon_fly1_down
         else
           ecs_single_entity.sprite == sprite_dragon_fly2_down
+        end
+      end
+      if is_fireball_there == true then
+        if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
+          ecs_single_entity.sprite = sprite_dragon_fire_left
+        elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
+          ecs_single_entity.sprite = sprite_dragon_fire_right
+        elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
+          ecs_single_entity.sprite = sprite_dragon_fire_up
+        elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
+          ecs_single_entity.sprite = sprite_dragon_fire_down
         end
       end
     end
@@ -1011,7 +1068,7 @@ a000a0000a0a0000a000a0000a0a0000a000a000a000a000c000cc000c0c0c00c000c0000c0c0000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-0000000000000000000000000505050501010101010101010101010101010101000000000000000000000000000000000000000000000000000000000000000001000000010001010101030303030303030303030303030303030303070707070303030303030303030303030303030303030303030303030303030303000107
+00000000000000000000000005050505010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000010000000100010101010b0b0b0b0b0b030303030303030303030303070707070303030303030303030303030303030303030303030303030303030303000107
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
