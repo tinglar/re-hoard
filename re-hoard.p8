@@ -889,15 +889,17 @@ patrol_system = system({"emotion",
           while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
             and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
 
-              if ecs_single_entity.x_position < ecs_single_entity.x_goal then
-                ecs_single_entity.x_movement = 0.1
-              elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
-                ecs_single_entity.x_movement = -0.1
-              end
-              if ecs_single_entity.y_position < ecs_single_entity.y_goal then
-                ecs_single_entity.y_movement = 0.1
-              elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
-                ecs_single_entity.y_movement = -0.1
+              if ecs_single_entity.touched_who < 1 then
+                if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+                  ecs_single_entity.x_movement = 0.1
+                elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+                  ecs_single_entity.x_movement = -0.1
+                end
+                if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+                  ecs_single_entity.y_movement = 0.1
+                elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+                  ecs_single_entity.y_movement = -0.1
+                end
               end
 
           end
