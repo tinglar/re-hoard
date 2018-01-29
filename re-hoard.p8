@@ -377,6 +377,7 @@ end
 
 collector_of_safe_cells = function()
   local collector_key = 1
+
   repeat
     safe_floor_locations.collector_key = total_floor_locations.collector_key
   until total_floor_locations.collector_key == nil
@@ -401,6 +402,7 @@ end
 
 random_emotion = function()
   local seed = flr(rnd(5))
+
   if seed == 0 then
     return joy
   elseif seed = 1 then
@@ -452,6 +454,8 @@ populate = function()
     x_position = location.1,
     y_position = location.2,
     target = {},
+    x_goal = target.1,
+    y_goal = target.2,
     is_patrolling = false,
     is_hunting = false,
     x_movement = 0,
@@ -468,6 +472,8 @@ populate = function()
       x_position = location.1,
       y_position = location.2,
       target = {},
+      x_goal = target.1,
+      y_goal = target.2,
       is_patrolling = false,
       is_hunting = false,
       is_hurt = false, --is this necessary anymore?
@@ -862,7 +868,10 @@ astar_search = function(my_location, my_target)
 end
 
 
-patrol_system = system({"emotion", "is_patrolling", "location", "target"},
+patrol_system = system({"emotion",
+                        "is_patrolling", "x_movement", "y_movement",
+                        "location", "x_position", "y_position",
+                        "target", "x_goal", "y_goal"},
   function(ecs_single_entity)
     local picked_target = {}
     local my_path = nil
@@ -874,8 +883,24 @@ patrol_system = system({"emotion", "is_patrolling", "location", "target"},
           random_pick = flr(rnd(#safe_floor_locations))
           picked_target = safe_floor_locations.random_pick
           my_path = astar_search(ecs_single_entity.location, picked_target)
+
         else
-          ecs_single_entity.location = my_path:plain_queue_pop()
+          ecs_single_entity.target = my_path:plain_queue_pop()
+          while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
+            and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+
+              if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+                ecs_single_entity.x_movement = 0.1
+              elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+                ecs_single_entity.x_movement = -0.1
+              end
+              if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+                ecs_single_entity.y_movement = 0.1
+              elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+                ecs_single_entity.y_movement = -0.1
+              end
+
+          end
         end
       -- sadness stays still when "patrolling".
       elseif ecs_single_entity.emotion == fear then
