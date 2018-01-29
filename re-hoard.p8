@@ -945,6 +945,25 @@ fight_system = system({"emotion", "is_hunting", "location", "target"},
   end)
 
 
+did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == joy
+                                    or sadness
+                                    or fear
+                                    or disgust
+                                    or anger
+                                    or surprise then
+      if ecs_single_entity.touched_who == 5 then
+        ecs_single_entity.is_hurt = true
+      end
+    elseif ecs_single_entity.emotion == dragon then
+      if ecs_single_entity.touched_who == 3 or 11 then
+        ecs_single_entity.is_hurt = true
+      end
+    end
+  end)
+
+
 hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
