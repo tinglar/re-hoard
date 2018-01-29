@@ -17,7 +17,7 @@ __lua__
 --
 title_screen = true
 
---title screen: 64×16 starting from 0, 16
+--title screen: 64 * 16 starting from 0, 16
 
 sprite_wall = 64
 sprite_floor = 65
@@ -115,11 +115,12 @@ sound_effect_warp = 61
 sound_effect_blocked_fire = 60
 sound_effect_treasure = 59
 sound_effect_retreat = 58
+sound_effect_fire_hit = 57
 
-flag_solidity = 0
-flag_hurts_dragon = 1
-flag_hurts_subordinate = 2
-flag_is_knight = 3
+flag_solidity = 0             --adds 1
+flag_hurts_dragon = 1         --adds 2
+flag_hurts_subordinate = 2    --adds 4
+flag_is_knight = 3            --adds 8
 
 
 initial_dungeon_size = 15
@@ -386,13 +387,13 @@ draw_dungeon = function()
   for x in all(dungeon[1]) do
     for y in all(dungeon[1][2]) do
       if dungeon(x,y) == false then
-        spr(sprite_wall, x, y)
+        mset(sprite_wall, x, y)
       else
-        spr(sprite_floor, x, y)
+        mset(sprite_floor, x, y)
       end
     end
   end
-  spr(sprite_closed_door, 2, 1)
+  mset(sprite_closed_door, 2, 1)
   spr(sprite_closed_treasure, dungeon_size - 1, dungeon_size - 1)
 end
 
@@ -507,7 +508,8 @@ subordinate_sprite_system = system({"emotion", "sprite"},
 
 --collision code adapted from:
 --scathe
-collision_system = system({"x_position", "y_position"},
+collision_system = system({"x_position", "y_position",
+                          "has_collided", "touched_who"},
   function(ecs_single_entity)
     local x1 = ecs_single_entity.x_position / 8
     local y1 = ecs_single_entity.y_position / 8
@@ -522,6 +524,15 @@ collision_system = system({"x_position", "y_position"},
                   or southwest_touch
                   or northeast_touch
                   or southeast_touch
+    if northwest_touch == true then
+      ecs_single_entity.touched_who = fget( mget(x1, y1) )
+    elseif southwest_touch == true then
+      ecs_single_entity.touched_who = fget( mget(x1, y2) )
+    elseif northeast_touch == true then
+      ecs_single_entity.touched_who = fget( mget(x2, y2) )
+    elseif southeast_touch == true then
+      ecs_single_entity.touched_who = fget( mget(x2, y1) )
+    end
   end)
 
 
@@ -570,7 +581,8 @@ control_dragon_system = system({"emotion", "is_hit", "sprite", "x_movement", "y_
               y_position = location.2,
               x_movement = -0.5,
               y_movement = 0,
-              has_collided = false
+              has_collided = false,
+              touched_who = nil
             })
           elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
             add(world, {
@@ -581,7 +593,8 @@ control_dragon_system = system({"emotion", "is_hit", "sprite", "x_movement", "y_
               y_position = location.2,
               x_movement = 0.5,
               y_movement = 0,
-              has_collided = false
+              has_collided = false,
+              touched_who = nil
             })
           elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
             add(world, {
@@ -592,7 +605,8 @@ control_dragon_system = system({"emotion", "is_hit", "sprite", "x_movement", "y_
               y_position = location.2,
               x_movement = 0,
               y_movement = -0.5,
-              has_collided = false
+              has_collided = false,
+              touched_who = nil
             })
           elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
             add(world, {
@@ -603,7 +617,8 @@ control_dragon_system = system({"emotion", "is_hit", "sprite", "x_movement", "y_
               y_position = location.2,
               x_movement = 0,
               y_movement = 0.5,
-              has_collided = false
+              has_collided = false,
+              touched_who = nil
             })
           end
         end
@@ -656,9 +671,19 @@ draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "spri
   end)
 
 
-fireball_system = system({"sprite"},
+fireball_system = system({"touched_who", "has_collided"},
   function(ecs_single_entity)
+    if ecs_single_entity.has_collided == true then
+      if ecs_single_entity.touched_who == 1 then
+        sfx sound_effect_bump 3
+      elseif ecs_single_entity.touched_who == 3 then
+        sfx sound_effect_fire_hit 3
+      elseif ecs_single_entity.touched_who == 11 then
+        sfx sound_effect_blocked_fire 3
+      end
 
+      del(world, {emotion == fireball})
+    end
   end)
 
 embarrass_dragon_system = system({"emotion", "is_hit", "sprite"},
@@ -1164,7 +1189,7 @@ __sfx__
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000001175300700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 010800002873110731287001070028700107002870010700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011400001c55029550295550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011000002435500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
