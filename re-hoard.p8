@@ -453,6 +453,8 @@ populate = function()
     location = place_knight(),
     x_position = location.1,
     y_position = location.2,
+    orientation = north,
+    line_of_sight = {},
     target = {},
     x_goal = target.1,
     y_goal = target.2,
@@ -471,6 +473,8 @@ populate = function()
       location = place_subordinate(),
       x_position = location.1,
       y_position = location.2,
+      orientation = north
+      line_of_sight = {},
       target = {},
       x_goal = target.1,
       y_goal = target.2,
@@ -877,9 +881,8 @@ patrol_system = system({"emotion",
     local my_path = nil
 
     if ecs_single_entity.is_patrolling == true then
-      --safe_floor_locations
       if ecs_single_entity.emotion == joy then
-        if my_path:plain_queue_length{)} == 0 or my_path == nil then
+        if my_path:plain_queue_length() == 0 or my_path == nil then
           random_pick = flr(rnd(#safe_floor_locations))
           picked_target = safe_floor_locations.random_pick
           my_path = astar_search(ecs_single_entity.location, picked_target)
@@ -914,7 +917,7 @@ patrol_system = system({"emotion",
       elseif ecs_single_entity.emotion == surprise then
         --
       elseif ecs_single_entity.emotion == knight then
-        ---
+        --
       end
     end
   end)
@@ -923,13 +926,34 @@ patrol_system = system({"emotion",
 hunt_system = system({"emotion", "is_hunting", "location", "target"},
   function(ecs_single_entity)
     local picked_target = {}
-    local my_path = {}
+    local my_path = nil
 
       if ecs_single_entity.is_hunting == true then
         ecs_single_entity.is_patrolling = false
 
         if ecs_single_entity.emotion == joy then
-          astar_search(ecs_single_entity.location, locate_dragon)
+          if my_path:plain_queue_length() == 0 or my_path == nil then
+            my_path = astar_search(ecs_single_entity.location, dragon_location)
+
+          else
+            ecs_single_entity.target = my_path:plain_queue_pop()
+            while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
+              and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+
+                if ecs_single_entity.touched_who < 1 then
+                  if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+                    ecs_single_entity.x_movement = 0.1
+                  elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+                    ecs_single_entity.x_movement = -0.1
+                  end
+                  if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+                    ecs_single_entity.y_movement = 0.1
+                  elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+                    ecs_single_entity.y_movement = -0.1
+                  end
+                end
+
+            end
           -- sadness stays still when "huntng".
         elseif ecs_single_entity.emotion == fear then
           --
@@ -940,34 +964,51 @@ hunt_system = system({"emotion", "is_hunting", "location", "target"},
         elseif ecs_single_entity.emotion == surprise then
           --
         elseif ecs_single_entity.emotion == knight then
-          ---
+          --
         end
       end
     end)
 
 
-fight_system = system({"emotion", "is_hunting", "location", "target"},
+cross_of_sight = {
+  {ecs_single_entity.x_location, ecs_single_entity.y_location},
+  {ecs_single_entity.x_location - 1, ecs_single_entity.y_location},
+  {ecs_single_entity.x_location + 1, ecs_single_entity.y_location},
+  {ecs_single_entity.x_location, ecs_single_entity.y_location - 1},
+  {ecs_single_entity.x_location, ecs_single_entity.y_location + 1},
+
+}
+
+
+fight_system = system({"emotion", "x_location", "y_location"},
   function(ecs_single_entity)
+    local dragon_is_close = false
 
-    if ecs_single_entity.is_hunting == true then
-      ecs_single_entity.is_patrolling = false
-
-      if ecs_single_entity.emotion == joy then
-        --check
-
-      elseif ecs_single_entity.emotion == sadness then
-        --
-      elseif ecs_single_entity.emotion == fear then
-        --
-      elseif ecs_single_entity.emotion == disgust then
-        --
-      elseif ecs_single_entity.emotion == anger then
-        --
-      elseif ecs_single_entity.emotion == surprise then
-        --
-      elseif ecs_single_entity.emotion == knight then
-        ---
+    for check in all(cross_of_sight) do
+      if dragon_location == cross_of_sight.check then
+        dragon_is_close = true
       end
+    end
+
+    if ecs_single_entity.emotion == joy then
+      --
+    elseif ecs_single_entity.emotion == sadness then
+      if dragon_location == {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1}
+                            {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1}
+                            {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1}
+                            {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} then
+        dragon_is_close = true
+      end
+    elseif ecs_single_entity.emotion == fear then
+      --
+    elseif ecs_single_entity.emotion == disgust then
+      --
+    elseif ecs_single_entity.emotion == anger then
+      --
+    elseif ecs_single_entity.emotion == surprise then
+      --
+    elseif ecs_single_entity.emotion == knight then
+      --
     end
   end)
 
