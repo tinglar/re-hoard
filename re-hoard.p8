@@ -51,44 +51,44 @@ sprite_knight_walk2 = 75
 sprite_knight_hunt1 = 76
 sprite_knight_hunt2 = 77
 sprite_knight_fight = 78
-sprite_knight_got_hit = 79
+sprite_knight_got_hurt = 79
 sprite_joy_walk1 = 80
 sprite_joy_walk2 = 81
 sprite_joy_hunt1 = 82
 sprite_joy_hunt2 = 83
 sprite_joy_fight = 84
-sprite_joy_got_hit = 85
+sprite_joy_got_hurt = 85
 sprite_sadness_walk1 = 86
 sprite_sadness_walk2 = 87
 sprite_sadness_hunt1 = 88
 sprite_sadness_hunt2 = 89
 sprite_sadness_fight = 90
-sprite_sadness_got_hit = 91
+sprite_sadness_got_hurt = 91
 sprite_fear_walk1 = 96
 sprite_fear_walk2 = 97
 sprite_fear_hunt1 = 98
 sprite_fear_hunt2 = 99
 sprite_fear_fight = 100
-sprite_fear_got_hit = 101
+sprite_fear_got_hurt = 101
 sprite_disgust_walk1 = 102
 sprite_disgust_walk2 = 103
 sprite_disgust_hunt1 = 104
 sprite_disgust_hunt2 = 105
 sprite_disgust_fight_horizontal = 106
 sprite_disgust_fight_vertical = 124
-sprite_disgust_got_hit = 107
+sprite_disgust_got_hurt = 107
 sprite_anger_walk1 = 112
 sprite_anger_walk2 = 113
 sprite_anger_hunt1 = 114
 sprite_anger_hunt2 = 115
 sprite_anger_fight = 116
-sprite_anger_got_hit = 117
+sprite_anger_got_hurt = 117
 sprite_surprise_walk1 = 118
 sprite_surprise_walk2 = 119
 sprite_surprise_hunt1 = 120
 sprite_surprise_hunt2 = 121
 sprite_surprise_fight = 122
-sprite_surprise_got_hit = 123
+sprite_surprise_got_hurt = 123
 sprite_arrow_left = 92
 sprite_arrow_right = 93 --could you not simply use flip_x?
 sprite_arrow_up = 94
@@ -117,10 +117,11 @@ sound_effect_treasure = 59
 sound_effect_retreat = 58
 sound_effect_fire_hit = 57
 
-flag_solidity = 0             --adds 1
-flag_hurts_dragon = 1         --adds 2
-flag_hurts_subordinate = 2    --adds 4
-flag_is_knight = 3            --adds 8
+flag_solidity = 0            --adds 1
+flag_hurts_dragon = 1        --adds 2
+flag_hurts_subordinate = 2   --adds 4
+flag_is_knight = 3           --adds 8
+flag_has_treasure = 4        --adds 16
 
 
 initial_dungeon_size = 15
@@ -455,7 +456,8 @@ populate = function()
     is_hunting = false,
     x_movement = 0,
     y_movement = 0,
-    has_collided = false
+    has_collided = false,
+    touched_who = nil
   })
 
   while (sentinel <= (flr(dungeon_size / 3) + 1) do
@@ -468,10 +470,11 @@ populate = function()
       target = {},
       is_patrolling = false,
       is_hunting = false,
-      is_hit = false,
+      is_hurt = false, --is this necessary anymore?
       x_movement = 0,
       y_movement = 0,
-      has_collided = false
+      has_collided = false,
+      touched_who = nil
     })
   end
 
@@ -481,10 +484,11 @@ populate = function()
     location = {2, 2},
     x_position = location.1,
     y_position = location.2,
-    is_hit = false,
+    is_hurt = false,
     x_movement = 0,
     y_movement = 0,
-    has_collided = false
+    has_collided = false,
+    touched_who = nil
   })
 end
 
@@ -548,9 +552,9 @@ move_collider_system = system({"has_collided",
   --safe_floor_locations
 
 
-control_dragon_system = system({"emotion", "is_hit", "sprite", "x_movement", "y_movement"},
+control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y_movement"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hit == false hen
+    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == false hen
       if btn(0) then
         ecs_single_entity.x_movement = -0.2
       end
@@ -686,9 +690,9 @@ fireball_system = system({"touched_who", "has_collided"},
     end
   end)
 
-embarrass_dragon_system = system({"emotion", "is_hit", "sprite"},
+embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hit == true then
+    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == true then
       music -1
 
       if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
@@ -941,15 +945,51 @@ fight_system = system({"emotion", "is_hunting", "location", "target"},
   end)
 
 
-selfdestruct_system = system({"is_hit", "location"},
+hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
+                                  "x_location", "y_location", "location"},
   function(ecs_single_entity)
-    if ecs_single_entity.is_hit == true then
+    if ecs_single_entity.is_hurt == true and if ecs_single_entity.emotion == joy
+                                                                        or sadness
+                                                                        or fear
+                                                                        or disgust
+                                                                        or anger
+                                                                        or surprise then
+      for frame = 1, 4 do
+        if ecs_single_entity.emotion == joy then
+          spr sprite_joy_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        elseif ecs_single_entity.emotion == sadness then
+          spr sprite_sadness_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        elseif ecs_single_entity.emotion == fear then
+          spr sprite_fear_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        elseif ecs_single_entity.emotion == disgust then
+          spr sprite_disgust_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        elseif ecs_single_entity.emotion == anger then
+          spr sprite_anger_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        elseif ecs_single_entity.emotion == surprise then
+          spr sprite_surprise_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        end
+      end
+
+      sfx sound_effect_warp 3
+      for frame = 1, 8 do
+        if frame % 2 == 0 then
+          spr sprite_warp2 ecs_single_entity.x_location ecs_single_entity.y_location
+        else
+          spr sprite_warp1 ecs_single_entity.x_location ecs_single_entity.y_location
+        end
+      end
+
       del(world, {location == ecs_single_entity.location})
     end
   end)
 
 
-
+--selfdestruct_system = system({"is_hurt", "location"},
+  --function(ecs_single_entity)
+    --if ecs_single_entity.is_hurt == true then
+      --del(world, {location == ecs_single_entity.location})
+    --end
+  --end)
 --
 --basic pico-8 stuff
 --
@@ -1096,7 +1136,7 @@ a000a0000a0a0000a000a0000a0a0000a000a000a000a000c000cc000c0c0c00c000c0000c0c0000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-00000000000000000000000005050505010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000010000000100010101010b0b0b0b0b0b030303030303030303030303070707070303030303030303030303030303030303030303030303030303030303000107
+00000000000000000000000005050505010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000010000000100090101010b0b0b0b0b0b030303030303030303030303070707070303030303030303030303030303030303030303030303030303030303000107
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
