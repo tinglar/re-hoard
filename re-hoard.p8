@@ -15,8 +15,8 @@ __lua__
 --
 -- parameters
 --
-title_screen = true
 
+-- constants
 -- title screen: 64 * 16 starting from 0, 16
 
 sprite_wall = 64
@@ -117,14 +117,20 @@ sound_effect_treasure = 59
 sound_effect_retreat = 58
 sound_effect_fire_hit = 57
 
-flag_solidity = 0            --adds 1
-flag_hurts_dragon = 1        --adds 2
-flag_hurts_subordinate = 2   --adds 4
-flag_is_knight = 3           --adds 8
-flag_has_treasure = 4        --adds 16
-
+flag_solidity = 0            -- adds 1
+flag_hurts_dragon = 1        -- adds 2
+flag_hurts_subordinate = 2   -- adds 4
+flag_is_knight = 3           -- adds 8
+flag_has_treasure = 4        -- adds 16
 
 initial_dungeon_size = 15
+
+
+-- variables
+title_phase = true
+intermission_phase = false
+setup_phase = false
+gameplay_phase = false
 
 level = 0
 opportunities = 3
@@ -505,18 +511,21 @@ end
 
 subordinate_sprite_system = system({"emotion", "sprite"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == joy then
-      ecs_single_entity.sprite = sprite_joy_walk1
-    elseif ecs_single_entity.emotion == sadness then
-      ecs_single_entity.sprite = sprite_sadness_walk1
-    elseif ecs_single_entity.emotion == fear then
-      ecs_single_entity.sprite = sprite_fear_walk1
-    elseif ecs_single_entity.emotion == disgust then
-      ecs_single_entity.sprite = sprite_disgust_walk1
-    elseif ecs_single_entity.emotion == anger then
-      ecs_single_entity.sprite = sprite_anger_walk1
-    elseif ecs_single_entity.emotion == surprise then
-      ecs_single_entity.sprite = sprite_surprise_walk1
+    if setup_phase == true then
+      if ecs_single_entity.emotion == joy then
+        ecs_single_entity.sprite = sprite_joy_walk1
+      elseif ecs_single_entity.emotion == sadness then
+        ecs_single_entity.sprite = sprite_sadness_walk1
+      elseif ecs_single_entity.emotion == fear then
+        ecs_single_entity.sprite = sprite_fear_walk1
+      elseif ecs_single_entity.emotion == disgust then
+        ecs_single_entity.sprite = sprite_disgust_walk1
+      elseif ecs_single_entity.emotion == anger then
+        ecs_single_entity.sprite = sprite_anger_walk1
+      elseif ecs_single_entity.emotion == surprise then
+        ecs_single_entity.sprite = sprite_surprise_walk1
+      end
+    end
   end)
 
 
