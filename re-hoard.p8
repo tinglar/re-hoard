@@ -6,9 +6,9 @@ __lua__
 --license gplv3 (gnu.org/licenses/gpl-3.0.en.html)
 --revision 0
 
--- title music by 0xabad1dea
--- gameplay music based
--- on song by tanner helland
+--title music by 0xabad1dea
+--gameplay music based
+--on song by tanner helland
 
 
 
@@ -17,7 +17,7 @@ __lua__
 --
 title_screen = true
 
---title screen: 64 * 16 starting from 0, 16
+-- title screen: 64 * 16 starting from 0, 16
 
 sprite_wall = 64
 sprite_floor = 65
@@ -140,8 +140,8 @@ is_fireball_there = false
 --
 -- structures
 --
---entity-component system code adapted from:
---selfsame at lexaloffle bbs
+-- entity-component system code adapted from:
+-- selfsame at lexaloffle bbs
 function _has(ecs_single_entity, ecs_component_value)
   for ecs_component_name in all(ecs_component_value) do
     if not ecs_single_entity[ecs_component_name] then
@@ -215,7 +215,7 @@ priority_queue = {
                     self[element_priority] = nil
                 end
             end
-        end, --please do not forget the commas!
+        end,
 
         priority_queue_pour = function(self) --returns value without the priority
             for element_priority, current_queue in pairs(self) do
@@ -314,7 +314,7 @@ build_dungeon = function()
     if immediate_cells:plain_queue_length() == 0 then
       current_cell = travelled_cells:plain_queue_pop()
     else
-      local randomly = flr(rdm(immediate_cells:plain_queue_length())) + 1
+      local randomly = flr (rdm (immediate_cells:plain_queue_length() ) ) + 1
 
       -- the program goes to the randomly-picked cell.
       current_cell = {immediate_cells.randomly}
@@ -336,7 +336,7 @@ build_dungeon = function()
         end
       end
 
-      travelled_cells:plain_queue_push({current_cell[1], current_cell[2]})
+      travelled_cells:plain_queue_push( {current_cell[1], current_cell[2]} )
       -- travelled_cells is a queue that holds tables.
       dungeon[current_cell] = true
     end
@@ -360,7 +360,7 @@ end
 
 collector_of_opponent_setup_cells = function()
   local collector_key = 1
-  local top_half_of_dungeon = flr(dungeon_size/2)
+  local top_half_of_dungeon = flr(dungeon_size / 2)
   local current_location = nil
 
   for x = 1, dungeon_size do
@@ -473,7 +473,7 @@ populate = function()
       location = place_subordinate(),
       x_position = location.1,
       y_position = location.2,
-      orientation = north
+      orientation = north,
       line_of_sight = {},
       target = {},
       x_goal = target.1,
@@ -520,32 +520,32 @@ subordinate_sprite_system = system({"emotion", "sprite"},
   end)
 
 
---collision code adapted from:
---scathe
+-- collision code adapted from:
+-- scathe
 collision_system = system({"x_position", "y_position",
                           "has_collided", "touched_who"},
   function(ecs_single_entity)
-    local x1 = ecs_single_entity.x_position / 8
-    local y1 = ecs_single_entity.y_position / 8
-    local x2 = (ecs_single_entity.x_position + 7) / 8
-    local y2 = (ecs_single_entity.y_position + 7) / 8
-    local northwest_touch = fget( mget(x1, y1), flag_solidity)
-    local southwest_touch = fget( mget(x1, y2), flag_solidity)
-    local northeast_touch = fget( mget(x2, y2), flag_solidity)
-    local southeast_touch = fget( mget(x2, y1), flag_solidity)
+    local x1 = ecs_single_entity.x_position
+    local y1 = ecs_single_entity.y_position
+    local x2 = ecs_single_entity.x_position + 1
+    local y2 = ecs_single_entity.y_position + 1
+    local northwest_touch = fget (mget (x1, y1), flag_solidity)
+    local southwest_touch = fget (mget (x1, y2), flag_solidity)
+    local northeast_touch = fget (mget (x2, y2), flag_solidity)
+    local southeast_touch = fget (mget (x2, y1), flag_solidity)
 
     ecs_single_entity.has_collided = northwest_touch
                   or southwest_touch
                   or northeast_touch
                   or southeast_touch
     if northwest_touch == true then
-      ecs_single_entity.touched_who = fget( mget(x1, y1) )
+      ecs_single_entity.touched_who = fget (mget (x1, y1) )
     elseif southwest_touch == true then
-      ecs_single_entity.touched_who = fget( mget(x1, y2) )
+      ecs_single_entity.touched_who = fget (mget (x1, y2) )
     elseif northeast_touch == true then
-      ecs_single_entity.touched_who = fget( mget(x2, y2) )
+      ecs_single_entity.touched_who = fget (mget (x2, y2) )
     elseif southeast_touch == true then
-      ecs_single_entity.touched_who = fget( mget(x2, y1) )
+      ecs_single_entity.touched_who = fget (mget (x2, y1) )
     end
   end)
 
@@ -585,7 +585,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
       end
       if btnp(4) then
         if is_fireball_there == false then
-          is_fireball_there == true
+          is_fireball_there = true
           if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
             add(world, {
               emotion = fireball,
@@ -593,7 +593,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
               x_position = location.1,
               y_position = location.2,
-              x_movement = -0.5,
+              x_movement = -0.4,
               y_movement = 0,
               has_collided = false,
               touched_who = nil
@@ -605,7 +605,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
               x_position = location.1,
               y_position = location.2,
-              x_movement = 0.5,
+              x_movement = 0.4,
               y_movement = 0,
               has_collided = false,
               touched_who = nil
@@ -618,7 +618,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               x_position = location.1,
               y_position = location.2,
               x_movement = 0,
-              y_movement = -0.5,
+              y_movement = -0.4,
               has_collided = false,
               touched_who = nil
             })
@@ -630,7 +630,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               x_position = location.1,
               y_position = location.2,
               x_movement = 0,
-              y_movement = 0.5,
+              y_movement = 0.4,
               has_collided = false,
               touched_who = nil
             })
@@ -642,35 +642,35 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
 draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon then
-      if ecs_single_entity.x_movement < 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_left then
-          ecs_single_entity.sprite = sprite_dragon_fly1_left
-        else
-          ecs_single_entity.sprite == sprite_dragon_fly2_left
+        if ecs_single_entity.x_movement < 0 then
+          if ecs_single_entity.sprite == sprite_dragon_fly2_left then
+            ecs_single_entity.sprite = sprite_dragon_fly1_left
+          else
+            ecs_single_entity.sprite == sprite_dragon_fly2_left
+          end
         end
-      end
-      if ecs_single_entity.x_movement > 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_right then
-          ecs_single_entity.sprite = sprite_dragon_fly1_right
-        else
-          ecs_single_entity.sprite == sprite_dragon_fly2_right
+        if ecs_single_entity.x_movement > 0 then
+          if ecs_single_entity.sprite == sprite_dragon_fly2_right then
+            ecs_single_entity.sprite = sprite_dragon_fly1_right
+          else
+            ecs_single_entity.sprite == sprite_dragon_fly2_right
+          end
         end
-      end
-      if ecs_single_entity.y_movement < 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_up then
-          ecs_single_entity.sprite = sprite_dragon_fly1_up
-        else
-          ecs_single_entity.sprite == sprite_dragon_fly2_up
+        if ecs_single_entity.y_movement < 0 then
+          if ecs_single_entity.sprite == sprite_dragon_fly2_up then
+            ecs_single_entity.sprite = sprite_dragon_fly1_up
+          else
+            ecs_single_entity.sprite == sprite_dragon_fly2_up
+          end
         end
-      end
-      if ecs_single_entity.y_movement > 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_down then
-          ecs_single_entity.sprite = sprite_dragon_fly1_down
-        else
-          ecs_single_entity.sprite == sprite_dragon_fly2_down
+        if ecs_single_entity.y_movement > 0 then
+          if ecs_single_entity.sprite == sprite_dragon_fly2_down then
+            ecs_single_entity.sprite = sprite_dragon_fly1_down
+          else
+            ecs_single_entity.sprite == sprite_dragon_fly2_down
+          end
         end
-      end
-      if is_fireball_there == true then
+      if btnp(4) then
         if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
           ecs_single_entity.sprite = sprite_dragon_fire_left
         elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
@@ -720,7 +720,7 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
 
       music music_failure
       repeat
-        --wait until the music is over
+        -- wait until the music is over
       until stat 16 == nil
 
       repeat
@@ -728,7 +728,6 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
         ecs_single_entity.y_position = ecs_single_entity.y_position - 1
         sfx sound_effect_retreat 3
       until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
-      end
     end
   end)
 
@@ -753,14 +752,14 @@ return_to_your_places_system = system({"emotion", "location"},
   end)
 
 
---patrol_system(world)
+-- patrol_system(world)
 
 
---a* code adapted from:
---richard "richy486" adem
+-- a* code adapted from:
+-- richard "richy486" adem
 
---dungeon is a table of tables that have the x and y integers.
---keep this in mind when reviewing the a* code.
+-- dungeon is a table of tables that have the x and y integers.
+-- keep this in mind when reviewing the a* code.
 astar_heuristic = function(a, b)
 	return abs(a[1] - b[1]) + abs(a[2] - b[2])
 end
@@ -770,9 +769,9 @@ astar_get_special_tile = function(astar_tile_id)
 	local astar_tile_y = nil
 	for astar_tile_x = 0, dungeon_size do
 		for astar_tile_y = 0, dungeon_size do
-			local astar_inspected_tile = mget(astar_tile_x, astar_tile_y) --contents
+			local astar_inspected_tile = mget(astar_tile_x, astar_tile_y) -- contents
 			if astar_inspected_tile == astar_tile_id then
-				return {astar_tile_x, astar_tile_y} --location
+				return {astar_tile_x, astar_tile_y} -- location
 			end
 		end
 	end
@@ -784,9 +783,9 @@ end
 
 astar_index_to_map = function(astar_index)
 	local astar_map_x = (astar_index - 1) / (dungeon_size + 1)
-	--the constant took the place of 16.
+	-- the constant took the place of 16.
 	local astar_map_y = astar_index - (astar_map_x * dungeon_size)
-	--the constant took the place of w.
+	-- the constant took the place of w.
 	return {astar_map_x, astar_map_y}
 end
 
@@ -799,25 +798,33 @@ astar_get_neighbor_locations = function(astar_your_location)
 	local astar_your_x = astar_your_location[1]
 	local astar_your_y = astar_your_location[2]
 
-	local astar_neighbor_content_above = mget(astar_your_x, astar_your_y - 1)
-	local astar_neighbor_content_below = mget(astar_your_x, astar_your_y + 1)
-	local astar_neighbor_content_back = mget(astar_your_x - 1, astar_your_y)
-	local astar_neighbor_content_front = mget(astar_your_x + 1, astar_your_y)
+	local astar_neighbor_tile_above = mget(astar_your_x, astar_your_y - 1)
+	local astar_neighbor_tile_below = mget(astar_your_x, astar_your_y + 1)
+	local astar_neighbor_tile_back = mget(astar_your_x - 1, astar_your_y)
+	local astar_neighbor_tile_front = mget(astar_your_x + 1, astar_your_y)
 	local astar_neighbor_location_above = {astar_your_x, astar_your_y - 1}
 	local astar_neighbor_location_below = {astar_your_x, astar_your_y + 1}
 	local astar_neighbor_location_back = {astar_your_x - 1, astar_your_y}
 	local astar_neighbor_location_front = {astar_your_x + 1, astar_your_y}
 
-	if astar_your_x > 0 and (astar_neighbor_content_back ~= wall_sprite) then
+	if astar_your_x > 0 and (astar_neighbor_tile_back ~= sprite_wall
+                                                    or sprite_closed_door
+                                                    or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_back})
 	end
-	if astar_your_y < dungeon_size and (astar_neighbor_content_below ~= wall_sprite) then
+	if astar_your_y < dungeon_size and (astar_neighbor_tile_below ~= sprite_wall
+                                                    or sprite_closed_door
+                                                    or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_below})
 	end
-	if astar_your_y > 0 and (astar_neighbor_content_above ~= wall_sprite) then
+	if astar_your_y > 0 and (astar_neighbor_tile_above ~= sprite_wall
+                                                    or sprite_closed_door
+                                                    or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
 	end
-	if astar_your_x < dungeon_size and (astar_neighbor_content_front ~= wall_sprite) then
+	if astar_your_x < dungeon_size and (astar_neighbor_tile_front ~= sprite_wall
+                                                    or sprite_closed_door
+                                                    or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_front})
 	end
 
@@ -856,14 +863,14 @@ astar_search = function(my_location, my_target)
 			astar_new_cost = astar_cost_so_far[astar_vector_to_index(astar_current_location)]
 			if (astar_cost_so_far[astar_next_index] == nil) or (astar_new_cost < astar_cost_so_far[astar_next_index]) then
 				astar_cost_so_far[astar_next_index] = astar_new_cost
-				astar_new_priority = astar_new_cost + astar_heuristic(astar_goal_location, next) --is the order reversed?
-				astar_frontier:priority_queue_push(astar_new_priority, next)
+				astar_new_priority = astar_new_cost + astar_heuristic(astar_goal_location, next_step)
+				astar_frontier:priority_queue_push(astar_new_priority, next_step) -- is the order reversed?
 				astar_came_from[astar_next_index] = astar_current_location
 
         if (astar_next_index ~= astar_vector_to_index(astar_start_location)) then
           next_x = next_step[1]
           next_y = next_step[2]
-          astar_final_path:plain_queue_push = {next_x, next_y} --is the order reversed, too?
+          astar_final_path:plain_queue_push = {next_x, next_y} -- is the order reversed, too?
 			end
 		end
 	end
@@ -883,7 +890,7 @@ patrol_system = system({"emotion",
     if ecs_single_entity.is_patrolling == true then
       if ecs_single_entity.emotion == joy then
         if my_path:plain_queue_length() == 0 or my_path == nil then
-          random_pick = flr(rnd(#safe_floor_locations))
+          random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations.random_pick
           my_path = astar_search(ecs_single_entity.location, picked_target)
 
@@ -1036,11 +1043,11 @@ hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
     if ecs_single_entity.is_hurt == true and if ecs_single_entity.emotion == joy
-                                                                        or sadness
-                                                                        or fear
-                                                                        or disgust
-                                                                        or anger
-                                                                        or surprise then
+                                                                          or sadness
+                                                                          or fear
+                                                                          or disgust
+                                                                          or anger
+                                                                          or surprise then
       for frame = 1, 4 do
         if ecs_single_entity.emotion == joy then
           spr sprite_joy_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
