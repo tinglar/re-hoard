@@ -134,6 +134,7 @@ gameplay_phase = false
 
 level = 0
 opportunities = 3
+current_dungeon_size = initial_dungeon_size + flr(level / 3)
 dungeon = {}
 total_floor_locations = {}
 opponent_setup_floor_locations = {}
@@ -253,8 +254,6 @@ setmetatable(priority_queue, priority_queue)
 -- algorithms
 --
 build_dungeon = function()
-  local dungeon_size = initial_dungeon_size + flr(level/3)
-
   local travelled_cells = plain_queue_new()
   local immediate_cells = plain_queue_new()
   local current_cell = nil
@@ -269,14 +268,14 @@ build_dungeon = function()
   local cell_location_front = {current_cell[1] + 1, current_cell[2]}
 
 
-  for x = 1, dungeon_size do
+  for x = 1, current_dungeon_size do
     dungeon[x] = {}
-    for y = 1, dungeon_size do
-      if y == (1 or dungeon_size) then
+    for y = 1, current_dungeon_size do
+      if y == (1 or current_dungeon_size) then
         dungeon[x][y] = false
       end
     end
-    if x == (1 or dungeon_size) then
+    if x == (1 or current_dungeon_size) then
       dungeon[x][y] = false
     end
   end
@@ -353,8 +352,8 @@ end
 collector_of_floor_cells = function()
   local collector_key = 1
 
-  for x = 1, dungeon_size do
-    for y = 1, dungeon_size do
+  for x = 1, current_dungeon_size do
+    for y = 1, current_dungeon_size do
       if dungeon[x][y] == true then
         total_floor_locations.collector_key = {x,y}
         collector_key = collector_key + 1
@@ -366,11 +365,11 @@ end
 
 collector_of_opponent_setup_cells = function()
   local collector_key = 1
-  local top_half_of_dungeon = flr(dungeon_size / 2)
+  local top_half_of_dungeon = flr(current_dungeon_size / 2)
   local current_location = nil
 
-  for x = 1, dungeon_size do
-    for y = 1, dungeon_size do
+  for x = 1, current_dungeon_size do
+    for y = 1, current_dungeon_size do
       current_location = total_floor_locations.collector_key
       if current_location.1 ~= top_half_of_dungeon or current_location.2 ~= top_half_of_dungeon then
         opponent_setup_floor_locations.collector_key = current_location
@@ -402,7 +401,7 @@ draw_dungeon = function()
     end
   end
   mset(sprite_closed_door, 2, 1)
-  spr(sprite_closed_treasure, dungeon_size - 1, dungeon_size - 1)
+  spr(sprite_closed_treasure, current_dungeon_size - 1, current_dungeon_size - 1)
 end
 
 
@@ -460,7 +459,7 @@ populate = function()
     x_position = location.1,
     y_position = location.2,
     orientation = north,
-    line_of_sight = {},
+    cross_of_sight = {},
     target = {},
     x_goal = target.1,
     y_goal = target.2,
@@ -472,7 +471,7 @@ populate = function()
     touched_who = nil
   })
 
-  while (sentinel <= (flr(dungeon_size / 3) + 1) do
+  while (sentinel <= (flr (current_dungeon_size / 3) + 1) do
     add(world, {
       emotion = random_emotion(),
       sprite = sprite_knight_walk1,
@@ -480,7 +479,7 @@ populate = function()
       x_position = location.1,
       y_position = location.2,
       orientation = north,
-      line_of_sight = {},
+      cross_of_sight = {},
       target = {},
       x_goal = target.1,
       y_goal = target.2,
@@ -508,10 +507,9 @@ populate = function()
   })
 end
 
-
 subordinate_sprite_system = system({"emotion", "sprite"},
   function(ecs_single_entity)
-    if setup_phase == true then
+    if sprite. == true then
       if ecs_single_entity.emotion == joy then
         ecs_single_entity.sprite = sprite_joy_walk1
       elseif ecs_single_entity.emotion == sadness then
@@ -526,6 +524,92 @@ subordinate_sprite_system = system({"emotion", "sprite"},
         ecs_single_entity.sprite = sprite_surprise_walk1
       end
     end
+  end)
+
+
+set_cross_of_sight_system = system({"orientation", "cross_of_sight",
+                                  "x_location", "y_location"},
+  function(ecs_single_entity)
+    ecs_single_entity.cross_of_sight = {}
+    local look = 1
+
+    if ecs_single_entity.orientation == north then
+      while look > -1 do
+        if mget(ecs_single_entity.y_location - look) == sprite_floor then
+          add (ecs_single_entity.cross_of_sight,
+                {ecs_single_entity.x_location, ecs_single_entity.y_location - look} )
+          look = look - 1
+        else
+          break
+        end
+      end
+      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1} )
+      end
+      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} )
+      end
+
+    elseif ecs_single_entity.orientation == south then
+      while look < current_dungeon_size do
+        if mget(ecs_single_entity.y_location + look) == sprite_floor then
+          add (ecs_single_entity.cross_of_sight,
+                {ecs_single_entity.x_location, ecs_single_entity.y_location + look} )
+          look = look + 1
+        else
+          break
+        end
+      end
+      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} )
+      end
+      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
+      end
+
+    elseif ecs_single_entity.orientation == west then
+      while look > -1 do
+        if mget(ecs_single_entity.x_location - look) == sprite_floor then
+          add (ecs_single_entity.cross_of_sight,
+                {ecs_single_entity.x_location - look, ecs_single_entity.y_location} )
+          look = look - 1
+        else
+          break
+        end
+      end
+      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1} )
+      end
+      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} )
+      end
+
+    elseif ecs_single_entity.orientation == east then
+      while look < current_dungeon_size do
+        if mget(ecs_single_entity.x_location + look) == sprite_floor then
+          add (ecs_single_entity.cross_of_sight,
+                {ecs_single_entity.x_location + look, ecs_single_entity.y_location} )
+          look = look + 1
+        else
+          break
+        end
+      end
+      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} )
+      end
+      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
+      end
+    end
+
   end)
 
 
@@ -648,6 +732,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
       end
   end)
 
+
 draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon then
@@ -708,6 +793,7 @@ fireball_system = system({"touched_who", "has_collided"},
       del(world, {emotion == fireball})
     end
   end)
+
 
 embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
   function(ecs_single_entity)
@@ -776,8 +862,8 @@ end
 astar_get_special_tile = function(astar_tile_id)
 	local astar_tile_x = nil
 	local astar_tile_y = nil
-	for astar_tile_x = 0, dungeon_size do
-		for astar_tile_y = 0, dungeon_size do
+	for astar_tile_x = 0, current_dungeon_size do
+		for astar_tile_y = 0, current_dungeon_size do
 			local astar_inspected_tile = mget(astar_tile_x, astar_tile_y) -- contents
 			if astar_inspected_tile == astar_tile_id then
 				return {astar_tile_x, astar_tile_y} -- location
@@ -787,13 +873,13 @@ astar_get_special_tile = function(astar_tile_id)
 end
 
 astar_map_to_index = function(astar_map_x, astar_map_y)
-	return ( (astar_map_x + 1) * dungeon_size ) + astar_map_y
+	return ( (astar_map_x + 1) * current_dungeon_size ) + astar_map_y
 end
 
 astar_index_to_map = function(astar_index)
-	local astar_map_x = (astar_index - 1) / (dungeon_size + 1)
+	local astar_map_x = (astar_index - 1) / (current_dungeon_size + 1)
 	-- the constant took the place of 16.
-	local astar_map_y = astar_index - (astar_map_x * dungeon_size)
+	local astar_map_y = astar_index - (astar_map_x * current_dungeon_size)
 	-- the constant took the place of w.
 	return {astar_map_x, astar_map_y}
 end
@@ -821,9 +907,9 @@ astar_get_neighbor_locations = function(astar_your_location)
                                                     or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_back})
 	end
-	if astar_your_y < dungeon_size and (astar_neighbor_tile_below ~= sprite_wall
-                                                    or sprite_closed_door
-                                                    or sprite_open_door) then
+	if astar_your_y < current_dungeon_size and (astar_neighbor_tile_below ~= sprite_wall
+                                                                        or sprite_closed_door
+                                                                        or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_below})
 	end
 	if astar_your_y > 0 and (astar_neighbor_tile_above ~= sprite_wall
@@ -831,9 +917,9 @@ astar_get_neighbor_locations = function(astar_your_location)
                                                     or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
 	end
-	if astar_your_x < dungeon_size and (astar_neighbor_tile_front ~= sprite_wall
-                                                    or sprite_closed_door
-                                                    or sprite_open_door) then
+	if astar_your_x < current_dungeon_size and (astar_neighbor_tile_front ~= sprite_wall
+                                                                        or sprite_closed_door
+                                                                        or sprite_open_door) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_front})
 	end
 
@@ -939,13 +1025,26 @@ patrol_system = system({"emotion",
   end)
 
 
+patrol_to_hunt_system = system({"is_patrolling", "is_hunting"},
+  function(ecs_single_entity)
+    for check in all(cross_of_sight) do
+      if dragon_location == cross_of_sight.check then
+        ecs_single_entity.is_patrolling = false
+        ecs_single_entity.is_hunting = true
+      end
+    end
+  end)
+
+
+
+
+
 hunt_system = system({"emotion", "is_hunting", "location", "target"},
   function(ecs_single_entity)
     local picked_target = {}
     local my_path = nil
 
       if ecs_single_entity.is_hunting == true then
-        ecs_single_entity.is_patrolling = false
 
         if ecs_single_entity.emotion == joy then
           if my_path:plain_queue_length() == 0 or my_path == nil then
@@ -970,15 +1069,21 @@ hunt_system = system({"emotion", "is_hunting", "location", "target"},
                 end
 
             end
-          -- sadness stays still when "huntng".
+
+        -- sadness stays still when "hunting".
+
         elseif ecs_single_entity.emotion == fear then
           --
+
         elseif ecs_single_entity.emotion == disgust then
           --
+
         elseif ecs_single_entity.emotion == anger then
           --
+
         elseif ecs_single_entity.emotion == surprise then
           --
+
         elseif ecs_single_entity.emotion == knight then
           --
         end
@@ -986,35 +1091,12 @@ hunt_system = system({"emotion", "is_hunting", "location", "target"},
     end)
 
 
-cross_of_sight = {
-  {ecs_single_entity.x_location, ecs_single_entity.y_location},
-  {ecs_single_entity.x_location - 1, ecs_single_entity.y_location},
-  {ecs_single_entity.x_location + 1, ecs_single_entity.y_location},
-  {ecs_single_entity.x_location, ecs_single_entity.y_location - 1},
-  {ecs_single_entity.x_location, ecs_single_entity.y_location + 1},
-
-}
-
-
 fight_system = system({"emotion", "x_location", "y_location"},
   function(ecs_single_entity)
-    local dragon_is_close = false
-
-    for check in all(cross_of_sight) do
-      if dragon_location == cross_of_sight.check then
-        dragon_is_close = true
-      end
-    end
-
     if ecs_single_entity.emotion == joy then
       --
     elseif ecs_single_entity.emotion == sadness then
-      if dragon_location == {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1}
-                            {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1}
-                            {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1}
-                            {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} then
-        dragon_is_close = true
-      end
+      --
     elseif ecs_single_entity.emotion == fear then
       --
     elseif ecs_single_entity.emotion == disgust then
