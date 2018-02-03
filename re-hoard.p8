@@ -509,7 +509,7 @@ end
 
 subordinate_sprite_system = system({"emotion", "sprite"},
   function(ecs_single_entity)
-    if sprite. == true then
+    if setup_phase == true then
       if ecs_single_entity.emotion == joy then
         ecs_single_entity.sprite = sprite_joy_walk1
       elseif ecs_single_entity.emotion == sadness then
