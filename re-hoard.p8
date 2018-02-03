@@ -130,7 +130,8 @@ initial_dungeon_size = 15
 title_phase = true
 intermission_phase = false
 setup_phase = false
-gameplay_phase = false
+normal_gameplay_phase = false
+panic_gameplay_phase = false
 
 level = 0
 opportunities = 3
