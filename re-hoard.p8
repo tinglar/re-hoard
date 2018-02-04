@@ -150,7 +150,7 @@ is_fireball_there = false
 --
 -- entity-component system code adapted from:
 -- selfsame at lexaloffle bbs
-function _has(ecs_single_entity, ecs_component_value)
+_has = function(ecs_single_entity, ecs_component_value)
   for ecs_component_name in all(ecs_component_value) do
     if not ecs_single_entity[ecs_component_name] then
       return false
@@ -159,7 +159,7 @@ function _has(ecs_single_entity, ecs_component_value)
   return true
 end
 
-function ecs_system(ecs_component_value, ecs_entity_function)
+ecs_system = function(ecs_component_value, ecs_entity_function)
   return function(ecs_every_entity)
     for ecs_single_entity in all(ecs_every_entity) do
       if _has(ecs_single_entity, ecs_component_value) then
@@ -612,6 +612,32 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
     end
 
   end)
+
+
+panic_system = system({"is_hunting"},
+  function(ecs_single_entity)
+    if is_hunting == true then
+      panic_gameplay_phase = true
+    end
+  end)
+
+
+back_to_normal = function()
+  -- you have to activate this function manually
+  local calm_down = true
+
+  for component_name, component_value in pairs(world) do
+    if component_name == is_hunting then
+      if component_value == true then
+        calm_down = false
+      end
+    end
+  end
+
+  if calm_down == true then
+    panic_gameplay_phase = false
+  end
+end
 
 
 -- collision code adapted from:
