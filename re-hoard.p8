@@ -1001,52 +1001,83 @@ astar_search = function(my_location, my_target)
 end
 
 
+move_opponent = function() -- would this work with the entity-component system?
+  while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
+    and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+
+      if ecs_single_entity.touched_who < 1 then
+        if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+          ecs_single_entity.x_movement = 0.1
+        elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+          ecs_single_entity.x_movement = -0.1
+        end
+        if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+          ecs_single_entity.y_movement = 0.1
+        elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+          ecs_single_entity.y_movement = -0.1
+        end
+      end
+
+  end
+end
+
+
 patrol_system = system({"emotion",
                         "is_patrolling", "x_movement", "y_movement",
                         "location", "x_position", "y_position",
                         "target", "x_goal", "y_goal"},
   function(ecs_single_entity)
     local picked_target = {}
-    local my_path = nil
+    local my_path:plain_queue_new()
 
     if ecs_single_entity.is_patrolling == true then
       if ecs_single_entity.emotion == joy then
-        if my_path:plain_queue_length() == 0 or my_path == nil then
+        if my_path:plain_queue_length() == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations.random_pick
           my_path = astar_search(ecs_single_entity.location, picked_target)
-
         else
           ecs_single_entity.target = my_path:plain_queue_pop()
-          while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
-            and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
-
-              if ecs_single_entity.touched_who < 1 then
-                if ecs_single_entity.x_position < ecs_single_entity.x_goal then
-                  ecs_single_entity.x_movement = 0.1
-                elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
-                  ecs_single_entity.x_movement = -0.1
-                end
-                if ecs_single_entity.y_position < ecs_single_entity.y_goal then
-                  ecs_single_entity.y_movement = 0.1
-                elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
-                  ecs_single_entity.y_movement = -0.1
-                end
-              end
-
-          end
+          move_opponent()
         end
+
       -- sadness stays still when "patrolling".
+
       elseif ecs_single_entity.emotion == fear then
-        --
+        if my_path:plain_queue_length() == 0 then
+          my_path:plain_queue_push(ecs_single_entity.location)
+          for key, value in pairs(safe_floor_locations) do
+            if {ecs_single_entity.x_location, ecs_single_entity.y_location - 1} == value then
+              my_path:plain_queue_push(value)
+              break
+            elseif {ecs_single_entity.x_location, ecs_single_entity.y_location + 1} == value then
+              my_path:plain_queue_push(value)
+              break
+            elseif {ecs_single_entity.x_location - 1, ecs_single_entity.y_location} == value then
+              my_path:plain_queue_push(value)
+              break
+            elseif {ecs_single_entity.x_location + 1, ecs_single_entity.y_location} == value then
+              my_path:plain_queue_push(value)
+              break
+            end
+          end
+        else
+          ecs_single_entity.target = my_path:plain_queue_pop()
+          my_path:plain_queue_push(ecs_single_entity.target)
+          move_opponent()
+        end
+
       elseif ecs_single_entity.emotion == disgust then
-        --
+        if my_path:plain_queue_length() == 0 then
+
       elseif ecs_single_entity.emotion == anger then
-        --
+        if my_path:plain_queue_length() == 0 then
+
       elseif ecs_single_entity.emotion == surprise then
-        --
+        if my_path:plain_queue_length() == 0 then
+
       elseif ecs_single_entity.emotion == knight then
-        --
+        if my_path:plain_queue_length() == 0 then
       end
     end
   end)
@@ -1063,13 +1094,11 @@ patrol_to_hunt_system = system({"is_patrolling", "is_hunting"},
   end)
 
 
-
-
-
 hunt_system = system({"emotion", "is_hunting", "location", "target"},
   function(ecs_single_entity)
     local picked_target = {}
     local my_path = nil
+    local pause_counter = 3
 
       if ecs_single_entity.is_hunting == true then
 
@@ -1100,7 +1129,20 @@ hunt_system = system({"emotion", "is_hunting", "location", "target"},
         -- sadness stays still when "hunting".
 
         elseif ecs_single_entity.emotion == fear then
-          --
+          while pause_counter > 0 do
+            pause_counter = pause_counter - 1
+          end
+          --add(world, {
+            --emotion = arrow,
+            --sprite = sprite_fireball_left,
+            --location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
+            --x_position = location.1,
+            --y_position = location.2,
+            --x_movement = -0.4,
+            --y_movement = 0,
+            --has_collided = false,
+            --touched_who = nil
+          --})
 
         elseif ecs_single_entity.emotion == disgust then
           --
@@ -1122,16 +1164,22 @@ fight_system = system({"emotion", "x_location", "y_location"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == joy then
       --
+
     elseif ecs_single_entity.emotion == sadness then
       --
+
     elseif ecs_single_entity.emotion == fear then
       --
+
     elseif ecs_single_entity.emotion == disgust then
       --
+
     elseif ecs_single_entity.emotion == anger then
       --
+
     elseif ecs_single_entity.emotion == surprise then
       --
+
     elseif ecs_single_entity.emotion == knight then
       --
     end
