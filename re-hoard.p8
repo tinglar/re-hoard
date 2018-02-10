@@ -1069,6 +1069,29 @@ patrol_system = system({"emotion",
 
       elseif ecs_single_entity.emotion == disgust then
         if my_path:plain_queue_length() == 0 then
+          for key, value in pairs(safe_floor_locations) do
+            if ecs_single_entity.location != value then
+              local check_x_location = value.1
+              local check_y_location = value.2
+
+              if (mget check_x_location, check_y_location - 1) == sprite_floor
+              and (mget check_x_location, check_y_location + 1) == sprite_floor
+              and (mget check_x_location - 1, check_y_location) == sprite_floor
+              and (mget check_x_location + 1, check_y_location) == sprite_floor
+              and (mget check_x_location - 1, check_y_location - 1) == sprite_floor
+              and (mget check_x_location - 1, check_y_location + 1) == sprite_floor
+              and (mget check_x_location + 1, check_y_location - 1) == sprite_floor
+              and (mget check_x_location + 1, check_y_location + 1) == sprite_floor then
+                picked_target = value
+                break
+              end
+            end
+          end
+          my_path = astar_search(ecs_single_entity.location, picked_target)
+        else
+          ecs_single_entity.target = my_path:plain_queue_pop()
+          move_opponent()
+        end
 
       elseif ecs_single_entity.emotion == anger then
         if my_path:plain_queue_length() == 0 then
