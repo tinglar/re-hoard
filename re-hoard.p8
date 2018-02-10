@@ -1031,7 +1031,7 @@ patrol_system = system({"emotion",
     local my_path:plain_queue_new()
 
     if ecs_single_entity.is_patrolling == true then
-      if ecs_single_entity.emotion == joy then
+      if ecs_single_entity.emotion == joy or surprise then
         if my_path:plain_queue_length() == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations.random_pick
@@ -1105,9 +1105,6 @@ patrol_system = system({"emotion",
           ecs_single_entity.target = my_path:plain_queue_pop()
           my_path:plain_queue_push(ecs_single_entity.target)
           move_opponent()
-
-      elseif ecs_single_entity.emotion == surprise then
-        if my_path:plain_queue_length() == 0 then
 
       elseif ecs_single_entity.emotion == knight then
         if my_path:plain_queue_length() == 0 then
