@@ -141,6 +141,7 @@ total_floor_locations = {}
 opponent_setup_floor_locations = {}
 safe_floor_locations = {}
 dragon_location = nil
+treasure_location = nil
 is_fireball_there = false
 
 
@@ -381,15 +382,6 @@ collector_of_opponent_setup_cells = function()
 end
 
 
-collector_of_safe_cells = function()
-  local collector_key = 1
-
-  repeat
-    safe_floor_locations.collector_key = total_floor_locations.collector_key
-  until total_floor_locations.collector_key == nil
-end
-
-
 draw_dungeon = function()
   cls()
   for x in all(dungeon[1]) do
@@ -401,8 +393,12 @@ draw_dungeon = function()
       end
     end
   end
+
   mset(sprite_closed_door, 2, 1)
-  spr(sprite_closed_treasure, current_dungeon_size - 1, current_dungeon_size - 1)
+
+  treasure_location = opponent_floor_locations.#opponent_floor_locations
+  spr(sprite_closed_treasure, last_location.1, last_location.2)
+  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
 end
 
 
@@ -536,7 +532,7 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
 
     if ecs_single_entity.orientation == north then
       while look > -1 do
-        if mget(ecs_single_entity.y_location - look) == sprite_floor then
+        if mget(ecs_single_entity.x_location, ecs_single_entity.y_location - look) == sprite_floor then
           add (ecs_single_entity.cross_of_sight,
                 {ecs_single_entity.x_location, ecs_single_entity.y_location - look} )
           look = look - 1
@@ -555,7 +551,7 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
 
     elseif ecs_single_entity.orientation == south then
       while look < current_dungeon_size do
-        if mget(ecs_single_entity.y_location + look) == sprite_floor then
+        if mget(ecs_single_entity.x_location, ecs_single_entity.y_location + look) == sprite_floor then
           add (ecs_single_entity.cross_of_sight,
                 {ecs_single_entity.x_location, ecs_single_entity.y_location + look} )
           look = look + 1
@@ -574,7 +570,7 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
 
     elseif ecs_single_entity.orientation == west then
       while look > -1 do
-        if mget(ecs_single_entity.x_location - look) == sprite_floor then
+        if mget(ecs_single_entity.x_location - look, ecs_single_entity.y_location) == sprite_floor then
           add (ecs_single_entity.cross_of_sight,
                 {ecs_single_entity.x_location - look, ecs_single_entity.y_location} )
           look = look - 1
@@ -593,7 +589,7 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
 
     elseif ecs_single_entity.orientation == east then
       while look < current_dungeon_size do
-        if mget(ecs_single_entity.x_location + look) == sprite_floor then
+        if mget(ecs_single_entity.x_location + look, ecs_single_entity.y_location) == sprite_floor then
           add (ecs_single_entity.cross_of_sight,
                 {ecs_single_entity.x_location + look, ecs_single_entity.y_location} )
           look = look + 1
@@ -679,7 +675,15 @@ move_collider_system = system({"has_collided",
       ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
     end
   end)
-  --safe_floor_locations
+
+
+collector_of_safe_cells = function()
+  local collector_key = 1
+
+  repeat
+    safe_floor_locations.collector_key = total_floor_locations.collector_key
+  until total_floor_locations.collector_key == nil
+end
 
 
 control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y_movement"},
@@ -1028,7 +1032,12 @@ patrol_system = system({"emotion",
                         "target", "x_goal", "y_goal"},
   function(ecs_single_entity)
     local picked_target = {}
-    local my_path:plain_queue_new()
+    if ecs_single_entity.emotion == knight then
+      local knight_path = {}
+      local knight_step = 1
+    else
+      local my_path:plain_queue_new()
+    end
 
     if ecs_single_entity.is_patrolling == true then
       if ecs_single_entity.emotion == joy or surprise then
@@ -1105,9 +1114,32 @@ patrol_system = system({"emotion",
           ecs_single_entity.target = my_path:plain_queue_pop()
           my_path:plain_queue_push(ecs_single_entity.target)
           move_opponent()
+        end
 
       elseif ecs_single_entity.emotion == knight then
-        if my_path:plain_queue_length() == 0 then
+        if #knight_path == 0 then
+          if mget(last_location.1 - 1, last_location.2) == sprite_floor then
+            add (knight_path, {last_location.1 - 1, last_location.2} )
+          end
+          if mget(last_location.1 - 1, last_location.2 - 1) == sprite_floor then
+            add (knight_path, {last_location.1 - 1, last_location.2 - 1} )
+          end
+          if mget(last_location.1, last_location.2 - 1) == sprite_floor then
+            add (knight_path, {last_location.1, last_location.2 - 1} )
+          end
+        else
+          if knight_step <= #knight_path then
+            ecs_single_entity.target = knight_path.knight_step
+            move_opponent()
+            knight_step = knight_step + 1
+          else
+            local hold = knight_path.#knight_path
+            knight_path.#knight_path = knight_path.1
+            knight_path.1 = hold
+            knight_step = 1
+          end
+        end
+
       end
     end
   end)
