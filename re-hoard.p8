@@ -1095,6 +1095,16 @@ patrol_system = system({"emotion",
 
       elseif ecs_single_entity.emotion == anger then
         if my_path:plain_queue_length() == 0 then
+          local top_right_corner = flr(#safe_floor_locations / 2) - 1
+          local bottom_left_corner = flr(#safe_floor_locations / 2) + 1
+          my_path:plain_queue_push(safe_floor_locations.1)
+          my_path:plain_queue_push(safe_floor_locations.top_right_corner)
+          my_path:plain_queue_push(safe_floor_locations.#safe_floor_locations)
+          my_path:plain_queue_push(safe_floor_locations.bottom_left_corner)
+        else
+          ecs_single_entity.target = my_path:plain_queue_pop()
+          my_path:plain_queue_push(ecs_single_entity.target)
+          move_opponent()
 
       elseif ecs_single_entity.emotion == surprise then
         if my_path:plain_queue_length() == 0 then
