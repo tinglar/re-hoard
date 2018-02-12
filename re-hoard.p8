@@ -1231,27 +1231,12 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
             end
           end
 
-          if my_path:plain_queue_length() == 0 or my_path == nil then
+          if my_path:plain_queue_length() == 0 then
             my_path = astar_search(ecs_single_entity.location, dragon_location)
           else
             ecs_single_entity.target = my_path:plain_queue_pop()
-            while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
-              and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
-
-                if ecs_single_entity.touched_who < 1 then
-                  if ecs_single_entity.x_position < ecs_single_entity.x_goal then
-                    ecs_single_entity.x_movement = 0.1
-                  elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
-                    ecs_single_entity.x_movement = -0.1
-                  end
-                  if ecs_single_entity.y_position < ecs_single_entity.y_goal then
-                    ecs_single_entity.y_movement = 0.1
-                  elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
-                    ecs_single_entity.y_movement = -0.1
-                  end
-                end
-
-            end
+            move_opponent()
+          end
 
         -- sadness stays still when "hunting".
 
@@ -1316,10 +1301,27 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
           end
 
         elseif ecs_single_entity.emotion == disgust then
-          --
+          if my_path:plain_queue_length() == 0 then
+            local my_goal = dragon_location
+            local seed = flr(rnd(3))
+
+            if seed == 0 then
+              my_goal.1 = my_goal.1 - 2
+            elseif seed = 1 then
+              my_goal.1 = my_goal.1 + 2
+            elseif seed == 2 then
+              my_goal.2 = my_goal.2 - 2
+            else
+              my_goal.2 = my_goal.2 + 2
+            end
+            my_path = astar_search(ecs_single_entity.location, my_goal)
+          else
+            ecs_single_entity.target = my_path:plain_queue_pop()
+            move_opponent()
+          end
 
         elseif ecs_single_entity.emotion == anger or knight then
-          if my_path:plain_queue_length() == 0 or my_path == nil then
+          if my_path:plain_queue_length() == 0 then
             my_path = astar_search(ecs_single_entity.location, dragon_location)
 
           else
