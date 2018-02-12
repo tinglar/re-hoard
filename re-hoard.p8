@@ -530,6 +530,22 @@ subordinate_sprite_system = system({"emotion", "sprite"},
   end)
 
 
+orientation_system = system({"orientation", "x_movement", "y_movement"},
+  function(ecs_single_entity)
+      if ecs_single_entity.x_movement < 0 then
+        ecs_single_entity.orientation = west
+      elseif ecs_single_entity.x_movement > 0 then
+        ecs_single_entity.orientation = east
+      end
+
+      if ecs_single_entity.y_movement < 0 then
+        ecs_single_entity.orientation = north
+      elseif ecs_single_entity.y_movement > 0 then
+        ecs_single_entity.orientation = south
+      end
+    end)
+
+
 set_cross_of_sight_system = system({"orientation", "cross_of_sight",
                                   "x_location", "y_location"},
   function(ecs_single_entity)
