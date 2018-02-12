@@ -97,8 +97,8 @@ sprite_lance_left = 108
 sprite_lance_right = 109
 sprite_lance_up = 110
 sprite_lance_down = 111
-sprite_explosive_off = 126
-sprite_explosive_on = 127
+sprite_dynamite_off = 126
+sprite_dynamite_on = 127
 sprite_warp1 = 72
 sprite_warp2 = 73
 
@@ -143,6 +143,10 @@ safe_floor_locations = {}
 dragon_location = nil
 treasure_location = nil
 is_fireball_there = false
+fear_count = 0
+arrow_count = 0
+surprise_count = 0
+dynamite_count = 0
 
 
 
@@ -402,7 +406,7 @@ draw_dungeon = function()
 end
 
 
-random_emotion = function()
+generate_emotion = function()
   local seed = flr(rnd(5))
 
   if seed == 0 then
@@ -410,12 +414,14 @@ random_emotion = function()
   elseif seed = 1 then
     return sadness
   elseif seed == 2 then
+    fear_count = fear_count + 1
     return fear
   elseif seed == 3 then
     return disgust
   elseif seed = 4 then
     return anger
   else
+    surprise_count = surprise_count + 1
     return surprise
   end
 end
@@ -470,7 +476,7 @@ populate = function()
 
   while (sentinel <= (flr (current_dungeon_size / 3) + 1) do
     add(world, {
-      emotion = random_emotion(),
+      emotion = generate_emotion(),
       sprite = sprite_knight_walk1,
       location = place_subordinate(),
       x_position = location.1,
@@ -1040,7 +1046,7 @@ patrol_system = system({"emotion",
     end
 
     if ecs_single_entity.is_patrolling == true then
-      if ecs_single_entity.emotion == joy or surprise then
+      if ecs_single_entity.emotion == joy then
         if my_path:plain_queue_length() == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations.random_pick
@@ -1116,6 +1122,28 @@ patrol_system = system({"emotion",
           move_opponent()
         end
 
+        if ecs_single_entity.emotion surprise then
+          if my_path:plain_queue_length() == 0 then
+            random_pick = flr (rnd (#safe_floor_locations) )
+            picked_target = safe_floor_locations.random_pick
+            my_path = astar_search(ecs_single_entity.location, picked_target)
+            if dynamite_count < surprise_count
+              add(world, {
+                emotion = dynamite,
+                sprite = sprite_dynamite_off
+                location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
+                x_position = location.1,
+                y_position = location.2,
+                has_collided = false,
+                touched_who = nil
+              })
+              dynamite_count = dynamite_count + 1
+            end
+          else
+            ecs_single_entity.target = my_path:plain_queue_pop()
+            move_opponent()
+          end
+
       elseif ecs_single_entity.emotion == knight then
         if #knight_path == 0 then
           if mget(last_location.1 - 1, last_location.2) == sprite_floor then
@@ -1156,7 +1184,7 @@ patrol_to_hunt_system = system({"is_patrolling", "is_hunting"},
   end)
 
 
-hunt_system = system({"emotion", "is_hunting", "location", "target"},
+hunt_system = system({"emotion", "is_hunting", "location", "target", "orientation"},
   function(ecs_single_entity)
     local picked_target = {}
     local my_path = nil
@@ -1194,17 +1222,61 @@ hunt_system = system({"emotion", "is_hunting", "location", "target"},
           while pause_counter > 0 do
             pause_counter = pause_counter - 1
           end
-          --add(world, {
-            --emotion = arrow,
-            --sprite = sprite_fireball_left,
-            --location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
-            --x_position = location.1,
-            --y_position = location.2,
-            --x_movement = -0.4,
-            --y_movement = 0,
-            --has_collided = false,
-            --touched_who = nil
-          --})
+          if arrow_count < fear_count then
+            if ecs_single_entity.orientation == west then
+              add(world, {
+                emotion = arrow,
+                sprite = sprite_arrow_left,
+                location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = -0.4,
+                y_movement = 0,
+                has_collided = false,
+                touched_who = nil
+              })
+
+            elseif ecs_single_entity.orientation == east then
+              add(world, {
+                emotion = arrow,
+                sprite = sprite_arrow_left,
+                location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = 0.4,
+                y_movement = 0,
+                has_collided = false,
+                touched_who = nil
+              })
+
+            elseif ecs_single_entity.orientation == north then
+              add(world, {
+                emotion = arrow,
+                prite = sprite_arrow_left,
+                location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = 0,
+                y_movement = -0.4,
+                has_collided = false,
+                touched_who = nil
+              })
+
+            elseif ecs_single_entity.orientation == south then
+              add(world, {
+                emotion = arrow,
+                sprite = sprite_arrow_left,
+                location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = 0,
+                y_movement = 0.4,
+                has_collided = false,
+                touched_who = nil
+              })
+            end
+            arrow_count = arrow_count + 1
+          end
 
         elseif ecs_single_entity.emotion == disgust then
           --
