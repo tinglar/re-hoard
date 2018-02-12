@@ -1194,10 +1194,15 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
 
       if ecs_single_entity.is_hunting == true then
 
-        if ecs_single_entity.emotion == joy then
+        if ecs_single_entity.emotion == joy or surprise then
+          if ecs_single_entity.emotion == surprise then
+            while pause_counter > 0 do
+              pause_counter = pause_counter - 1
+            end
+          end
+
           if my_path:plain_queue_length() == 0 or my_path == nil then
             my_path = astar_search(ecs_single_entity.location, dragon_location)
-
           else
             ecs_single_entity.target = my_path:plain_queue_pop()
             while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
@@ -1306,9 +1311,7 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
                 end
 
             end
-
-        elseif ecs_single_entity.emotion == surprise then
-          --
+          end
         end
       end
     end)
