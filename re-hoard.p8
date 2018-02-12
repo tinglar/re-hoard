@@ -1184,7 +1184,9 @@ patrol_to_hunt_system = system({"is_patrolling", "is_hunting"},
   end)
 
 
-hunt_system = system({"emotion", "is_hunting", "location", "target", "orientation"},
+hunt_system = system({"emotion", "is_hunting", "location", "target",
+                      "x_position", "y_position", "x_goal", "y_goal",
+                      "x_movement", "y_movement", "orientation"},
   function(ecs_single_entity)
     local picked_target = {}
     local my_path = nil
@@ -1281,13 +1283,31 @@ hunt_system = system({"emotion", "is_hunting", "location", "target", "orientatio
         elseif ecs_single_entity.emotion == disgust then
           --
 
-        elseif ecs_single_entity.emotion == anger then
-          --
+        elseif ecs_single_entity.emotion == anger or knight then
+          if my_path:plain_queue_length() == 0 or my_path == nil then
+            my_path = astar_search(ecs_single_entity.location, dragon_location)
+
+          else
+            ecs_single_entity.target = my_path:plain_queue_pop()
+            while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
+              and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+
+                if ecs_single_entity.touched_who < 1 then
+                  if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+                    ecs_single_entity.x_movement = 0.2
+                  elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+                    ecs_single_entity.x_movement = -0.2
+                  end
+                  if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+                    ecs_single_entity.y_movement = 0.2
+                  elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+                    ecs_single_entity.y_movement = -0.2
+                  end
+                end
+
+            end
 
         elseif ecs_single_entity.emotion == surprise then
-          --
-
-        elseif ecs_single_entity.emotion == knight then
           --
         end
       end
