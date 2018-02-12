@@ -989,6 +989,20 @@ astar_search = function(my_location, my_target)
 	local astar_cost_so_far = {}
 	astar_cost_so_far [astar_vector_to_index(astar_start_location)] = 0
 
+  -- if the target is out of bounds,
+  -- then the following conditionals readjust the target
+  -- to within the bounds
+  if astar_goal_location.1 < 2 then
+    astar_goal_location.1 = 2
+  elseif astar_goal_location.1 > current_dungeon_size - 1 then
+    astar_goal_location.1 = current_dungeon_size - 1
+  end
+  if astar_goal_location.2 < 2 then
+    astar_goal_location.2 = 2
+  elseif astar_goal_location.2 > current_dungeon_size - 1 then
+    astar_goal_location.2 = current_dungeon_size - 1
+  end
+
 	local astar_current_location = nil
 	local astar_current_neighbors = nil
 	local astar_next_index = nil
