@@ -663,6 +663,7 @@ end
 collision_system = system({"x_position", "y_position",
                           "has_collided", "touched_who"},
   function(ecs_single_entity)
+    local sprite_size = 8
     local x1 = ecs_single_entity.x_position
     local y1 = ecs_single_entity.y_position
     local x2 = ecs_single_entity.x_position + 1
@@ -684,6 +685,20 @@ collision_system = system({"x_position", "y_position",
       ecs_single_entity.touched_who = fget (mget (x2, y2) )
     elseif southeast_touch == true then
       ecs_single_entity.touched_who = fget (mget (x2, y1) )
+    end
+
+
+    local my_x = ecs_single_entity.x_position
+    local my_y = ecs_single_entity.y_position
+    local your_x = other.position.x
+    local your_y = other.position.y
+
+    if your_x + sprite_size > my_x
+    and your_y + sprite_size > my_y
+    and your_x < my_x + sprite_size
+    and your_y < my_y + sprite_size then
+      ecs_single_entity.has_collided = true
+      ecs_single_entity.touched_who = other
     end
   end)
 
@@ -1348,29 +1363,69 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
       end
     end)
 
+move_opponent_to_dragon = function()
+  ecs_single_entity.x_location = dragon_location.1
+  ecs_single_entity.y_location = dragon_location.2
+end
 
 fight_system = system({"emotion", "x_location", "y_location"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == joy then
-      --
-
-    elseif ecs_single_entity.emotion == sadness then
-      --
-
-    elseif ecs_single_entity.emotion == fear then
-      --
-
+    if ecs_single_entity.emotion == sadness then
+      if ecs_single_entity.orientation == north or south then
+        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
+        or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) == dragon_location then
+          move_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == west or east then
+        if (ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
+        or (ecs_single_entity.x_location, ecs_single_entity.y_location + 1) == dragon_location then
+          move_opponent_to_dragon()
+        end
+      end
     elseif ecs_single_entity.emotion == disgust then
-      --
+      if ecs_single_entity.orientation == north then
+        if (ecs_single_entity.x_location , ecs_single_entity.y_location - 2) then
+          move_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == south then
+        if (ecs_single_entity.x_location , ecs_single_entity.y_location + 2) then
+          move_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == west then
+        if (ecs_single_entity.x_location - 2, ecs_single_entity.y_location) then
+          move_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == east then
+        if (ecs_single_entity.x_location + 2, ecs_single_entity.y_location) then
+          move_opponent_to_dragon()
+        end
+      end
+    end
 
-    elseif ecs_single_entity.emotion == anger then
-      --
-
-    elseif ecs_single_entity.emotion == surprise then
-      --
-
-    elseif ecs_single_entity.emotion == knight then
-      --
+    if ecs_single_entity.orientation == north then
+      if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1)
+      or (ecs_single_entity.x_location , ecs_single_entity.y_location - 1)
+      or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1) == dragon_location then
+        move_opponent_to_dragon()
+      end
+    elseif ecs_single_entity.orientation == south then
+      if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1)
+      or (ecs_single_entity.x_location , ecs_single_entity.y_location + 1)
+      or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == dragon_location then
+        move_opponent_to_dragon()
+      end
+    elseif ecs_single_entity.orientation == west then
+      if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1)
+      or (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
+      or (ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1) == dragon_location then
+        move_opponent_to_dragon()
+      end
+    elseif ecs_single_entity.orientation == east then
+      if (ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1)
+      or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location)
+      or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == dragon_location then
+        move_opponent_to_dragon()
+      end
     end
   end)
 
