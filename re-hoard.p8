@@ -116,6 +116,8 @@ sound_effect_blocked_fire = 60
 sound_effect_treasure = 59
 sound_effect_retreat = 58
 sound_effect_fire_hit = 57
+sound_effect_pierce = 56
+sound_effect_explode = 55
 
 flag_solidity = 0            -- adds 1
 flag_hurts_dragon = 1        -- adds 2
@@ -847,9 +849,10 @@ draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "spri
   end)
 
 
-fireball_system = system({"touched_who", "has_collided"},
+fireball_system = system({"emotion", "touched_who", "has_collided"},
   function(ecs_single_entity)
-    if ecs_single_entity.has_collided == true then
+    if ecs_single_entity.emotion == fireball
+    and ecs_single_entity.has_collided == true then
       if ecs_single_entity.touched_who == 1 then
         sfx sound_effect_bump 3
       elseif ecs_single_entity.touched_who == 3 then
@@ -859,38 +862,6 @@ fireball_system = system({"touched_who", "has_collided"},
       end
 
       del(world, {emotion == fireball})
-    end
-  end)
-
-
-embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
-  function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == true then
-      music -1
-
-      if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_left
-      end
-      if ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right or sprite_dragon_fire_right then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_right
-      end
-      if ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up or sprite_dragon_fire_up then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_up
-      end
-      if ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down or sprite_dragon_fire_down then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_down
-      end
-
-      music music_failure
-      repeat
-        -- wait until the music is over
-      until stat 16 == nil
-
-      repeat
-        ecs_single_entity.x_position = ecs_single_entity.x_position - 1
-        ecs_single_entity.y_position = ecs_single_entity.y_position - 1
-        sfx sound_effect_retreat 3
-      until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
     end
   end)
 
@@ -1181,6 +1152,7 @@ patrol_system = system({"emotion",
                 y_position = location.2,
                 has_collided = false,
                 touched_who = nil
+                fuse_count = flr (rnd (9) )
               })
               dynamite_count = dynamite_count + 1
             end
@@ -1363,76 +1335,111 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
       end
     end)
 
-move_opponent_to_dragon = function()
+relocate_opponent_to_dragon = function()
   ecs_single_entity.x_location = dragon_location.1
   ecs_single_entity.y_location = dragon_location.2
 end
 
 fight_system = system({"emotion", "x_location", "y_location"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == sadness then
-      if ecs_single_entity.orientation == north or south then
-        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
-        or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) == dragon_location then
-          move_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == west or east then
-        if (ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
-        or (ecs_single_entity.x_location, ecs_single_entity.y_location + 1) == dragon_location then
-          move_opponent_to_dragon()
-        end
-      end
-    elseif ecs_single_entity.emotion == disgust then
-      if ecs_single_entity.orientation == north then
-        if (ecs_single_entity.x_location , ecs_single_entity.y_location - 2) then
-          move_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == south then
-        if (ecs_single_entity.x_location , ecs_single_entity.y_location + 2) then
-          move_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == west then
-        if (ecs_single_entity.x_location - 2, ecs_single_entity.y_location) then
-          move_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == east then
-        if (ecs_single_entity.x_location + 2, ecs_single_entity.y_location) then
-          move_opponent_to_dragon()
-        end
-      end
-    end
-
     if ecs_single_entity.orientation == north then
       if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1)
       or (ecs_single_entity.x_location , ecs_single_entity.y_location - 1)
       or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1) == dragon_location then
-        move_opponent_to_dragon()
+        relocate_opponent_to_dragon()
       end
     elseif ecs_single_entity.orientation == south then
       if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1)
       or (ecs_single_entity.x_location , ecs_single_entity.y_location + 1)
       or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == dragon_location then
-        move_opponent_to_dragon()
+        relocate_opponent_to_dragon()
       end
     elseif ecs_single_entity.orientation == west then
       if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1)
       or (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
       or (ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1) == dragon_location then
-        move_opponent_to_dragon()
+        relocate_opponent_to_dragon()
       end
     elseif ecs_single_entity.orientation == east then
       if (ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1)
       or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location)
       or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == dragon_location then
-        move_opponent_to_dragon()
+        relocate_opponent_to_dragon()
       end
+    end
+
+    if ecs_single_entity.emotion == sadness then
+      if ecs_single_entity.orientation == north or south then
+        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
+        or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) == dragon_location then
+          relocate_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == west or east then
+        if (ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
+        or (ecs_single_entity.x_location, ecs_single_entity.y_location + 1) == dragon_location then
+          relocate_opponent_to_dragon()
+        end
+      end
+    elseif ecs_single_entity.emotion == disgust then
+      if ecs_single_entity.orientation == north then
+        if (ecs_single_entity.x_location , ecs_single_entity.y_location - 1) then
+          relocate_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == south then
+        if (ecs_single_entity.x_location , ecs_single_entity.y_location + 1) then
+          relocate_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == west then
+        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location) then
+          relocate_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == east then
+        if (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) then
+          relocate_opponent_to_dragon()
+        end
+
+    end
+
+  end)
+
+
+arrow_system = system({"emotion", "touched_who", "has_collided"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == arrow
+    and ecs_single_entity.has_collided == true then
+      if ecs_single_entity.touched_who == 1 or 11 then
+        sfx sound_effect_bump 3
+      elseif ecs_single_entity.touched_who == 3 then
+        sfx sound_effect_pierce 3
+      end
+
+      del(world, {location == ecs_single_entity.location})
+    end
+  end)
+
+
+dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
+  function(ecs_single_entity)
+    if ecs_single_entity.fuse_count > 0 then
+      ecs_single_entity.fuse_count = ecs_single_entity.fuse_count - 1
+    elseif fuse_count <= 0 then
+      ecs_single_entity.sprite = sprite_dynamite_on
+      sfx sound_effect_explode 3
+      for sentinel = 1, 3 do
+        --nothing
+      end
+      del(world, {location == ecs_single_entity.location})
     end
   end)
 
 
 did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == joy
+    if ecs_single_entity.emotion == dragon then
+      if ecs_single_entity.touched_who == 3 or 11 then
+        ecs_single_entity.is_hurt = true
+      end
+    elseif ecs_single_entity.emotion == joy
                                     or sadness
                                     or fear
                                     or disgust
@@ -1441,10 +1448,38 @@ did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
       if ecs_single_entity.touched_who == 5 then
         ecs_single_entity.is_hurt = true
       end
-    elseif ecs_single_entity.emotion == dragon then
-      if ecs_single_entity.touched_who == 3 or 11 then
-        ecs_single_entity.is_hurt = true
+    end
+  end)
+
+
+embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == true then
+      music -1
+
+      if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_left
       end
+      if ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right or sprite_dragon_fire_right then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_right
+      end
+      if ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up or sprite_dragon_fire_up then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_up
+      end
+      if ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down or sprite_dragon_fire_down then
+        ecs_single_entity.sprite = sprite_dragon_embarrassed_down
+      end
+
+      music music_failure
+      repeat
+        -- wait until the music is over
+      until stat 16 == nil
+
+      repeat
+        ecs_single_entity.x_position = ecs_single_entity.x_position - 1
+        ecs_single_entity.y_position = ecs_single_entity.y_position - 1
+        sfx sound_effect_retreat 3
+      until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
     end
   end)
 
@@ -1488,12 +1523,7 @@ hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
   end)
 
 
---selfdestruct_system = system({"is_hurt", "location"},
-  --function(ecs_single_entity)
-    --if ecs_single_entity.is_hurt == true then
-      --del(world, {location == ecs_single_entity.location})
-    --end
-  --end)
+
 --
 --basic pico-8 stuff
 --
