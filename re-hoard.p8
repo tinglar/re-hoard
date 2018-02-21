@@ -50,44 +50,44 @@ sprite_knight_walk1 = 74
 sprite_knight_walk2 = 75
 sprite_knight_hunt1 = 76
 sprite_knight_hunt2 = 77
-sprite_knight_fight = 78
+sprite_knight_attack = 78
 sprite_knight_got_hurt = 79
 sprite_joy_walk1 = 80
 sprite_joy_walk2 = 81
 sprite_joy_hunt1 = 82
 sprite_joy_hunt2 = 83
-sprite_joy_fight = 84
+sprite_joy_attack = 84
 sprite_joy_got_hurt = 85
 sprite_sadness_walk1 = 86
 sprite_sadness_walk2 = 87
 sprite_sadness_hunt1 = 88
 sprite_sadness_hunt2 = 89
-sprite_sadness_fight = 90
+sprite_sadness_attack = 90
 sprite_sadness_got_hurt = 91
 sprite_fear_walk1 = 96
 sprite_fear_walk2 = 97
 sprite_fear_hunt1 = 98
 sprite_fear_hunt2 = 99
-sprite_fear_fight = 100
+sprite_fear_attack = 100
 sprite_fear_got_hurt = 101
 sprite_disgust_walk1 = 102
 sprite_disgust_walk2 = 103
 sprite_disgust_hunt1 = 104
 sprite_disgust_hunt2 = 105
-sprite_disgust_fight_horizontal = 106
-sprite_disgust_fight_vertical = 124
+sprite_disgust_attack_horizontal = 106
+sprite_disgust_attack_vertical = 124
 sprite_disgust_got_hurt = 107
 sprite_anger_walk1 = 112
 sprite_anger_walk2 = 113
 sprite_anger_hunt1 = 114
 sprite_anger_hunt2 = 115
-sprite_anger_fight = 116
+sprite_anger_attack = 116
 sprite_anger_got_hurt = 117
 sprite_surprise_walk1 = 118
 sprite_surprise_walk2 = 119
 sprite_surprise_hunt1 = 120
 sprite_surprise_hunt2 = 121
-sprite_surprise_fight = 122
+sprite_surprise_attack = 122
 sprite_surprise_got_hurt = 123
 sprite_arrow_left = 92
 sprite_arrow_right = 93 --could you not simply use flip_x?
@@ -118,6 +118,7 @@ sound_effect_retreat = 58
 sound_effect_fire_hit = 57
 sound_effect_pierce = 56
 sound_effect_explode = 55
+sound_effect_slice = 54
 
 flag_solidity = 0            -- adds 1
 flag_hurts_dragon = 1        -- adds 2
@@ -1457,6 +1458,55 @@ did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
         ecs_single_entity.is_hurt = true
       end
     end
+  end)
+
+
+attack_dragon_system = system({"location", "emotion", "sprite", "orientation"},
+  function(ecs_single_entity)
+    if ecs_single_entity.location == dragon_location then
+      if ecs_single_entity.emotion == joy then
+        ecs_single_entity.sprite == sprite_joy_attack
+        sfx sound_effect_bump 3
+      elseif ecs_single_entity.emotion == sadness then
+        ecs_single_entity.sprite == sprite_sadness_attack
+        sfx sound_effect_slice 3
+      elseif ecs_single_entity.emotion == fear then
+        ecs_single_entity.pierce == sprite_fear_attack
+        sfx sound_effect_explode 3
+      elseif ecs_single_entity.emotion == disgust then
+        if ecs_single_entity.orientation == north or south then
+          ecs_single_entity.sprite == sprite_disgust_attack_vertical
+        else
+          ecs_single_entity.sprite == sprite_disgust_attack_horizontal
+        end
+        sfx sound_effect_pierce 3
+      elseif ecs_single_entity.emotion == anger then
+        ecs_single_entity.sprite == sprite_anger_attack
+        sfx sound_effect_slice 3
+      elseif ecs_single_entity.emotion == surprise then
+        ecs_single_entity.sprite == sprite_surprise_attack
+        sfx sound_effect_explode 3
+      elseif ecs_single_entity.emotion == knight then
+        ecs_single_entity.sprite == sprite_knight_attack
+        sfx sound_effect_slice 3
+      else
+  end)
+
+
+lance_system = system({"sprite", "orientation", "x_location", "y_location"},
+  function(ecs_single_entity)
+    if ecs_single_entity.sprite == sprite_disgust_attack_vertical then
+      if ecs_single_entity.orientation == north then
+        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location - 1)
+      elseif ecs_single_entity.orientation == south then
+        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location + 1)
+      end
+    elseif ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
+      if ecs_single_entity.orientation == west then
+        spr sprite_lance_up (ecs_single_entity.x_location - 1) ecs_single_entity.y_location
+      elseif ecs_single_entity.orientation == east then
+        spr sprite_lance_up (ecs_single_entity.x_location + 1) ecs_single_entity.y_location
+      end
   end)
 
 
