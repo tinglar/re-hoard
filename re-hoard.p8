@@ -855,11 +855,11 @@ fireball_system = system({"emotion", "touched_who", "has_collided"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == fireball
     and ecs_single_entity.has_collided == true then
-      if ecs_single_entity.touched_who == 1 then
+      if ecs_single_entity.touched_who == flag_solidity then
         sfx sound_effect_bump 3
-      elseif ecs_single_entity.touched_who == 3 then
+      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
         sfx sound_effect_fire_hit 3
-      elseif ecs_single_entity.touched_who == 11 then
+      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon + flag_is_knight then
         sfx sound_effect_blocked_fire 3
       end
 
@@ -1416,9 +1416,10 @@ arrow_system = system({"emotion", "touched_who", "has_collided"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == arrow
     and ecs_single_entity.has_collided == true then
-      if ecs_single_entity.touched_who == 1 or 11 then
+      if ecs_single_entity.touched_who == flag_solidity
+      or flag_solidity + flag_hurts_dragon + flag_is_knight then
         sfx sound_effect_bump 3
-      elseif ecs_single_entity.touched_who == 3 then
+      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
         sfx sound_effect_pierce 3
       end
 
@@ -1445,7 +1446,8 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
 did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon then
-      if ecs_single_entity.touched_who == 3 or 11 then
+      if ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
+      or flag_solidity + flag_hurts_dragon + flag_is_knight then
         ecs_single_entity.is_hurt = true
       end
     elseif ecs_single_entity.emotion == joy
@@ -1454,7 +1456,7 @@ did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
                                     or disgust
                                     or anger
                                     or surprise then
-      if ecs_single_entity.touched_who == 5 then
+      if ecs_single_entity.touched_who == flag_solidity + flag_hurts_subordinate then
         ecs_single_entity.is_hurt = true
       end
     end
