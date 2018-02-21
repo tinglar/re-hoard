@@ -488,7 +488,7 @@ populate = function()
       y_goal = target.2,
       is_patrolling = false,
       is_hunting = false,
-      is_hurt = false,
+      is_hurt = false, --is this necessary anymore?
       x_movement = 0,
       y_movement = 0,
       has_collided = false,
@@ -1120,29 +1120,6 @@ patrol_system = system({"emotion",
               my_path:plain_queue_push(value)
               break
             end
-          end
-          if arrow_count < fear_count
-            local current_arrow_sprite = nil
-            if ecs_single_entity.orientation == north then
-              current_arrow_sprite = sprite_arrow_up
-            elseif ecs_single_entity.orientation == south then
-              current_arrow_sprite = sprite_arrow_down
-            elseif ecs_single_entity.orientation == west then
-              current_arrow_sprite = sprite_arrow_left
-            elseif ecs_single_entity.orientation == east then
-              current_arrow_sprite = sprite_arrow_right
-            end
-
-            add(world, {
-              emotion = arrow,
-              sprite = current_arrow_sprite
-              location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
-              x_position = location.1,
-              y_position = location.2,
-              has_collided = false,
-              touched_who = nil
-            })
-            arrow_count = arrow_count + 1
           end
         else
           ecs_single_entity.target = my_path:plain_queue_pop()
