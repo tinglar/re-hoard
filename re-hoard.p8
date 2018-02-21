@@ -1443,6 +1443,17 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
   end)
 
 
+remove_hazards_from_safe_locations_system = system({"emotion", "location"},
+  function(ecs_single_entity)
+    for key, value in pairs(safe_floor_locations) do
+      if ecs_single_entity.emotion == fireball or arrow or dynamite then
+        if ecs_single_entity.location == value then
+        del(key, value)
+      end
+    end
+  end)
+
+
 did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon then
@@ -1901,4 +1912,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
