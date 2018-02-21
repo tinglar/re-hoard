@@ -512,6 +512,7 @@ populate = function()
   })
 end
 
+
 subordinate_sprite_system = system({"emotion", "sprite"},
   function(ecs_single_entity)
     if setup_phase == true then
@@ -898,6 +899,7 @@ astar_heuristic = function(a, b)
 	return abs(a[1] - b[1]) + abs(a[2] - b[2])
 end
 
+
 astar_get_special_tile = function(astar_tile_id)
 	local astar_tile_x = nil
 	local astar_tile_y = nil
@@ -911,9 +913,11 @@ astar_get_special_tile = function(astar_tile_id)
 	end
 end
 
+
 astar_map_to_index = function(astar_map_x, astar_map_y)
 	return ( (astar_map_x + 1) * current_dungeon_size ) + astar_map_y
 end
+
 
 astar_index_to_map = function(astar_index)
 	local astar_map_x = (astar_index - 1) / (current_dungeon_size + 1)
@@ -926,6 +930,7 @@ end
 astar_vector_to_index = function(astar_vector)
 	return astar_map_to_index(astar_vector[1], astar_vector[2])
 end
+
 
 astar_get_neighbor_locations = function(astar_your_location)
 	local astar_all_neighbor_locations = {}
@@ -964,6 +969,7 @@ astar_get_neighbor_locations = function(astar_your_location)
 
 	return astar_all_neighbor_locations
 end
+
 
 astar_search = function(my_location, my_target)
 	local astar_start_location = my_location
@@ -1335,10 +1341,12 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
       end
     end)
 
+
 relocate_opponent_to_dragon = function()
   ecs_single_entity.x_location = dragon_location.1
   ecs_single_entity.y_location = dragon_location.2
 end
+
 
 fight_system = system({"emotion", "x_location", "y_location"},
   function(ecs_single_entity)
@@ -1519,6 +1527,12 @@ hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
       end
 
       del(world, {location == ecs_single_entity.location})
+
+      if ecs_single_entity.emotion == fear then
+        fear_count = fear_count - 1
+      elseif ecs_single_entity.emotion == surprise then
+        surprise_count = surprise_count - 1
+      end
     end
   end)
 
