@@ -1443,13 +1443,48 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
   end)
 
 
-remove_hazards_from_safe_locations_system = system({"emotion", "location"},
+remove_hazards_from_safe_locations_system = system({"emotion", "location", "sprite"},
   function(ecs_single_entity)
     for key, value in pairs(safe_floor_locations) do
+
       if ecs_single_entity.emotion == fireball or arrow or dynamite then
         if ecs_single_entity.location == value then
         del(key, value)
       end
+
+      if ecs_single_entity.emotion == fireball or arrow then
+        if ecs_single_entity.sprite == sprite_fireball_up or sprite_arrow_up then
+          if {ecs_single_entity.x_position, ecs_single_entity.y_position - 1} == value then
+            del(key, value)
+          end
+        elseif ecs_single_entity.sprite == sprite_fireball_down or sprite_arrow_down then
+          if {ecs_single_entity.x_position, ecs_single_entity.y_position + 1} == value then
+            del(key, value)
+          end
+        elseif ecs_single_entity.sprite == sprite_fireball_left or sprite_arrow_left then
+          if {ecs_single_entity.x_position - 1, ecs_single_entity.y_position} == value then
+            del(key, value)
+          end
+        elseif ecs_single_entity.sprite == sprite_fireball_right or sprite_arrow_right then
+          if {ecs_single_entity.x_position + 1, ecs_single_entity.y_position} == value then
+            del(key, value)
+          end
+        end
+      end
+
+      if ecs_single_entity.emotion == dynamite then
+        if value == {ecs_single_entity.x_position - 1, ecs_single_entity.y_position - 1}
+        or {ecs_single_entity.x_position, ecs_single_entity.y_position - 1}
+        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position - 1}
+        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position}
+        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position}
+        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position + 1}
+        or {ecs_single_entity.x_position, ecs_single_entity.y_position + 1}
+        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position + 1} then
+          del(key, value)
+        end
+      end
+
     end
   end)
 
