@@ -119,7 +119,6 @@ sound_effect_fire_hit = 57
 sound_effect_pierce = 56
 sound_effect_explode = 55
 sound_effect_slice = 54
-sound_effect_get_treasure = 53
 
 flag_solidity = 0            -- adds 1
 flag_hurts_dragon = 1        -- adds 2
@@ -1641,7 +1640,7 @@ treasure_system = system({"emotion", "touched_who"},
     if ecs_single_entity.emotion == dragon
     and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
       spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
-      sfx sound_effect_get_treasure 3
+      sfx sound_effect_treasure 3
       mset(sprite_open_door, 2, 1)
     end
   end)
