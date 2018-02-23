@@ -1555,6 +1555,7 @@ lance_system = system({"sprite", "orientation", "x_location", "y_location"},
       elseif ecs_single_entity.orientation == east then
         spr sprite_lance_up (ecs_single_entity.x_location + 1) ecs_single_entity.y_location
       end
+    end
   end)
 
 
