@@ -119,12 +119,12 @@ sound_effect_fire_hit = 57
 sound_effect_pierce = 56
 sound_effect_explode = 55
 sound_effect_slice = 54
+sound_effect_get_treasure = 53
 
 flag_solidity = 0            -- adds 1
 flag_hurts_dragon = 1        -- adds 2
 flag_hurts_subordinate = 2   -- adds 4
-flag_is_knight = 3           -- adds 8
-flag_has_treasure = 4        -- adds 16
+flag_is_fireproof = 3        -- adds 8
 
 initial_dungeon_size = 15
 
@@ -859,7 +859,7 @@ fireball_system = system({"emotion", "touched_who", "has_collided"},
         sfx sound_effect_bump 3
       elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
         sfx sound_effect_fire_hit 3
-      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon + flag_is_knight then
+      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         sfx sound_effect_blocked_fire 3
       end
 
@@ -1417,7 +1417,7 @@ arrow_system = system({"emotion", "touched_who", "has_collided"},
     if ecs_single_entity.emotion == arrow
     and ecs_single_entity.has_collided == true then
       if ecs_single_entity.touched_who == flag_solidity
-      or flag_solidity + flag_hurts_dragon + flag_is_knight then
+      or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         sfx sound_effect_bump 3
       elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
         sfx sound_effect_pierce 3
@@ -1493,7 +1493,7 @@ did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon then
       if ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
-      or flag_solidity + flag_hurts_dragon + flag_is_knight then
+      or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         ecs_single_entity.is_hurt = true
       end
     elseif ecs_single_entity.emotion == joy
@@ -1632,6 +1632,17 @@ hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
       elseif ecs_single_entity.emotion == surprise then
         surprise_count = surprise_count - 1
       end
+    end
+  end)
+
+
+treasure_system = system({"emotion", "touched_who"},
+  function(ecs_single_entity)
+    if ecs_single_entity.emotion == dragon
+    and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
+      spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
+      sfx sound_effect_get_treasure 3
+      mset(sprite_open_door, 2, 1)
     end
   end)
 
