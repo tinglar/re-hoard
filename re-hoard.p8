@@ -144,6 +144,7 @@ opponent_setup_floor_locations = {}
 safe_floor_locations = {}
 dragon_location = nil
 treasure_location = nil
+got_treasure = false
 is_fireball_there = false
 fear_count = 0
 arrow_count = 0
@@ -307,6 +308,7 @@ game_setup = function()
     draw_dungeon()
     populate()
     subordinate_sprite_system(world)
+    got_treasure = false
 
     setup_phase = false
     normal_phase = true
@@ -1229,12 +1231,19 @@ patrol_system = system({"emotion",
   end)
 
 
-patrol_to_hunt_system = system({"is_patrolling", "is_hunting"},
+patrol_to_hunt_system = system({"emotion", "is_patrolling", "is_hunting"},
   function(ecs_single_entity)
-    for check in all(cross_of_sight) do
-      if dragon_location == cross_of_sight.check then
+    if ecs_single_entity.is_hunting == false then
+      if ecs_single_entity.emotion == knight and got_treasure == true then
         ecs_single_entity.is_patrolling = false
         ecs_single_entity.is_hunting = true
+      end
+
+      for check in all(cross_of_sight) do
+        if dragon_location == cross_of_sight.check then
+          ecs_single_entity.is_patrolling = false
+          ecs_single_entity.is_hunting = true
+        end
       end
     end
   end)
@@ -1718,23 +1727,26 @@ treasure_system = system({"emotion", "touched_who"},
       spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
       sfx sound_effect_treasure 3
       mset(sprite_open_door, 2, 1)
+      got_treasure = true
     end
   end)
 
 
 won_stage = function()
-  normal_phase = false
-  panic_phase = false
-  music music_success
-  repeat
-    -- wait until the music is over
-  until stat 16 == nil
+  if dragon_location = {2, 1} and got_treasure == true then
+    normal_phase = false
+    panic_phase = false
+    music music_success
+    repeat
+      -- wait until the music is over
+    until stat 16 == nil
 
-  level = level + 1
-  if level > highest_round then
-    highest_round = level
+    level = level + 1
+    if level > highest_round then
+      highest_round = level
+    end
+    intermission_screen()
   end
-  intermission_screen()
 end
 
 
