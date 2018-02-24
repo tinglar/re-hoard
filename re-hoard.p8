@@ -189,11 +189,23 @@ title_screen = function()
     cls()
     title_phase = false
     intermission_phase = true
+    intermission_screen()
+  end
 end
 
 
 intermission_screen = function()
-  music -1
+  if intermission_phase = true then
+    music -1
+    print("round " + (level + 1), 56, 56)
+    print("opportunities: " + opportunities, 50, 70)
+
+    if btn 4 then
+      cls()
+      intermission_phase = false
+      setup_phase = true
+    end
+  end
 end
 
 
