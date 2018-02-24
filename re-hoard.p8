@@ -451,23 +451,24 @@ end
 
 
 draw_dungeon = function()
-  cls()
-  for x in all(dungeon[1]) do
-    for y in all(dungeon[1][2]) do
-      if dungeon(x,y) == false then
-        mset(sprite_wall, x, y)
-      else
-        mset(sprite_floor, x, y)
+  if title_phase and intermission_phase and setup_phase == false then
+    for x in all(dungeon[1]) do
+      for y in all(dungeon[1][2]) do
+        if dungeon(x,y) == false then
+          mset(sprite_wall, x, y)
+        else
+          mset(sprite_floor, x, y)
+        end
       end
     end
-  end
 
-  if got_treasure == true then
-    mset(sprite_open_door, 2, 1)
-    spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
-  else
-    mset(sprite_closed_door, 2, 1)
-    spr(sprite_closed_treasure, treasure_location.1, treasure_location.2)
+    if got_treasure == true then
+      mset(sprite_open_door, 2, 1)
+      spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
+    else
+      mset(sprite_closed_door, 2, 1)
+      spr(sprite_closed_treasure, treasure_location.1, treasure_location.2)
+    end
   end
 end
 
@@ -908,14 +909,16 @@ draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "spri
           end
         end
       if btnp(4) then
-        if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
-          ecs_single_entity.sprite = sprite_dragon_fire_left
-        elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
-          ecs_single_entity.sprite = sprite_dragon_fire_right
-        elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
-          ecs_single_entity.sprite = sprite_dragon_fire_up
-        elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
-          ecs_single_entity.sprite = sprite_dragon_fire_down
+        if normal_phase or panic_phase == true then
+          if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
+            ecs_single_entity.sprite = sprite_dragon_fire_left
+          elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
+            ecs_single_entity.sprite = sprite_dragon_fire_right
+          elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
+            ecs_single_entity.sprite = sprite_dragon_fire_up
+          elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
+            ecs_single_entity.sprite = sprite_dragon_fire_down
+          end
         end
       end
     end
@@ -1546,6 +1549,14 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
   end)
 
 
+draw_actor_system = system({"sprite", "x_location", "y_location"},
+  function(ecs_single_entity)
+    if title_phase and intermission_phase and setup_phase == false then
+      spr ecs_single_entity.sprite ecs_single_entity.x_location ecs_single_entity.y_location
+    end
+  end)
+
+
 remove_hazards_from_safe_locations_system = system({"emotion", "location", "sprite"},
   function(ecs_single_entity)
     for key, value in pairs(safe_floor_locations) do
@@ -1799,7 +1810,8 @@ function _init()
 end
 
 function _draw()
-
+  draw_dungeon()
+  draw_actor_system(world)
 end
 
 function _update()
