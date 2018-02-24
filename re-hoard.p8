@@ -265,17 +265,19 @@ setmetatable(priority_queue, priority_queue)
 
 
 title_screen = function()
-  sspr 0 16 64 16 32 32
-  print("tinglar 2018", 50, 64)
-  print("press �", 60, 84)
-  print("highest round: " + highest_round, 0, 120)
-  music music_title
+  if title_phase == true then
+    sspr 0 16 64 16 32 32
+    print("tinglar 2018", 50, 64)
+    print("press �", 60, 84)
+    print("highest round: " + (highest_round + 1), 0, 120)
+    music music_title
 
-  if btn 4 then
-    cls()
-    title_phase = false
-    intermission_phase = true
-    intermission_screen()
+    if btn 4 then
+      cls()
+      title_phase = false
+      intermission_phase = true
+      intermission_screen()
+    end
   end
 end
 
@@ -1617,6 +1619,8 @@ lance_system = system({"sprite", "orientation", "x_location", "y_location"},
 embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == true then
+      normal_phase = false
+      panic_phase = false
       music -1
 
       if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
@@ -1642,12 +1646,23 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
         ecs_single_entity.y_position = ecs_single_entity.y_position - 1
         sfx sound_effect_retreat 3
       until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
+
+      intermission_screen()
     end
   end)
 
 
 lost_game = function()
+  print("game over", 50, 42)
+  print("final round: " + (level + 1), 48, 84)
+  print("press �", 50, 96)
   music music_game_over
+
+  if btn 4 then
+    cls()
+    title_phase = true
+    title_screen()
+  end
 end
 
 
