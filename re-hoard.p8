@@ -149,6 +149,7 @@ fear_count = 0
 arrow_count = 0
 surprise_count = 0
 dynamite_count = 0
+highest_round = 0
 
 
 
@@ -178,7 +179,16 @@ end
 
 
 title_screen = function()
+  sspr 0 16 64 16 32 32
+  print("tinglar 2018", 50, 64)
+  print("press �", 60, 84)
+  print("highest round: " + highest_round, 0, 120)
   music music_title
+
+  if btn 4 then
+    cls()
+    title_phase = false
+    intermission_phase = true
 end
 
 
