@@ -132,8 +132,8 @@ initial_dungeon_size = 15
 title_phase = true
 intermission_phase = false
 setup_phase = false
-normal_gameplay_phase = false
-panic_gameplay_phase = false
+normal_phase = false
+panic_phase = false
 
 level = 0
 opportunities = 3
@@ -174,6 +174,16 @@ ecs_system = function(ecs_component_value, ecs_entity_function)
       end
     end
   end
+end
+
+
+title_screen = function()
+  music music_title
+end
+
+
+intermission_screen = function()
+  music -1
 end
 
 
@@ -549,6 +559,11 @@ orientation_system = system({"orientation", "x_movement", "y_movement"},
     end)
 
 
+start_gameplay = function()
+  music music_gameplay
+end
+
+
 set_cross_of_sight_system = system({"orientation", "cross_of_sight",
                                   "x_location", "y_location"},
   function(ecs_single_entity)
@@ -633,32 +648,6 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
     end
 
   end)
-
-
-panic_system = system({"is_hunting"},
-  function(ecs_single_entity)
-    if is_hunting == true then
-      panic_gameplay_phase = true
-    end
-  end)
-
-
-back_to_normal = function()
-  -- you have to activate this function manually
-  local calm_down = true
-
-  for component_name, component_value in pairs(world) do
-    if component_name == is_hunting then
-      if component_value == true then
-        calm_down = false
-      end
-    end
-  end
-
-  if calm_down == true then
-    panic_gameplay_phase = false
-  end
-end
 
 
 -- collision code adapted from:
@@ -1216,6 +1205,10 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
     local pause_counter = 3
 
       if ecs_single_entity.is_hunting == true then
+        if panic_phase == false then
+          panic_phase = true
+          music music_panic
+        end
 
         if ecs_single_entity.emotion == joy or surprise then
           if ecs_single_entity.emotion == surprise then
@@ -1345,6 +1338,27 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
 relocate_opponent_to_dragon = function()
   ecs_single_entity.x_location = dragon_location.1
   ecs_single_entity.y_location = dragon_location.2
+end
+
+
+back_to_normal = function()
+  -- you have to activate this function manually
+  if panic_phase == true then
+    local calm_down = true
+
+    for component_name, component_value in pairs(world) do
+      if component_name == is_hunting then
+        if component_value == true then
+          calm_down = false
+        end
+      end
+    end
+
+    if calm_down == true then
+      panic_phase = false
+      music music_gameplay
+    end
+  end
 end
 
 
@@ -1590,6 +1604,11 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
   end)
 
 
+lost_game = function()
+  music music_game_over
+end
+
+
 hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
@@ -1645,6 +1664,10 @@ treasure_system = system({"emotion", "touched_who"},
     end
   end)
 
+
+won_stage = function()
+  music music_success
+end
 
 
 --
