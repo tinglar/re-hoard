@@ -304,6 +304,7 @@ game_setup = function()
     collector_of_safe_cells()
     draw_dungeon()
     populate()
+    subordinate_sprite_system(world)
 
     setup_phase = false
     normal_phase = true
@@ -1707,7 +1708,18 @@ treasure_system = system({"emotion", "touched_who"},
 
 
 won_stage = function()
+  normal_phase = false
+  panic_phase = false
   music music_success
+  repeat
+    -- wait until the music is over
+  until stat 16 == nil
+
+  level = level + 1
+  if level > highest_round then
+    highest_round = level
+  end
+  intermission_screen()
 end
 
 
