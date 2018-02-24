@@ -308,6 +308,8 @@ game_setup = function()
       collector_of_opponent_setup_cells()
       collector_of_safe_cells()
       populate()
+    else
+      return_to_your_places_system(world)
     end
 
     draw_dungeon()
@@ -749,9 +751,11 @@ move_collider_system = system({"has_collided",
                               "x_position", "y_position"
                               "x_movement", "y_movement"},
   function(ecs_single_entity)
-    if ecs_single_entity.has_collided == false then
-      ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
-      ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
+    if normal_phase or panic_phase == true then
+      if ecs_single_entity.has_collided == false then
+        ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
+        ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
+      end
     end
   end)
 
@@ -767,79 +771,82 @@ end
 
 control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y_movement"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == false hen
-      if btn(0) then
-        ecs_single_entity.x_movement = -0.2
-      end
-      if btn(1) then
-        ecs_single_entity.x_movement = 0.2
-      end
-      if not btn(0) and not btn(1) then
-        ecs_single_entity.x_movement = 0
-      end
-      if btn(2) then
-        ecs_single_entity.y_movement = -0.2
-      end
-      if btn(3) then
-        ecs_single_entity.y_movement = 0.2
-      end
-      if not btn(2) and not btn(3) then
-        ecs_single_entity.y_movement = 0
-      end
-      if btnp(4) then
-        if is_fireball_there == false then
-          is_fireball_there = true
-          if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
-            add(world, {
-              emotion = fireball,
-              sprite = sprite_fireball_left,
-              location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
-              x_position = location.1,
-              y_position = location.2,
-              x_movement = -0.4,
-              y_movement = 0,
-              has_collided = false,
-              touched_who = nil
-            })
-          elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
-            add(world, {
-              emotion = fireball,
-              sprite = sprite_fireball_right,
-              location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
-              x_position = location.1,
-              y_position = location.2,
-              x_movement = 0.4,
-              y_movement = 0,
-              has_collided = false,
-              touched_who = nil
-            })
-          elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
-            add(world, {
-              emotion = fireball,
-              sprite = sprite_fireball_up,
-              location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
-              x_position = location.1,
-              y_position = location.2,
-              x_movement = 0,
-              y_movement = -0.4,
-              has_collided = false,
-              touched_who = nil
-            })
-          elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
-            add(world, {
-              emotion = fireball,
-              sprite = sprite_fireball_down,
-              location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
-              x_position = location.1,
-              y_position = location.2,
-              x_movement = 0,
-              y_movement = 0.4,
-              has_collided = false,
-              touched_who = nil
-            })
+    if normal_phase or panic_phase == true then
+      if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == false hen
+        if btn(0) then
+          ecs_single_entity.x_movement = -0.2
+        end
+        if btn(1) then
+          ecs_single_entity.x_movement = 0.2
+        end
+        if not btn(0) and not btn(1) then
+          ecs_single_entity.x_movement = 0
+        end
+        if btn(2) then
+          ecs_single_entity.y_movement = -0.2
+        end
+        if btn(3) then
+          ecs_single_entity.y_movement = 0.2
+        end
+        if not btn(2) and not btn(3) then
+          ecs_single_entity.y_movement = 0
+        end
+        if btnp(4) then
+          if is_fireball_there == false then
+            is_fireball_there = true
+            if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
+              add(world, {
+                emotion = fireball,
+                sprite = sprite_fireball_left,
+                location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = -0.4,
+                y_movement = 0,
+                has_collided = false,
+                touched_who = nil
+              })
+            elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
+              add(world, {
+                emotion = fireball,
+                sprite = sprite_fireball_right,
+                location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = 0.4,
+                y_movement = 0,
+                has_collided = false,
+                touched_who = nil
+              })
+            elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
+              add(world, {
+                emotion = fireball,
+                sprite = sprite_fireball_up,
+                location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = 0,
+                y_movement = -0.4,
+                has_collided = false,
+                touched_who = nil
+              })
+            elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
+              add(world, {
+                emotion = fireball,
+                sprite = sprite_fireball_down,
+                location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
+                x_position = location.1,
+                y_position = location.2,
+                x_movement = 0,
+                y_movement = 0.4,
+                has_collided = false,
+                touched_who = nil
+              })
+            end
           end
         end
       end
+    end
   end)
 
 
@@ -1661,6 +1668,7 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
       until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
 
       previous_level = current_level
+      cls()
       intermission_screen()
     end
   end)
