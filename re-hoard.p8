@@ -135,9 +135,10 @@ setup_phase = false
 normal_phase = false
 panic_phase = false
 
-level = 0
+current_level = 0
+previous_level = nil
 opportunities = 3
-current_dungeon_size = initial_dungeon_size + flr(level / 3)
+current_dungeon_size = initial_dungeon_size + flr(current_level / 3)
 dungeon = {}
 total_floor_locations = {}
 opponent_setup_floor_locations = {}
@@ -286,7 +287,7 @@ end
 intermission_screen = function()
   if intermission_phase == true then
     music -1
-    print("round " + (level + 1), 56, 56)
+    print("round " + (current_level + 1), 56, 56)
     print("opportunities: " + opportunities, 50, 70)
 
     if btn 4 then
@@ -301,12 +302,15 @@ end
 
 game_setup = function()
   if setup_phase == true then
-    build_dungeon()
-    collector_of_floor_cells()
-    collector_of_opponent_setup_cells()
-    collector_of_safe_cells()
+    if current_level > previous_level or current_level == 0 then
+      build_dungeon()
+      collector_of_floor_cells()
+      collector_of_opponent_setup_cells()
+      collector_of_safe_cells()
+      populate()
+    end
+
     draw_dungeon()
-    populate()
     subordinate_sprite_system(world)
     got_treasure = false
 
@@ -1656,6 +1660,7 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
         sfx sound_effect_retreat 3
       until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
 
+      previous_level = current_level
       intermission_screen()
     end
   end)
@@ -1663,7 +1668,7 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
 
 lost_game = function()
   print("game over", 50, 42)
-  print("final round: " + (level + 1), 48, 84)
+  print("final round: " + (current_level + 1), 48, 84)
   print("press �", 50, 96)
   music music_game_over
 
@@ -1741,9 +1746,9 @@ won_stage = function()
       -- wait until the music is over
     until stat 16 == nil
 
-    level = level + 1
-    if level > highest_round then
-      highest_round = level
+    current_level = current_level + 1
+    if current_level > highest_round then
+      highest_round = current_level
     end
     intermission_screen()
   end
