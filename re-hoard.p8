@@ -158,6 +158,7 @@ highest_round = 0
 --
 -- structures
 --
+
 -- entity-component system code adapted from:
 -- selfsame at lexaloffle bbs
 _has = function(ecs_single_entity, ecs_component_value)
@@ -264,8 +265,6 @@ setmetatable(priority_queue, priority_queue)
 --
 -- algorithms
 --
-
-
 title_screen = function()
   if title_phase == true then
     sspr 0 16 64 16 32 32
@@ -601,29 +600,31 @@ subordinate_sprite_system = system({"emotion", "sprite"},
 
 
 run_gameplay = function()
-  orientation_system(world)
-  set_cross_of_sight_system(world)
-  collision_system(world)
-  move_collider_system(world)
-  collector_of_safe_cells(world)
-  control_dragon_system(world)
-  fireball_system(world)
-  locate_dragon_system(world)
-  patrol_system(world)
-  patrol_to_hunt_system(world)
-  hunt_system(world)
-  back_to_normal()
-  fight_system(world)
-  arrow_system(world)
-  dynamite_system(world)
-  remove_hazards_from_safe_locations_system(world)
-  did_that_hurt_system(world)
-  attack_dragon_system(world)
-  lance_system(world)
-  embarrass_dragon_system(world)
-  hurt_subordinate_system(world)
-  treasure_system(world)
-  won_stage()
+  if normal_phase or panic_phase == true then
+    orientation_system(world)
+    set_cross_of_sight_system(world)
+    collision_system(world)
+    move_collider_system(world)
+    collector_of_safe_cells(world)
+    control_dragon_system(world)
+    fireball_system(world)
+    locate_dragon_system(world)
+    patrol_system(world)
+    patrol_to_hunt_system(world)
+    hunt_system(world)
+    back_to_normal()
+    fight_system(world)
+    arrow_system(world)
+    dynamite_system(world)
+    remove_hazards_from_safe_locations_system(world)
+    did_that_hurt_system(world)
+    attack_dragon_system(world)
+    lance_system(world)
+    embarrass_dragon_system(world)
+    hurt_subordinate_system(world)
+    treasure_system(world)
+    won_stage()
+  end
 end
 
 
@@ -1815,7 +1816,7 @@ function _draw()
 end
 
 function _update()
-
+  run_gameplay()
 end
 
 __gfx__
