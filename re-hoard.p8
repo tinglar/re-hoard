@@ -462,11 +462,13 @@ draw_dungeon = function()
     end
   end
 
-  mset(sprite_closed_door, 2, 1)
-
-  treasure_location = opponent_floor_locations.#opponent_floor_locations
-  spr(sprite_closed_treasure, last_location.1, last_location.2)
-  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
+  if got_treasure == true then
+    mset(sprite_open_door, 2, 1)
+    spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
+  else
+    mset(sprite_closed_door, 2, 1)
+    spr(sprite_closed_treasure, treasure_location.1, treasure_location.2)
+  end
 end
 
 
@@ -518,6 +520,9 @@ end
 world = {}
 
 populate = function()
+  treasure_location = opponent_floor_locations.#opponent_floor_locations
+  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
+
   add(world, {
     emotion = knight,
     sprite = sprite_knight_walk1,
@@ -1762,10 +1767,8 @@ treasure_system = system({"emotion", "touched_who"},
   function(ecs_single_entity)
     if ecs_single_entity.emotion == dragon
     and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
-      spr(sprite_open_treasure, treasure_location.1, treasure_location.2)
-      sfx sound_effect_treasure 3
-      mset(sprite_open_door, 2, 1)
       got_treasure = true
+      sfx sound_effect_treasure 3
     end
   end)
 
@@ -1792,7 +1795,7 @@ end
 --basic pico-8 stuff
 --
 function _init()
---patrol_system(world)
+  title_screen()
 end
 
 function _draw()
