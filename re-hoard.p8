@@ -515,7 +515,6 @@ end
 --
 --entity-component system
 --
-
 world = {}
 
 populate = function()
@@ -595,8 +594,30 @@ subordinate_sprite_system = system({"emotion", "sprite"},
   end)
 
 
-start_gameplay = function()
-  music music_gameplay
+run_gameplay = function()
+  orientation_system(world)
+  set_cross_of_sight_system(world)
+  collision_system(world)
+  move_collider_system(world)
+  collector_of_safe_cells(world)
+  control_dragon_system(world)
+  fireball_system(world)
+  locate_dragon_system(world)
+  patrol_system(world)
+  patrol_to_hunt_system(world)
+  hunt_system(world)
+  back_to_normal()
+  fight_system(world)
+  arrow_system(world)
+  dynamite_system(world)
+  remove_hazards_from_safe_locations_system(world)
+  did_that_hurt_system(world)
+  attack_dragon_system(world)
+  lance_system(world)
+  embarrass_dragon_system(world)
+  hurt_subordinate_system(world)
+  treasure_system(world)
+  won_stage()
 end
 
 
@@ -1079,27 +1100,6 @@ astar_search = function(my_location, my_target)
 end
 
 
-move_opponent = function() -- would this work with the entity-component system?
-  while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
-    and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
-
-      if ecs_single_entity.touched_who < 1 then
-        if ecs_single_entity.x_position < ecs_single_entity.x_goal then
-          ecs_single_entity.x_movement = 0.1
-        elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
-          ecs_single_entity.x_movement = -0.1
-        end
-        if ecs_single_entity.y_position < ecs_single_entity.y_goal then
-          ecs_single_entity.y_movement = 0.1
-        elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
-          ecs_single_entity.y_movement = -0.1
-        end
-      end
-
-  end
-end
-
-
 patrol_system = system({"emotion",
                         "is_patrolling", "x_movement", "y_movement",
                         "location", "x_position", "y_position",
@@ -1240,6 +1240,27 @@ patrol_system = system({"emotion",
       end
     end
   end)
+
+
+move_opponent = function() -- would this work with the entity-component system?
+  while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
+    and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+
+      if ecs_single_entity.touched_who < 1 then
+        if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+          ecs_single_entity.x_movement = 0.1
+        elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+          ecs_single_entity.x_movement = -0.1
+        end
+        if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+          ecs_single_entity.y_movement = 0.1
+        elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+          ecs_single_entity.y_movement = -0.1
+        end
+      end
+
+  end
+end
 
 
 patrol_to_hunt_system = system({"emotion", "is_patrolling", "is_hunting"},
@@ -1406,7 +1427,6 @@ end
 
 
 back_to_normal = function()
-  -- you have to activate this function manually
   if panic_phase == true then
     local calm_down = true
 
@@ -1466,6 +1486,7 @@ fight_system = system({"emotion", "x_location", "y_location"},
           relocate_opponent_to_dragon()
         end
       end
+
     elseif ecs_single_entity.emotion == disgust then
       if ecs_single_entity.orientation == north then
         if (ecs_single_entity.x_location , ecs_single_entity.y_location - 1) then
@@ -1667,9 +1688,13 @@ embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
         sfx sound_effect_retreat 3
       until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
 
-      previous_level = current_level
-      cls()
-      intermission_screen()
+      if opportunities < 1 then
+        lost_game()
+      else
+        previous_level = current_level
+        cls()
+        intermission_screen()
+      end
     end
   end)
 
