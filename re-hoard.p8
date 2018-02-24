@@ -178,37 +178,6 @@ ecs_system = function(ecs_component_value, ecs_entity_function)
 end
 
 
-title_screen = function()
-  sspr 0 16 64 16 32 32
-  print("tinglar 2018", 50, 64)
-  print("press �", 60, 84)
-  print("highest round: " + highest_round, 0, 120)
-  music music_title
-
-  if btn 4 then
-    cls()
-    title_phase = false
-    intermission_phase = true
-    intermission_screen()
-  end
-end
-
-
-intermission_screen = function()
-  if intermission_phase = true then
-    music -1
-    print("round " + (level + 1), 56, 56)
-    print("opportunities: " + opportunities, 50, 70)
-
-    if btn 4 then
-      cls()
-      intermission_phase = false
-      setup_phase = true
-    end
-  end
-end
-
-
 -- queue code adapted from:
 -- deque implementation by pierre "catwell" chapuis
 plain_queue_new = function()
@@ -293,6 +262,56 @@ setmetatable(priority_queue, priority_queue)
 --
 -- algorithms
 --
+
+
+title_screen = function()
+  sspr 0 16 64 16 32 32
+  print("tinglar 2018", 50, 64)
+  print("press �", 60, 84)
+  print("highest round: " + highest_round, 0, 120)
+  music music_title
+
+  if btn 4 then
+    cls()
+    title_phase = false
+    intermission_phase = true
+    intermission_screen()
+  end
+end
+
+
+intermission_screen = function()
+  if intermission_phase == true then
+    music -1
+    print("round " + (level + 1), 56, 56)
+    print("opportunities: " + opportunities, 50, 70)
+
+    if btn 4 then
+      cls()
+      intermission_phase = false
+      setup_phase = true
+      game_setup()
+    end
+  end
+end
+
+
+game_setup = function()
+  if setup_phase == true then
+    build_dungeon()
+    collector_of_floor_cells()
+    collector_of_opponent_setup_cells()
+    collector_of_safe_cells()
+    draw_dungeon()
+    populate()
+
+    setup_phase = false
+    normal_phase = true
+    music music_gameplay
+  end
+end
+
+
 build_dungeon = function()
   local travelled_cells = plain_queue_new()
   local immediate_cells = plain_queue_new()
@@ -565,6 +584,11 @@ subordinate_sprite_system = system({"emotion", "sprite"},
   end)
 
 
+start_gameplay = function()
+  music music_gameplay
+end
+
+
 orientation_system = system({"orientation", "x_movement", "y_movement"},
   function(ecs_single_entity)
       if ecs_single_entity.x_movement < 0 then
@@ -579,11 +603,6 @@ orientation_system = system({"orientation", "x_movement", "y_movement"},
         ecs_single_entity.orientation = south
       end
     end)
-
-
-start_gameplay = function()
-  music music_gameplay
-end
 
 
 set_cross_of_sight_system = system({"orientation", "cross_of_sight",
