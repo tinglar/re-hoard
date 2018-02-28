@@ -271,9 +271,10 @@ setmetatable(priority_queue, priority_queue)
 --
 title_screen = function()
   if title_phase == true then
+    cls()
     sspr(0, 16, 64, 16, 32, 32)
-    print("tinglar 2018", 50, 64)
-    print("press ï¿½", 60, 84)
+    print("tinglar 2018", 41, 64)
+    print("press Ž", 49, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
     music(music_title)
 
@@ -1721,7 +1722,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "sprite"},
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press ï¿½", 50, 96)
+  print("press Ž", 50, 96)
   music(music_game_over)
 
   if btn(4) then
@@ -2122,3 +2123,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
