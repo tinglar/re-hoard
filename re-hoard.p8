@@ -128,6 +128,7 @@ flag_is_fireproof = 3        -- adds 8
 initial_dungeon_size = 15
 
 
+
 -- variables
 title_phase = true
 intermission_phase = false
@@ -167,6 +168,7 @@ _has = function(ecs_single_entity, ecs_component_value)
       return false
     end
   end
+
   return true
 end
 
@@ -202,6 +204,7 @@ plain_queue_pop = function(self)
   if self:queue_length() == 0 then
     return nil
   end
+
   local queue_instance = self[self.tail]
   self[self.tail] = nil
   self.tail = self.tail - 1
@@ -262,6 +265,7 @@ priority_queue = {
 setmetatable(priority_queue, priority_queue)
 
 
+
 --
 -- algorithms
 --
@@ -301,7 +305,7 @@ end
 
 game_setup = function()
   if setup_phase == true then
-    if current_level > previous_level or current_level == 0 then
+    if current_level > previous_level or previous_level == nil then
       build_dungeon()
       collector_of_floor_cells()
       collector_of_opponent_setup_cells()
@@ -317,6 +321,7 @@ game_setup = function()
 
     setup_phase = false
     normal_phase = true
+    start_patrolling_system(world)
     music music_gameplay
   end
 end
@@ -327,15 +332,14 @@ build_dungeon = function()
   local immediate_cells = plain_queue_new()
   local current_cell = nil
 
-  local cell_content_above = dungeon[current_cell[1]][current_cell[2] - 1]
-  local cell_content_below = dungeon[current_cell[1]][current_cell[2] + 1]
   local cell_content_back  = dungeon[current_cell[1] - 1][current_cell[2]]
   local cell_content_front = dungeon[current_cell[1] + 1][current_cell[2]]
-  local cell_location_above = {current_cell[1], current_cell[2] - 1}
-  local cell_location_below = {current_cell[1], current_cell[2] + 1}
+  local cell_content_above = dungeon[current_cell[1]][current_cell[2] - 1]
+  local cell_content_below = dungeon[current_cell[1]][current_cell[2] + 1]
   local cell_location_back  = {current_cell[1] - 1, current_cell[2]}
   local cell_location_front = {current_cell[1] + 1, current_cell[2]}
-
+  local cell_location_above = {current_cell[1], current_cell[2] - 1}
+  local cell_location_below = {current_cell[1], current_cell[2] + 1}
 
   for x = 1, current_dungeon_size do
     dungeon[x] = {}
@@ -375,11 +379,11 @@ build_dungeon = function()
       -- immediate_cells is a queue that holds tables.
       -- after all, immediate_cells needs the locations, not their contents.
     end
-    if cell_content_above ~= nil then
-      immediate_cells:plain_queue_push(cell_location_above)
-    end
     if cell_content_front ~= nil then
       immediate_cells:plain_queue_push(cell_location_front)
+    end
+    if cell_content_above ~= nil then
+      immediate_cells:plain_queue_push(cell_location_above)
     end
     if cell_content_below ~= nil then
       immediate_cells:plain_queue_push(cell_location_below)
@@ -394,24 +398,22 @@ build_dungeon = function()
       current_cell = {immediate_cells.randomly}
 
       -- if the program travelled horizontally...
-      if randomly % 2 == 1 then
-        if cell_content_above == nil then
-          cell_content_above = false
-        end
-        if cell_content_below == nil then
-          cell_content_below = false
-        end
-      else
+      if randomly < 3 then
         if cell_content_back == nil then
           cell_content_back = false
         end
         if cell_content_front == nil then
           cell_content_front = false
         end
+      else
+        if cell_content_above == nil then
+          cell_content_above = false
+        end
+        if cell_content_below == nil then
+          cell_content_below = false
       end
 
       travelled_cells:plain_queue_push( {current_cell[1], current_cell[2]} )
-      -- travelled_cells is a queue that holds tables.
       dungeon[current_cell] = true
     end
   until travelled_cells:plain_queue_length() == 0
@@ -472,24 +474,68 @@ draw_dungeon = function()
 end
 
 
-generate_emotion = function()
-  local seed = flr(rnd(5))
+--
+--entity-component system
+--
+world = {}
 
-  if seed == 0 then
-    return joy
-  elseif seed = 1 then
-    return sadness
-  elseif seed == 2 then
-    fear_count = fear_count + 1
-    return fear
-  elseif seed == 3 then
-    return disgust
-  elseif seed = 4 then
-    return anger
-  else
-    surprise_count = surprise_count + 1
-    return surprise
+populate = function()
+  treasure_location = opponent_floor_locations.#opponent_floor_locations
+  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
+
+  add(world, {
+    actor = knight,
+    sprite = sprite_knight_walk1,
+    location = place_knight(),
+    x_position = location.1,
+    y_position = location.2,
+    orientation = north,
+    cross_of_sight = {},
+    target = {},
+    x_goal = target.1,
+    y_goal = target.2,
+    is_patrolling = false,
+    is_hunting = false,
+    x_movement = 0,
+    y_movement = 0,
+    has_collided = false,
+    touched_who = nil
+  })
+
+  while (sentinel <= (flr (current_dungeon_size / 3) + 1) do
+    add(world, {
+      actor = generate_emotion(),
+      sprite = sprite_knight_walk1,
+      location = place_subordinate(),
+      x_position = location.1,
+      y_position = location.2,
+      orientation = north,
+      cross_of_sight = {},
+      target = {},
+      x_goal = target.1,
+      y_goal = target.2,
+      is_patrolling = false,
+      is_hunting = false,
+      is_hurt = false,
+      x_movement = 0,
+      y_movement = 0,
+      has_collided = false,
+      touched_who = nil
+    })
   end
+
+  add(world, {
+    actor = dragon,
+    sprite = sprite_dragon_fly1_down,
+    location = {2, 2},
+    x_position = location.1,
+    y_position = location.2,
+    is_hurt = false,
+    x_movement = 0,
+    y_movement = 0,
+    has_collided = false,
+    touched_who = nil
+  })
 end
 
 
@@ -514,86 +560,52 @@ place_subordinate = function()
 end
 
 
---
---entity-component system
---
-world = {}
+generate_emotion = function()
+  local seed = flr(rnd(5))
 
-populate = function()
-  treasure_location = opponent_floor_locations.#opponent_floor_locations
-  opponent_setup_floor_locations.#opponent_setup_floor_locations = nil
-
-  add(world, {
-    emotion = knight,
-    sprite = sprite_knight_walk1,
-    location = place_knight(),
-    x_position = location.1,
-    y_position = location.2,
-    orientation = north,
-    cross_of_sight = {},
-    target = {},
-    x_goal = target.1,
-    y_goal = target.2,
-    is_patrolling = false,
-    is_hunting = false,
-    x_movement = 0,
-    y_movement = 0,
-    has_collided = false,
-    touched_who = nil
-  })
-
-  while (sentinel <= (flr (current_dungeon_size / 3) + 1) do
-    add(world, {
-      emotion = generate_emotion(),
-      sprite = sprite_knight_walk1,
-      location = place_subordinate(),
-      x_position = location.1,
-      y_position = location.2,
-      orientation = north,
-      cross_of_sight = {},
-      target = {},
-      x_goal = target.1,
-      y_goal = target.2,
-      is_patrolling = false,
-      is_hunting = false,
-      is_hurt = false, --is this necessary anymore?
-      x_movement = 0,
-      y_movement = 0,
-      has_collided = false,
-      touched_who = nil
-    })
+  if seed == 0 then
+    return joy
+  elseif seed = 1 then
+    return sadness
+  elseif seed == 2 then
+    fear_count = fear_count + 1
+    return fear
+  elseif seed == 3 then
+    return disgust
+  elseif seed = 4 then
+    return anger
+  else
+    surprise_count = surprise_count + 1
+    return surprise
   end
-
-  add(world, {
-    emotion = dragon,
-    sprite = sprite_dragon_fly1_down,
-    location = {2, 2},
-    x_position = location.1,
-    y_position = location.2,
-    is_hurt = false,
-    x_movement = 0,
-    y_movement = 0,
-    has_collided = false,
-    touched_who = nil
-  })
 end
 
 
-subordinate_sprite_system = system({"emotion", "sprite"},
+subordinate_sprite_system = system({"actor", "sprite"},
   function(ecs_single_entity)
     if setup_phase == true then
-      if ecs_single_entity.emotion == joy then
+      if ecs_single_entity.actor == joy then
         ecs_single_entity.sprite = sprite_joy_walk1
-      elseif ecs_single_entity.emotion == sadness then
+      elseif ecs_single_entity.actor == sadness then
         ecs_single_entity.sprite = sprite_sadness_walk1
-      elseif ecs_single_entity.emotion == fear then
+      elseif ecs_single_entity.actor == fear then
         ecs_single_entity.sprite = sprite_fear_walk1
-      elseif ecs_single_entity.emotion == disgust then
+      elseif ecs_single_entity.actor == disgust then
         ecs_single_entity.sprite = sprite_disgust_walk1
-      elseif ecs_single_entity.emotion == anger then
+      elseif ecs_single_entity.actor == anger then
         ecs_single_entity.sprite = sprite_anger_walk1
-      elseif ecs_single_entity.emotion == surprise then
+      elseif ecs_single_entity.actor == surprise then
         ecs_single_entity.sprite = sprite_surprise_walk1
+      end
+    end
+  end)
+
+
+start_patrolling_system = system({"is_patrolling"},
+  function(ecs_single_entity)
+    if normal_phase ==  true then
+      if ecs_single_entity.is_patrolling == false then
+        ecs_single_entity.is_patrolling = true
       end
     end
   end)
@@ -650,53 +662,11 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
     ecs_single_entity.cross_of_sight = {}
     local look = 1
 
-    if ecs_single_entity.orientation == north then
-      while look > -1 do
-        if mget(ecs_single_entity.x_location, ecs_single_entity.y_location - look) == sprite_floor then
-          add (ecs_single_entity.cross_of_sight,
-                {ecs_single_entity.x_location, ecs_single_entity.y_location - look} )
-          look = look - 1
-        else
-          break
-        end
-      end
-      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+    if ecs_single_entity.orientation == west then
+      while mget(ecs_single_entity.x_location - look, ecs_single_entity.y_location) == sprite_floor do
         add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1} )
-      end
-      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1,) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} )
-      end
-
-    elseif ecs_single_entity.orientation == south then
-      while look < current_dungeon_size do
-        if mget(ecs_single_entity.x_location, ecs_single_entity.y_location + look) == sprite_floor then
-          add (ecs_single_entity.cross_of_sight,
-                {ecs_single_entity.x_location, ecs_single_entity.y_location + look} )
-          look = look + 1
-        else
-          break
-        end
-      end
-      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1,) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} )
-      end
-      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1,) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
-      end
-
-    elseif ecs_single_entity.orientation == west then
-      while look > -1 do
-        if mget(ecs_single_entity.x_location - look, ecs_single_entity.y_location) == sprite_floor then
-          add (ecs_single_entity.cross_of_sight,
-                {ecs_single_entity.x_location - look, ecs_single_entity.y_location} )
-          look = look - 1
-        else
-          break
-        end
+              {ecs_single_entity.x_location - look, ecs_single_entity.y_location} )
+        look = look + 1
       end
       if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1,) == sprite_floor then
         add (ecs_single_entity.cross_of_sight,
@@ -708,14 +678,10 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
       end
 
     elseif ecs_single_entity.orientation == east then
-      while look < current_dungeon_size do
-        if mget(ecs_single_entity.x_location + look, ecs_single_entity.y_location) == sprite_floor then
-          add (ecs_single_entity.cross_of_sight,
-                {ecs_single_entity.x_location + look, ecs_single_entity.y_location} )
-          look = look + 1
-        else
-          break
-        end
+      while mget(ecs_single_entity.x_location + look, ecs_single_entity.y_location) == sprite_floor do
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + look, ecs_single_entity.y_location} )
+        look = look + 1
       end
       if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1,) == sprite_floor then
         add (ecs_single_entity.cross_of_sight,
@@ -725,8 +691,38 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
         add (ecs_single_entity.cross_of_sight,
               {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
       end
-    end
 
+    elseif ecs_single_entity.orientation == north then
+      while mget(ecs_single_entity.x_location, ecs_single_entity.y_location - look) == sprite_floor do
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location, ecs_single_entity.y_location - look} )
+        look = look + 1
+      end
+      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1} )
+      end
+      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} )
+      end
+
+    elseif ecs_single_entity.orientation == south then
+      while mget(ecs_single_entity.x_location, ecs_single_entity.y_location + look) == sprite_floor do
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location, ecs_single_entity.y_location + look} )
+        look = look + 1
+      end
+      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} )
+      end
+      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1,) == sprite_floor then
+        add (ecs_single_entity.cross_of_sight,
+              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
+      end
+
+    end
   end)
 
 
@@ -797,10 +793,10 @@ collector_of_safe_cells = function()
 end
 
 
-control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y_movement"},
+control_dragon_system = system({"actor", "is_hurt", "sprite", "x_movement", "y_movement"},
   function(ecs_single_entity)
     if normal_phase or panic_phase == true then
-      if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == false hen
+      if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == false hen
         if btn(0) then
           ecs_single_entity.x_movement = -0.2
         end
@@ -824,7 +820,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
             is_fireball_there = true
             if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
               add(world, {
-                emotion = fireball,
+                actor = fireball,
                 sprite = sprite_fireball_left,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
                 x_position = location.1,
@@ -836,7 +832,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               })
             elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
               add(world, {
-                emotion = fireball,
+                actor = fireball,
                 sprite = sprite_fireball_right,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
                 x_position = location.1,
@@ -848,7 +844,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               })
             elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
               add(world, {
-                emotion = fireball,
+                actor = fireball,
                 sprite = sprite_fireball_up,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
                 x_position = location.1,
@@ -860,7 +856,7 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
               })
             elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
               add(world, {
-                emotion = fireball,
+                actor = fireball,
                 sprite = sprite_fireball_down,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
                 x_position = location.1,
@@ -878,9 +874,9 @@ control_dragon_system = system({"emotion", "is_hurt", "sprite", "x_movement", "y
   end)
 
 
-draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "sprite"},
+draw_normal_dragon_system = system({"actor", "x_movement", "y_movement", "sprite"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon then
+    if ecs_single_entity.actor == dragon then
         if ecs_single_entity.x_movement < 0 then
           if ecs_single_entity.sprite == sprite_dragon_fly2_left then
             ecs_single_entity.sprite = sprite_dragon_fly1_left
@@ -926,9 +922,9 @@ draw_normal_dragon_system = system({"emotion", "x_movement", "y_movement", "spri
   end)
 
 
-fireball_system = system({"emotion", "touched_who", "has_collided"},
+fireball_system = system({"actor", "touched_who", "has_collided"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == fireball
+    if ecs_single_entity.actor == fireball
     and ecs_single_entity.has_collided == true then
       if ecs_single_entity.touched_who == flag_solidity then
         sfx sound_effect_bump 3
@@ -938,32 +934,30 @@ fireball_system = system({"emotion", "touched_who", "has_collided"},
         sfx sound_effect_blocked_fire 3
       end
 
-      del(world, {emotion == fireball})
+      del(world, {actor == fireball})
+      is_fireball_there = false
     end
   end)
 
 
-locate_dragon_system = system({"emotion"},
+locate_dragon_system = system({"actor"},
   function(ecs_single_entity)
-    if emotion == dragon then
+    if actor == dragon then
       dragon_location = ecs_single_entity.location
     end
   end)
 
 
-return_to_your_places_system = system({"emotion", "location"},
+return_to_your_places_system = system({"actor", "location"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == knight then
+    if ecs_single_entity.actor == knight then
       ecs_single_entity.location = place_knight()
-    elseif ecs_single_entity.emotion == dragon then
+    elseif ecs_single_entity.actor == dragon then
       ecs_single_entity.location = {2, 2}
     else
       ecs_single_entity.location = place_subordinate()
     end
   end)
-
-
--- patrol_system(world)
 
 
 -- a* code adapted from:
@@ -981,9 +975,9 @@ astar_get_special_tile = function(astar_tile_id)
 	local astar_tile_y = nil
 	for astar_tile_x = 0, current_dungeon_size do
 		for astar_tile_y = 0, current_dungeon_size do
-			local astar_inspected_tile = mget(astar_tile_x, astar_tile_y) -- contents
+			local astar_inspected_tile = mget(astar_tile_x, astar_tile_y)
 			if astar_inspected_tile == astar_tile_id then
-				return {astar_tile_x, astar_tile_y} -- location
+				return {astar_tile_x, astar_tile_y}
 			end
 		end
 	end
@@ -1013,35 +1007,28 @@ astar_get_neighbor_locations = function(astar_your_location)
 	local astar_your_x = astar_your_location[1]
 	local astar_your_y = astar_your_location[2]
 
-	local astar_neighbor_tile_above = mget(astar_your_x, astar_your_y - 1)
-	local astar_neighbor_tile_below = mget(astar_your_x, astar_your_y + 1)
 	local astar_neighbor_tile_back = mget(astar_your_x - 1, astar_your_y)
 	local astar_neighbor_tile_front = mget(astar_your_x + 1, astar_your_y)
-	local astar_neighbor_location_above = {astar_your_x, astar_your_y - 1}
-	local astar_neighbor_location_below = {astar_your_x, astar_your_y + 1}
+  local astar_neighbor_tile_above = mget(astar_your_x, astar_your_y - 1)
+	local astar_neighbor_tile_below = mget(astar_your_x, astar_your_y + 1)
 	local astar_neighbor_location_back = {astar_your_x - 1, astar_your_y}
 	local astar_neighbor_location_front = {astar_your_x + 1, astar_your_y}
+  local astar_neighbor_location_above = {astar_your_x, astar_your_y - 1}
+  local astar_neighbor_location_below = {astar_your_x, astar_your_y + 1}
 
-	if astar_your_x > 0 and (astar_neighbor_tile_back ~= sprite_wall
-                                                    or sprite_closed_door
-                                                    or sprite_open_door) then
+	if astar_your_x > 0 and (astar_neighbor_tile_back == sprite_floor) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_back})
 	end
-	if astar_your_y < current_dungeon_size and (astar_neighbor_tile_below ~= sprite_wall
-                                                                        or sprite_closed_door
-                                                                        or sprite_open_door) then
-		add(astar_all_neighbor_locations, {astar_neighbor_location_below})
-	end
-	if astar_your_y > 0 and (astar_neighbor_tile_above ~= sprite_wall
-                                                    or sprite_closed_door
-                                                    or sprite_open_door) then
-		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
-	end
-	if astar_your_x < current_dungeon_size and (astar_neighbor_tile_front ~= sprite_wall
-                                                                        or sprite_closed_door
-                                                                        or sprite_open_door) then
+	if astar_your_x < current_dungeon_size and (astar_neighbor_tile_front == sprite_floor) then
 		add(astar_all_neighbor_locations, {astar_neighbor_location_front})
 	end
+  if astar_your_y > 0 and (astar_neighbor_tile_above == sprite_floor) then
+		add(astar_all_neighbor_locations, {astar_neighbor_location_above})
+	end
+  if astar_your_y < current_dungeon_size and (astar_neighbor_tile_below == sprite_floor
+  ) then
+    add(astar_all_neighbor_locations, {astar_neighbor_location_below})
+  end
 
 	return astar_all_neighbor_locations
 end
@@ -1109,13 +1096,59 @@ astar_search = function(my_location, my_target)
 end
 
 
-patrol_system = system({"emotion",
+remove_hazards_from_safe_locations_system = system({"actor", "location", "sprite"},
+  function(ecs_single_entity)
+    for key, value in pairs(safe_floor_locations) do
+
+      if ecs_single_entity.actor == fireball or arrow or dynamite then
+        if ecs_single_entity.location == value then
+        del(key, value)
+      end
+
+      if ecs_single_entity.actor == fireball or arrow then
+        if ecs_single_entity.sprite == sprite_fireball_up or sprite_arrow_up then
+          if {ecs_single_entity.x_position, ecs_single_entity.y_position - 1} == value then
+            del(key, value)
+          end
+        elseif ecs_single_entity.sprite == sprite_fireball_down or sprite_arrow_down then
+          if {ecs_single_entity.x_position, ecs_single_entity.y_position + 1} == value then
+            del(key, value)
+          end
+        elseif ecs_single_entity.sprite == sprite_fireball_left or sprite_arrow_left then
+          if {ecs_single_entity.x_position - 1, ecs_single_entity.y_position} == value then
+            del(key, value)
+          end
+        elseif ecs_single_entity.sprite == sprite_fireball_right or sprite_arrow_right then
+          if {ecs_single_entity.x_position + 1, ecs_single_entity.y_position} == value then
+            del(key, value)
+          end
+        end
+      end
+
+      if ecs_single_entity.actor == dynamite then
+        if value ==  {ecs_single_entity.x_position - 1, ecs_single_entity.y_position}
+        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position}
+        or {ecs_single_entity.x_position, ecs_single_entity.y_position - 1}
+        or {ecs_single_entity.x_position, ecs_single_entity.y_position + 1}
+        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position - 1}
+        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position + 1}
+        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position - 1}
+        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position + 1} then
+          del(key, value)
+        end
+      end
+
+    end
+  end)
+
+
+patrol_system = system({"actor",
                         "is_patrolling", "x_movement", "y_movement",
                         "location", "x_position", "y_position",
                         "target", "x_goal", "y_goal"},
   function(ecs_single_entity)
     local picked_target = {}
-    if ecs_single_entity.emotion == knight then
+    if ecs_single_entity.actor == knight then
       local knight_path = {}
       local knight_step = 1
     else
@@ -1123,7 +1156,7 @@ patrol_system = system({"emotion",
     end
 
     if ecs_single_entity.is_patrolling == true then
-      if ecs_single_entity.emotion == joy then
+      if ecs_single_entity.actor == joy then
         if my_path:plain_queue_length() == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations.random_pick
@@ -1135,7 +1168,7 @@ patrol_system = system({"emotion",
 
       -- sadness stays still when "patrolling".
 
-      elseif ecs_single_entity.emotion == fear then
+      elseif ecs_single_entity.actor == fear then
         if my_path:plain_queue_length() == 0 then
           my_path:plain_queue_push(ecs_single_entity.location)
           for key, value in pairs(safe_floor_locations) do
@@ -1159,17 +1192,17 @@ patrol_system = system({"emotion",
           move_opponent()
         end
 
-      elseif ecs_single_entity.emotion == disgust then
+      elseif ecs_single_entity.actor == disgust then
         if my_path:plain_queue_length() == 0 then
           for key, value in pairs(safe_floor_locations) do
-            if ecs_single_entity.location != value then
+            if ecs_single_entity.location ~= value then
               local check_x_location = value.1
               local check_y_location = value.2
 
-              if (mget check_x_location, check_y_location - 1) == sprite_floor
-              and (mget check_x_location, check_y_location + 1) == sprite_floor
-              and (mget check_x_location - 1, check_y_location) == sprite_floor
+              if (mget check_x_location - 1, check_y_location) == sprite_floor
               and (mget check_x_location + 1, check_y_location) == sprite_floor
+              and (mget check_x_location, check_y_location - 1) == sprite_floor
+              and (mget check_x_location, check_y_location + 1) == sprite_floor
               and (mget check_x_location - 1, check_y_location - 1) == sprite_floor
               and (mget check_x_location - 1, check_y_location + 1) == sprite_floor
               and (mget check_x_location + 1, check_y_location - 1) == sprite_floor
@@ -1180,12 +1213,13 @@ patrol_system = system({"emotion",
             end
           end
           my_path = astar_search(ecs_single_entity.location, picked_target)
+
         else
           ecs_single_entity.target = my_path:plain_queue_pop()
           move_opponent()
         end
 
-      elseif ecs_single_entity.emotion == anger then
+      elseif ecs_single_entity.actor == anger then
         if my_path:plain_queue_length() == 0 then
           local top_right_corner = flr(#safe_floor_locations / 2) - 1
           local bottom_left_corner = flr(#safe_floor_locations / 2) + 1
@@ -1199,30 +1233,30 @@ patrol_system = system({"emotion",
           move_opponent()
         end
 
-        if ecs_single_entity.emotion surprise then
-          if my_path:plain_queue_length() == 0 then
-            random_pick = flr (rnd (#safe_floor_locations) )
-            picked_target = safe_floor_locations.random_pick
-            my_path = astar_search(ecs_single_entity.location, picked_target)
-            if dynamite_count < surprise_count
-              add(world, {
-                emotion = dynamite,
-                sprite = sprite_dynamite_off
-                location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
-                x_position = location.1,
-                y_position = location.2,
-                has_collided = false,
-                touched_who = nil
-                fuse_count = flr (rnd (9) )
-              })
-              dynamite_count = dynamite_count + 1
-            end
-          else
-            ecs_single_entity.target = my_path:plain_queue_pop()
-            move_opponent()
+      elseif ecs_single_entity.actor surprise then
+        if my_path:plain_queue_length() == 0 then
+          random_pick = flr (rnd (#safe_floor_locations) )
+          picked_target = safe_floor_locations.random_pick
+          my_path = astar_search(ecs_single_entity.location, picked_target)
+          if dynamite_count < surprise_count
+            add(world, {
+              actor = dynamite,
+              sprite = sprite_dynamite_off
+              location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
+              x_position = location.1,
+              y_position = location.2,
+              has_collided = false,
+              touched_who = nil
+              fuse_count = flr (rnd (9) )
+            })
+            dynamite_count = dynamite_count + 1
           end
+        else
+          ecs_single_entity.target = my_path:plain_queue_pop()
+          move_opponent()
+        end
 
-      elseif ecs_single_entity.emotion == knight then
+      elseif ecs_single_entity.actor == knight then
         if #knight_path == 0 then
           if mget(last_location.1 - 1, last_location.2) == sprite_floor then
             add (knight_path, {last_location.1 - 1, last_location.2} )
@@ -1251,7 +1285,7 @@ patrol_system = system({"emotion",
   end)
 
 
-move_opponent = function() -- would this work with the entity-component system?
+move_opponent = function()
   while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
     and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
 
@@ -1272,16 +1306,17 @@ move_opponent = function() -- would this work with the entity-component system?
 end
 
 
-patrol_to_hunt_system = system({"emotion", "is_patrolling", "is_hunting"},
+patrol_to_hunt_system = system({"actor", "is_patrolling", "is_hunting"},
   function(ecs_single_entity)
     if ecs_single_entity.is_hunting == false then
-      if ecs_single_entity.emotion == knight and got_treasure == true then
+      if ecs_single_entity.actor == knight and got_treasure == true then
         ecs_single_entity.is_patrolling = false
         ecs_single_entity.is_hunting = true
       end
 
-      for check in all(cross_of_sight) do
-        if dragon_location == cross_of_sight.check then
+      local look_around = ecs_single_entity.cross_of_sight
+      for check in all(look_around) do
+        if dragon_location == look_around.check then
           ecs_single_entity.is_patrolling = false
           ecs_single_entity.is_hunting = true
         end
@@ -1290,7 +1325,7 @@ patrol_to_hunt_system = system({"emotion", "is_patrolling", "is_hunting"},
   end)
 
 
-hunt_system = system({"emotion", "is_hunting", "location", "target",
+hunt_system = system({"actor", "is_hunting", "location", "target",
                       "x_position", "y_position", "x_goal", "y_goal",
                       "x_movement", "y_movement", "orientation"},
   function(ecs_single_entity)
@@ -1304,8 +1339,8 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
           music music_panic
         end
 
-        if ecs_single_entity.emotion == joy or surprise then
-          if ecs_single_entity.emotion == surprise then
+        if ecs_single_entity.actor == joy or surprise then
+          if ecs_single_entity.actor == surprise then
             while pause_counter > 0 do
               pause_counter = pause_counter - 1
             end
@@ -1320,14 +1355,14 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
 
         -- sadness stays still when "hunting".
 
-        elseif ecs_single_entity.emotion == fear then
+        elseif ecs_single_entity.actor == fear then
           while pause_counter > 0 do
             pause_counter = pause_counter - 1
           end
           if arrow_count < fear_count then
             if ecs_single_entity.orientation == west then
               add(world, {
-                emotion = arrow,
+                actor = arrow,
                 sprite = sprite_arrow_left,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
                 x_position = location.1,
@@ -1340,7 +1375,7 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
 
             elseif ecs_single_entity.orientation == east then
               add(world, {
-                emotion = arrow,
+                actor = arrow,
                 sprite = sprite_arrow_left,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
                 x_position = location.1,
@@ -1353,7 +1388,7 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
 
             elseif ecs_single_entity.orientation == north then
               add(world, {
-                emotion = arrow,
+                actor = arrow,
                 prite = sprite_arrow_left,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
                 x_position = location.1,
@@ -1366,7 +1401,7 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
 
             elseif ecs_single_entity.orientation == south then
               add(world, {
-                emotion = arrow,
+                actor = arrow,
                 sprite = sprite_arrow_left,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
                 x_position = location.1,
@@ -1380,7 +1415,7 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
             arrow_count = arrow_count + 1
           end
 
-        elseif ecs_single_entity.emotion == disgust then
+        elseif ecs_single_entity.actor == disgust then
           if my_path:plain_queue_length() == 0 then
             local my_goal = dragon_location
             local seed = flr(rnd(3))
@@ -1400,7 +1435,7 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
             move_opponent()
           end
 
-        elseif ecs_single_entity.emotion == anger or knight then
+        elseif ecs_single_entity.actor == anger or knight then
           if my_path:plain_queue_length() == 0 then
             my_path = astar_search(ecs_single_entity.location, dragon_location)
 
@@ -1429,12 +1464,6 @@ hunt_system = system({"emotion", "is_hunting", "location", "target",
     end)
 
 
-relocate_opponent_to_dragon = function()
-  ecs_single_entity.x_location = dragon_location.1
-  ecs_single_entity.y_location = dragon_location.2
-end
-
-
 back_to_normal = function()
   if panic_phase == true then
     local calm_down = true
@@ -1455,17 +1484,17 @@ back_to_normal = function()
 end
 
 
-fight_system = system({"emotion", "x_location", "y_location"},
+fight_system = system({"actor", "x_location", "y_location"},
   function(ecs_single_entity)
     if ecs_single_entity.orientation == north then
       if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1)
-      or (ecs_single_entity.x_location , ecs_single_entity.y_location - 1)
+      or (ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
       or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1) == dragon_location then
         relocate_opponent_to_dragon()
       end
     elseif ecs_single_entity.orientation == south then
       if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1)
-      or (ecs_single_entity.x_location , ecs_single_entity.y_location + 1)
+      or (ecs_single_entity.x_location, ecs_single_entity.y_location + 1)
       or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == dragon_location then
         relocate_opponent_to_dragon()
       end
@@ -1483,34 +1512,34 @@ fight_system = system({"emotion", "x_location", "y_location"},
       end
     end
 
-    if ecs_single_entity.emotion == sadness then
-      if ecs_single_entity.orientation == north or south then
-        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
-        or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) == dragon_location then
-          relocate_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == west or east then
+    if ecs_single_entity.actor == sadness then
+      if ecs_single_entity.orientation == west or east then
         if (ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
         or (ecs_single_entity.x_location, ecs_single_entity.y_location + 1) == dragon_location then
           relocate_opponent_to_dragon()
         end
+      elseif ecs_single_entity.orientation == north or south then
+        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
+        or (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) == dragon_location then
+          relocate_opponent_to_dragon()
+        end
       end
 
-    elseif ecs_single_entity.emotion == disgust then
-      if ecs_single_entity.orientation == north then
-        if (ecs_single_entity.x_location , ecs_single_entity.y_location - 1) then
-          relocate_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == south then
-        if (ecs_single_entity.x_location , ecs_single_entity.y_location + 1) then
-          relocate_opponent_to_dragon()
-        end
-      elseif ecs_single_entity.orientation == west then
-        if (ecs_single_entity.x_location - 1, ecs_single_entity.y_location) then
+    elseif ecs_single_entity.actor == disgust then
+      if ecs_single_entity.orientation == west then
+        if (ecs_single_entity.x_location - 2, ecs_single_entity.y_location) then
           relocate_opponent_to_dragon()
         end
       elseif ecs_single_entity.orientation == east then
-        if (ecs_single_entity.x_location + 1, ecs_single_entity.y_location) then
+        if (ecs_single_entity.x_location + 2, ecs_single_entity.y_location) then
+          relocate_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == north then
+        if (ecs_single_entity.x_location, ecs_single_entity.y_location - 2) then
+          relocate_opponent_to_dragon()
+        end
+      elseif ecs_single_entity.orientation == south then
+        if (ecs_single_entity.x_location, ecs_single_entity.y_location + 2) then
           relocate_opponent_to_dragon()
         end
 
@@ -1519,18 +1548,26 @@ fight_system = system({"emotion", "x_location", "y_location"},
   end)
 
 
-arrow_system = system({"emotion", "touched_who", "has_collided"},
+relocate_opponent_to_dragon = function()
+  ecs_single_entity.x_location = dragon_location.1
+  ecs_single_entity.y_location = dragon_location.2
+end
+
+
+arrow_system = system({"actor", "touched_who", "has_collided"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == arrow
+    if ecs_single_entity.actor == arrow
     and ecs_single_entity.has_collided == true then
       if ecs_single_entity.touched_who == flag_solidity
       or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         sfx sound_effect_bump 3
-      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
+      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
+      or flag_solidity + flag_hurts_subordinate then
         sfx sound_effect_pierce 3
       end
 
       del(world, {location == ecs_single_entity.location})
+      arrow_count = arrow_count - 1
     end
   end)
 
@@ -1545,7 +1582,9 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
       for sentinel = 1, 3 do
         --nothing
       end
+
       del(world, {location == ecs_single_entity.location})
+      dynamite_count = dynamite_count - 1
     end
   end)
 
@@ -1558,60 +1597,14 @@ draw_actor_system = system({"sprite", "x_location", "y_location"},
   end)
 
 
-remove_hazards_from_safe_locations_system = system({"emotion", "location", "sprite"},
+did_that_hurt_system = system({"touched_who", "actor", "is_hurt"},
   function(ecs_single_entity)
-    for key, value in pairs(safe_floor_locations) do
-
-      if ecs_single_entity.emotion == fireball or arrow or dynamite then
-        if ecs_single_entity.location == value then
-        del(key, value)
-      end
-
-      if ecs_single_entity.emotion == fireball or arrow then
-        if ecs_single_entity.sprite == sprite_fireball_up or sprite_arrow_up then
-          if {ecs_single_entity.x_position, ecs_single_entity.y_position - 1} == value then
-            del(key, value)
-          end
-        elseif ecs_single_entity.sprite == sprite_fireball_down or sprite_arrow_down then
-          if {ecs_single_entity.x_position, ecs_single_entity.y_position + 1} == value then
-            del(key, value)
-          end
-        elseif ecs_single_entity.sprite == sprite_fireball_left or sprite_arrow_left then
-          if {ecs_single_entity.x_position - 1, ecs_single_entity.y_position} == value then
-            del(key, value)
-          end
-        elseif ecs_single_entity.sprite == sprite_fireball_right or sprite_arrow_right then
-          if {ecs_single_entity.x_position + 1, ecs_single_entity.y_position} == value then
-            del(key, value)
-          end
-        end
-      end
-
-      if ecs_single_entity.emotion == dynamite then
-        if value == {ecs_single_entity.x_position - 1, ecs_single_entity.y_position - 1}
-        or {ecs_single_entity.x_position, ecs_single_entity.y_position - 1}
-        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position - 1}
-        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position}
-        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position}
-        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position + 1}
-        or {ecs_single_entity.x_position, ecs_single_entity.y_position + 1}
-        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position + 1} then
-          del(key, value)
-        end
-      end
-
-    end
-  end)
-
-
-did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
-  function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon then
+    if ecs_single_entity.actor == dragon then
       if ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
       or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         ecs_single_entity.is_hurt = true
       end
-    elseif ecs_single_entity.emotion == joy
+    elseif ecs_single_entity.actor == joy
                                     or sadness
                                     or fear
                                     or disgust
@@ -1624,32 +1617,32 @@ did_that_hurt_system = system({"touched_who", "emotion", "is_hurt"},
   end)
 
 
-attack_dragon_system = system({"location", "emotion", "sprite", "orientation"},
+attack_dragon_system = system({"location", "actor", "sprite", "orientation"},
   function(ecs_single_entity)
     if ecs_single_entity.location == dragon_location then
-      if ecs_single_entity.emotion == joy then
+      if ecs_single_entity.actor == joy then
         ecs_single_entity.sprite == sprite_joy_attack
         sfx sound_effect_bump 3
-      elseif ecs_single_entity.emotion == sadness then
+      elseif ecs_single_entity.actor == sadness then
         ecs_single_entity.sprite == sprite_sadness_attack
         sfx sound_effect_slice 3
-      elseif ecs_single_entity.emotion == fear then
+      elseif ecs_single_entity.actor == fear then
         ecs_single_entity.pierce == sprite_fear_attack
         sfx sound_effect_explode 3
-      elseif ecs_single_entity.emotion == disgust then
+      elseif ecs_single_entity.actor == disgust then
         if ecs_single_entity.orientation == north or south then
           ecs_single_entity.sprite == sprite_disgust_attack_vertical
         else
           ecs_single_entity.sprite == sprite_disgust_attack_horizontal
         end
         sfx sound_effect_pierce 3
-      elseif ecs_single_entity.emotion == anger then
+      elseif ecs_single_entity.actor == anger then
         ecs_single_entity.sprite == sprite_anger_attack
         sfx sound_effect_slice 3
-      elseif ecs_single_entity.emotion == surprise then
+      elseif ecs_single_entity.actor == surprise then
         ecs_single_entity.sprite == sprite_surprise_attack
         sfx sound_effect_explode 3
-      elseif ecs_single_entity.emotion == knight then
+      elseif ecs_single_entity.actor == knight then
         ecs_single_entity.sprite == sprite_knight_attack
         sfx sound_effect_slice 3
       else
@@ -1658,25 +1651,25 @@ attack_dragon_system = system({"location", "emotion", "sprite", "orientation"},
 
 lance_system = system({"sprite", "orientation", "x_location", "y_location"},
   function(ecs_single_entity)
-    if ecs_single_entity.sprite == sprite_disgust_attack_vertical then
-      if ecs_single_entity.orientation == north then
-        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location - 1)
-      elseif ecs_single_entity.orientation == south then
-        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location + 1)
-      end
-    elseif ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
+    if ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
       if ecs_single_entity.orientation == west then
         spr sprite_lance_up (ecs_single_entity.x_location - 1) ecs_single_entity.y_location
       elseif ecs_single_entity.orientation == east then
         spr sprite_lance_up (ecs_single_entity.x_location + 1) ecs_single_entity.y_location
       end
+    elseif ecs_single_entity.sprite == sprite_disgust_attack_vertical then
+      if ecs_single_entity.orientation == north then
+        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location - 1)
+      elseif ecs_single_entity.orientation == south then
+        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location + 1)
+      end
     end
   end)
 
 
-embarrass_dragon_system = system({"emotion", "is_hurt", "sprite"},
+embarrass_dragon_system = system({"actor", "is_hurt", "sprite"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon and ecs_single_entity.is_hurt == true then
+    if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == true then
       normal_phase = false
       panic_phase = false
       music -1
@@ -1730,29 +1723,32 @@ lost_game = function()
 end
 
 
-hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
+hurt_subordinate_system = system({"is_hurt", "actor", "sprite",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
-    if ecs_single_entity.is_hurt == true and if ecs_single_entity.emotion == joy
+    if ecs_single_entity.is_hurt == true and if ecs_single_entity.actor == joy
                                                                           or sadness
                                                                           or fear
                                                                           or disgust
                                                                           or anger
                                                                           or surprise then
+
+      if ecs_single_entity.actor == joy then
+        spr sprite_joy_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+      elseif ecs_single_entity.actor == sadness then
+        spr sprite_sadness_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+      elseif ecs_single_entity.actor == fear then
+        spr sprite_fear_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+      elseif ecs_single_entity.actor == disgust then
+        spr sprite_disgust_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+      elseif ecs_single_entity.actor == anger then
+        spr sprite_anger_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+      elseif ecs_single_entity.actor == surprise then
+        spr sprite_surprise_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+      end
+
       for frame = 1, 4 do
-        if ecs_single_entity.emotion == joy then
-          spr sprite_joy_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
-        elseif ecs_single_entity.emotion == sadness then
-          spr sprite_sadness_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
-        elseif ecs_single_entity.emotion == fear then
-          spr sprite_fear_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
-        elseif ecs_single_entity.emotion == disgust then
-          spr sprite_disgust_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
-        elseif ecs_single_entity.emotion == anger then
-          spr sprite_anger_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
-        elseif ecs_single_entity.emotion == surprise then
-          spr sprite_surprise_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
-        end
+        --nothing
       end
 
       sfx sound_effect_warp 3
@@ -1765,19 +1761,18 @@ hurt_subordinate_system = system({"is_hurt", "emotion", "sprite",
       end
 
       del(world, {location == ecs_single_entity.location})
-
-      if ecs_single_entity.emotion == fear then
+      if ecs_single_entity.actor == fear then
         fear_count = fear_count - 1
-      elseif ecs_single_entity.emotion == surprise then
+      elseif ecs_single_entity.actor == surprise then
         surprise_count = surprise_count - 1
       end
     end
   end)
 
 
-treasure_system = system({"emotion", "touched_who"},
+treasure_system = system({"actor", "touched_who"},
   function(ecs_single_entity)
-    if ecs_single_entity.emotion == dragon
+    if ecs_single_entity.actor == dragon
     and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
       got_treasure = true
       sfx sound_effect_treasure 3
@@ -1797,6 +1792,7 @@ won_stage = function()
     current_level = current_level + 1
     if current_level > highest_round then
       highest_round = current_level
+      dset(0, highest_round)
     end
     intermission_screen()
   end
@@ -1807,6 +1803,8 @@ end
 --basic pico-8 stuff
 --
 function _init()
+  cartdata("re_hoard_high_score")
+  highest_round = dget(0)
   title_screen()
 end
 
