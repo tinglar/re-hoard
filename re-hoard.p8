@@ -274,7 +274,7 @@ title_screen = function()
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 50, 64)
     print("press �", 60, 84)
-    print("highest round: " + (highest_round + 1), 0, 120)
+    print("highest round: "..(highest_round + 1), 0, 120)
     music(music_title)
 
     if btn(4) then
@@ -290,8 +290,8 @@ end
 intermission_screen = function()
   if intermission_phase == true then
     music(-1)
-    print("round " + (current_level + 1), 56, 56)
-    print("opportunities: " + opportunities, 50, 70)
+    print("round "..(current_level + 1), 56, 56)
+    print("opportunities: "..opportunities, 50, 70)
 
     if btn(4) then
       cls()
@@ -1720,7 +1720,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "sprite"},
 
 lost_game = function()
   print("game over", 50, 42)
-  print("final round: " + (current_level + 1), 48, 84)
+  print("final round: "..(current_level + 1), 48, 84)
   print("press �", 50, 96)
   music(music_game_over)
 
