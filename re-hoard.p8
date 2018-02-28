@@ -582,7 +582,7 @@ generate_emotion = function()
 end
 
 
-subordinate_sprite_system = system({"actor", "sprite"},
+subordinate_sprite_system = ecs_system({"actor", "sprite"},
   function(ecs_single_entity)
     if setup_phase == true then
       if ecs_single_entity.actor == joy then
@@ -602,7 +602,7 @@ subordinate_sprite_system = system({"actor", "sprite"},
   end)
 
 
-start_patrolling_system = system({"is_patrolling"},
+start_patrolling_system = ecs_system({"is_patrolling"},
   function(ecs_single_entity)
     if normal_phase ==  true then
       if ecs_single_entity.is_patrolling == false then
@@ -641,7 +641,7 @@ run_gameplay = function()
 end
 
 
-orientation_system = system({"orientation", "x_movement", "y_movement"},
+orientation_system = ecs_system({"orientation", "x_movement", "y_movement"},
   function(ecs_single_entity)
       if ecs_single_entity.x_movement < 0 then
         ecs_single_entity.orientation = west
@@ -657,7 +657,7 @@ orientation_system = system({"orientation", "x_movement", "y_movement"},
   end)
 
 
-set_cross_of_sight_system = system({"orientation", "cross_of_sight",
+set_cross_of_sight_system = ecs_system({"orientation", "cross_of_sight",
                                   "x_location", "y_location"},
   function(ecs_single_entity)
     ecs_single_entity.cross_of_sight = {}
@@ -729,7 +729,7 @@ set_cross_of_sight_system = system({"orientation", "cross_of_sight",
 
 -- collision code adapted from:
 -- scathe
-collision_system = system({"x_position", "y_position",
+collision_system = ecs_system({"x_position", "y_position",
                           "has_collided", "touched_who"},
   function(ecs_single_entity)
     local sprite_size = 8
@@ -772,7 +772,7 @@ collision_system = system({"x_position", "y_position",
   end)
 
 
-move_collider_system = system({"has_collided",
+move_collider_system = ecs_system({"has_collided",
                               "x_position", "y_position",
                               "x_movement", "y_movement"},
   function(ecs_single_entity)
@@ -794,7 +794,7 @@ collector_of_safe_cells = function()
 end
 
 
-control_dragon_system = system({"actor", "is_hurt", "sprite", "x_movement", "y_movement"},
+control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", "y_movement"},
   function(ecs_single_entity)
     if normal_phase or panic_phase == true then
       if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == false then
@@ -875,7 +875,7 @@ control_dragon_system = system({"actor", "is_hurt", "sprite", "x_movement", "y_m
   end)
 
 
-draw_normal_dragon_system = system({"actor", "x_movement", "y_movement", "sprite"},
+draw_normal_dragon_system = ecs_system({"actor", "x_movement", "y_movement", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon then
       if ecs_single_entity.x_movement < 0 then
@@ -924,7 +924,7 @@ draw_normal_dragon_system = system({"actor", "x_movement", "y_movement", "sprite
   end)
 
 
-fireball_system = system({"actor", "touched_who", "has_collided"},
+fireball_system = ecs_system({"actor", "touched_who", "has_collided"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == fireball
     and ecs_single_entity.has_collided == true then
@@ -942,7 +942,7 @@ fireball_system = system({"actor", "touched_who", "has_collided"},
   end)
 
 
-locate_dragon_system = system({"actor"},
+locate_dragon_system = ecs_system({"actor"},
   function(ecs_single_entity)
     if actor == dragon then
       dragon_location = ecs_single_entity.location
@@ -950,7 +950,7 @@ locate_dragon_system = system({"actor"},
   end)
 
 
-return_to_your_places_system = system({"actor", "location"},
+return_to_your_places_system = ecs_system({"actor", "location"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == knight then
       ecs_single_entity.location = place_knight()
@@ -1099,7 +1099,7 @@ astar_search = function(my_location, my_target)
 end
 
 
-remove_hazards_from_safe_locations_system = system({"actor", "location", "sprite"},
+remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sprite"},
   function(ecs_single_entity)
     for key, value in pairs(safe_floor_locations) do
 
@@ -1146,7 +1146,7 @@ remove_hazards_from_safe_locations_system = system({"actor", "location", "sprite
   end)
 
 
-patrol_system = system({"actor",
+patrol_system = ecs_system({"actor",
                         "is_patrolling", "x_movement", "y_movement",
                         "location", "x_position", "y_position",
                         "target", "x_goal", "y_goal"},
@@ -1310,7 +1310,7 @@ move_opponent = function()
 end
 
 
-patrol_to_hunt_system = system({"actor", "is_patrolling", "is_hunting"},
+patrol_to_hunt_system = ecs_system({"actor", "is_patrolling", "is_hunting"},
   function(ecs_single_entity)
     if ecs_single_entity.is_hunting == false then
       if ecs_single_entity.actor == knight and got_treasure == true then
@@ -1329,7 +1329,7 @@ patrol_to_hunt_system = system({"actor", "is_patrolling", "is_hunting"},
   end)
 
 
-hunt_system = system({"actor", "is_hunting", "location", "target",
+hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                       "x_position", "y_position", "x_goal", "y_goal",
                       "x_movement", "y_movement", "orientation"},
   function(ecs_single_entity)
@@ -1489,7 +1489,7 @@ back_to_normal = function()
 end
 
 
-fight_system = system({"actor", "x_location", "y_location"},
+fight_system = ecs_system({"actor", "x_location", "y_location"},
   function(ecs_single_entity)
     if ecs_single_entity.orientation == north then
       if {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1}
@@ -1561,7 +1561,7 @@ relocate_opponent_to_dragon = function()
 end
 
 
-arrow_system = system({"actor", "touched_who", "has_collided"},
+arrow_system = ecs_system({"actor", "touched_who", "has_collided"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == arrow
     and ecs_single_entity.has_collided == true then
@@ -1579,7 +1579,7 @@ arrow_system = system({"actor", "touched_who", "has_collided"},
   end)
 
 
-dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
+dynamite_system = ecs_system({"fuse_count", "touched_who", "has_collided"},
   function(ecs_single_entity)
     if ecs_single_entity.fuse_count > 0 then
       ecs_single_entity.fuse_count = ecs_single_entity.fuse_count - 1
@@ -1596,7 +1596,7 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
   end)
 
 
-draw_actor_system = system({"sprite", "x_location", "y_location"},
+draw_actor_system = ecs_system({"sprite", "x_location", "y_location"},
   function(ecs_single_entity)
     if title_phase and intermission_phase and setup_phase == false then
       spr(ecs_single_entity.sprite, ecs_single_entity.x_location, ecs_single_entity.y_location)
@@ -1604,7 +1604,7 @@ draw_actor_system = system({"sprite", "x_location", "y_location"},
   end)
 
 
-did_that_hurt_system = system({"touched_who", "actor", "is_hurt"},
+did_that_hurt_system = ecs_system({"touched_who", "actor", "is_hurt"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon then
       if ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
@@ -1624,7 +1624,7 @@ did_that_hurt_system = system({"touched_who", "actor", "is_hurt"},
   end)
 
 
-attack_dragon_system = system({"location", "actor", "sprite", "orientation"},
+attack_dragon_system = ecs_system({"location", "actor", "sprite", "orientation"},
   function(ecs_single_entity)
     if ecs_single_entity.location == dragon_location then
       if ecs_single_entity.actor == joy then
@@ -1658,7 +1658,7 @@ attack_dragon_system = system({"location", "actor", "sprite", "orientation"},
   end)
 
 
-lance_system = system({"sprite", "orientation", "x_location", "y_location"},
+lance_system = ecs_system({"sprite", "orientation", "x_location", "y_location"},
   function(ecs_single_entity)
     if ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
       if ecs_single_entity.orientation == west then
@@ -1676,7 +1676,7 @@ lance_system = system({"sprite", "orientation", "x_location", "y_location"},
   end)
 
 
-embarrass_dragon_system = system({"actor", "is_hurt", "sprite"},
+embarrass_dragon_system = ecs_system({"actor", "is_hurt", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == true then
       normal_phase = false
@@ -1732,7 +1732,7 @@ lost_game = function()
 end
 
 
-hurt_subordinate_system = system({"is_hurt", "actor", "sprite",
+hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
     if ecs_single_entity.is_hurt == true and ecs_single_entity.actor == joy
@@ -1779,7 +1779,7 @@ hurt_subordinate_system = system({"is_hurt", "actor", "sprite",
   end)
 
 
-treasure_system = system({"actor", "touched_who"},
+treasure_system = ecs_system({"actor", "touched_who"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon
     and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
