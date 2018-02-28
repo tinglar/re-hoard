@@ -277,7 +277,7 @@ title_screen = function()
     print("highest round: " + (highest_round + 1), 0, 120)
     music(music_title)
 
-    if btn 4 then
+    if btn(4) then
       cls()
       title_phase = false
       intermission_phase = true
