@@ -271,11 +271,11 @@ setmetatable(priority_queue, priority_queue)
 --
 title_screen = function()
   if title_phase == true then
-    sspr 0 16 64 16 32 32
+    sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 50, 64)
     print("press �", 60, 84)
     print("highest round: " + (highest_round + 1), 0, 120)
-    music music_title
+    music(music_title)
 
     if btn 4 then
       cls()
@@ -289,11 +289,11 @@ end
 
 intermission_screen = function()
   if intermission_phase == true then
-    music -1
+    music(-1)
     print("round " + (current_level + 1), 56, 56)
     print("opportunities: " + opportunities, 50, 70)
 
-    if btn 4 then
+    if btn(4) then
       cls()
       intermission_phase = false
       setup_phase = true
@@ -322,7 +322,7 @@ game_setup = function()
     setup_phase = false
     normal_phase = true
     start_patrolling_system(world)
-    music music_gameplay
+    music(music_gameplay)
   end
 end
 
@@ -927,11 +927,11 @@ fireball_system = system({"actor", "touched_who", "has_collided"},
     if ecs_single_entity.actor == fireball
     and ecs_single_entity.has_collided == true then
       if ecs_single_entity.touched_who == flag_solidity then
-        sfx sound_effect_bump 3
+        sfx(sound_effect_bump, 3)
       elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
-        sfx sound_effect_fire_hit 3
+        sfx(sound_effect_fire_hit, 3)
       elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon + flag_is_fireproof then
-        sfx sound_effect_blocked_fire 3
+        sfx(sound_effect_blocked_fire, 3)
       end
 
       del(world, {actor == fireball})
@@ -1336,7 +1336,7 @@ hunt_system = system({"actor", "is_hunting", "location", "target",
       if ecs_single_entity.is_hunting == true then
         if panic_phase == false then
           panic_phase = true
-          music music_panic
+          music(music_panic)
         end
 
         if ecs_single_entity.actor == joy or surprise then
@@ -1478,7 +1478,7 @@ back_to_normal = function()
 
     if calm_down == true then
       panic_phase = false
-      music music_gameplay
+      music(music_gameplay)
     end
   end
 end
@@ -1560,10 +1560,10 @@ arrow_system = system({"actor", "touched_who", "has_collided"},
     and ecs_single_entity.has_collided == true then
       if ecs_single_entity.touched_who == flag_solidity
       or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
-        sfx sound_effect_bump 3
+        sfx(sound_effect_bump, 3)
       elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
       or flag_solidity + flag_hurts_subordinate then
-        sfx sound_effect_pierce 3
+        sfx(sound_effect_pierce, 3)
       end
 
       del(world, {location == ecs_single_entity.location})
@@ -1578,7 +1578,7 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
       ecs_single_entity.fuse_count = ecs_single_entity.fuse_count - 1
     elseif fuse_count <= 0 then
       ecs_single_entity.sprite = sprite_dynamite_on
-      sfx sound_effect_explode 3
+      sfx(sound_effect_explode, 3)
       for sentinel = 1, 3 do
         --nothing
       end
@@ -1592,7 +1592,7 @@ dynamite_system = system({"fuse_count", "touched_who", "has_collided"},
 draw_actor_system = system({"sprite", "x_location", "y_location"},
   function(ecs_single_entity)
     if title_phase and intermission_phase and setup_phase == false then
-      spr ecs_single_entity.sprite ecs_single_entity.x_location ecs_single_entity.y_location
+      spr(ecs_single_entity.sprite, ecs_single_entity.x_location, ecs_single_entity.y_location)
     end
   end)
 
@@ -1622,29 +1622,29 @@ attack_dragon_system = system({"location", "actor", "sprite", "orientation"},
     if ecs_single_entity.location == dragon_location then
       if ecs_single_entity.actor == joy then
         ecs_single_entity.sprite == sprite_joy_attack
-        sfx sound_effect_bump 3
+        sfx(sound_effect_bump, 3)
       elseif ecs_single_entity.actor == sadness then
         ecs_single_entity.sprite == sprite_sadness_attack
-        sfx sound_effect_slice 3
+        sfx(sound_effect_slice, 3)
       elseif ecs_single_entity.actor == fear then
         ecs_single_entity.pierce == sprite_fear_attack
-        sfx sound_effect_explode 3
+        sfx(sound_effect_explode, 3)
       elseif ecs_single_entity.actor == disgust then
         if ecs_single_entity.orientation == north or south then
           ecs_single_entity.sprite == sprite_disgust_attack_vertical
         else
           ecs_single_entity.sprite == sprite_disgust_attack_horizontal
         end
-        sfx sound_effect_pierce 3
+        sfx(sound_effect_pierce, 3)
       elseif ecs_single_entity.actor == anger then
         ecs_single_entity.sprite == sprite_anger_attack
-        sfx sound_effect_slice 3
+        sfx(sound_effect_slice, 3)
       elseif ecs_single_entity.actor == surprise then
         ecs_single_entity.sprite == sprite_surprise_attack
-        sfx sound_effect_explode 3
+        sfx(sound_effect_explode, 3)
       elseif ecs_single_entity.actor == knight then
         ecs_single_entity.sprite == sprite_knight_attack
-        sfx sound_effect_slice 3
+        sfx(sound_effect_slice, 3)
       else
   end)
 
@@ -1653,15 +1653,15 @@ lance_system = system({"sprite", "orientation", "x_location", "y_location"},
   function(ecs_single_entity)
     if ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
       if ecs_single_entity.orientation == west then
-        spr sprite_lance_up (ecs_single_entity.x_location - 1) ecs_single_entity.y_location
+        spr(sprite_lance_up, ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
       elseif ecs_single_entity.orientation == east then
-        spr sprite_lance_up (ecs_single_entity.x_location + 1) ecs_single_entity.y_location
+        spr(sprite_lance_up, ecs_single_entity.x_location + 1, ecs_single_entity.y_location)
       end
     elseif ecs_single_entity.sprite == sprite_disgust_attack_vertical then
       if ecs_single_entity.orientation == north then
-        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location - 1)
+        spr(sprite_lance_up, ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
       elseif ecs_single_entity.orientation == south then
-        spr sprite_lance_up ecs_single_entity.x_location (ecs_single_entity.y_location + 1)
+        spr(sprite_lance_up, ecs_single_entity.x_location, ecs_single_entity.y_location + 1)
       end
     end
   end)
@@ -1672,7 +1672,7 @@ embarrass_dragon_system = system({"actor", "is_hurt", "sprite"},
     if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == true then
       normal_phase = false
       panic_phase = false
-      music -1
+      music(-1)
 
       if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
         ecs_single_entity.sprite = sprite_dragon_embarrassed_left
@@ -1687,7 +1687,7 @@ embarrass_dragon_system = system({"actor", "is_hurt", "sprite"},
         ecs_single_entity.sprite = sprite_dragon_embarrassed_down
       end
 
-      music music_failure
+      music(music_failure)
       repeat
         -- wait until the music is over
       until stat 16 == nil
@@ -1695,7 +1695,7 @@ embarrass_dragon_system = system({"actor", "is_hurt", "sprite"},
       repeat
         ecs_single_entity.x_position = ecs_single_entity.x_position - 1
         ecs_single_entity.y_position = ecs_single_entity.y_position - 1
-        sfx sound_effect_retreat 3
+        sfx(sound_effect_retreat, 3)
       until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
 
       if opportunities < 1 then
@@ -1713,7 +1713,7 @@ lost_game = function()
   print("game over", 50, 42)
   print("final round: " + (current_level + 1), 48, 84)
   print("press �", 50, 96)
-  music music_game_over
+  music(music_game_over)
 
   if btn 4 then
     cls()
@@ -1734,29 +1734,29 @@ hurt_subordinate_system = system({"is_hurt", "actor", "sprite",
                                                                           or surprise then
 
       if ecs_single_entity.actor == joy then
-        spr sprite_joy_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        ecs_single_entity.sprite = sprite_joy_got_hurt
       elseif ecs_single_entity.actor == sadness then
-        spr sprite_sadness_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        ecs_single_entity.sprite = sprite_sadness_got_hurt
       elseif ecs_single_entity.actor == fear then
-        spr sprite_fear_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        ecs_single_entity.sprite = sprite_fear_got_hurt
       elseif ecs_single_entity.actor == disgust then
-        spr sprite_disgust_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        ecs_single_entity.sprite = sprite_disgust_got_hurt
       elseif ecs_single_entity.actor == anger then
-        spr sprite_anger_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        ecs_single_entity.sprite = sprite_anger_got_hurt
       elseif ecs_single_entity.actor == surprise then
-        spr sprite_surprise_got_hurt ecs_single_entity.x_location ecs_single_entity.y_location
+        ecs_single_entity.sprite = sprite_surprise_got_hurt
       end
 
       for frame = 1, 4 do
         --nothing
       end
 
-      sfx sound_effect_warp 3
+      sfx(sound_effect_warp, 3)
       for frame = 1, 8 do
-        if frame % 2 == 0 then
-          spr sprite_warp2 ecs_single_entity.x_location ecs_single_entity.y_location
+        if frame % 2 == 1 then
+          ecs_single_entity.sprite = sprite_warp1
         else
-          spr sprite_warp1 ecs_single_entity.x_location ecs_single_entity.y_location
+          ecs_single_entity.sprite = sprite_warp2
         end
       end
 
@@ -1775,7 +1775,7 @@ treasure_system = system({"actor", "touched_who"},
     if ecs_single_entity.actor == dragon
     and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
       got_treasure = true
-      sfx sound_effect_treasure 3
+      sfx(sound_effect_treasure, 3)
     end
   end)
 
@@ -1784,7 +1784,7 @@ won_stage = function()
   if dragon_location = {2, 1} and got_treasure == true then
     normal_phase = false
     panic_phase = false
-    music music_success
+    music(music_success)
     repeat
       -- wait until the music is over
     until stat 16 == nil
