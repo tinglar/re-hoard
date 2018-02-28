@@ -411,6 +411,7 @@ build_dungeon = function()
         end
         if cell_content_below == nil then
           cell_content_below = false
+        end
       end
 
       travelled_cells:plain_queue_push( {current_cell[1], current_cell[2]} )
