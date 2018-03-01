@@ -130,6 +130,7 @@ initial_dungeon_size = 15
 
 
 -- variables
+startup = true
 title_phase = true
 intermission_phase = false
 setup_phase = false
@@ -137,7 +138,7 @@ normal_phase = false
 panic_phase = false
 
 current_level = 0
-previous_level = nil
+previous_level = 0
 opportunities = 3
 current_dungeon_size = initial_dungeon_size + flr(current_level / 3)
 dungeon = {}
@@ -272,6 +273,7 @@ setmetatable(priority_queue, priority_queue)
 title_screen = function()
   if title_phase == true then
     cls()
+    startup = true
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
     print("press Ž", 48, 84)
@@ -306,7 +308,10 @@ end
 
 game_setup = function()
   if setup_phase == true then
-    if current_level > previous_level or previous_level == nil then
+    if current_level > previous_level or startup == true then
+      if startup == true then
+        startup = false
+      end
       build_dungeon()
       collector_of_floor_cells()
       collector_of_opponent_setup_cells()
@@ -1824,6 +1829,12 @@ function _draw()
 end
 
 function _update()
+  if title_phase == true and btn(4) then
+    cls()
+    title_phase = false
+    intermission_phase = true
+    intermission_screen()
+  end
   run_gameplay()
 end
 
