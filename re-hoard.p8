@@ -126,6 +126,9 @@ flag_hurts_subordinate = 2   -- adds 4
 flag_is_fireproof = 3        -- adds 8
 
 initial_dungeon_size = 15
+bounce_force = -2
+actor_width = 0.4
+actor_height = 0.4
 
 
 
@@ -276,7 +279,7 @@ title_screen = function()
     startup = true
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press ", 48, 84)
+    print("press ï¿½", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
     music(music_title)
 
@@ -493,6 +496,8 @@ populate = function()
   add(world, {
     actor = knight,
     sprite = sprite_knight_walk1,
+    current_frame = 0,
+    total_frames = 2,
     location = place_knight(),
     x_position = location["1"],
     y_position = location["2"],
@@ -505,6 +510,7 @@ populate = function()
     is_hunting = false,
     x_movement = 0,
     y_movement = 0,
+    solidity = false,
     has_collided = false,
     touched_who = nil
   })
@@ -513,6 +519,8 @@ populate = function()
     add(world, {
       actor = generate_emotion(),
       sprite = sprite_knight_walk1,
+      current_frame = 0,
+      total_frames = 2,
       location = place_subordinate(),
       x_position = location["1"],
       y_position = location["2"],
@@ -526,6 +534,7 @@ populate = function()
       is_hurt = false,
       x_movement = 0,
       y_movement = 0,
+      solidity = false,
       has_collided = false,
       touched_who = nil
     })
@@ -534,12 +543,15 @@ populate = function()
   add(world, {
     actor = dragon,
     sprite = sprite_dragon_fly1_down,
+    current_frame = 0,
+    total_frames = 2,
     location = {2, 2},
     x_position = location["1"],
     y_position = location["2"],
     is_hurt = false,
     x_movement = 0,
     y_movement = 0,
+    solidity = false,
     has_collided = false,
     touched_who = nil
   })
@@ -734,61 +746,89 @@ set_cross_of_sight_system = ecs_system({"orientation", "cross_of_sight",
 
 
 -- collision code adapted from:
--- scathe
-collision_system = ecs_system({"x_position", "y_position",
-                          "has_collided", "touched_who"},
-  function(ecs_single_entity)
-    local sprite_size = 8
-    local x1 = ecs_single_entity.x_position
-    local y1 = ecs_single_entity.y_position
-    local x2 = ecs_single_entity.x_position + 1
-    local y2 = ecs_single_entity.y_position + 1
-    local northwest_touch = fget (mget (x1, y1), flag_solidity)
-    local southwest_touch = fget (mget (x1, y2), flag_solidity)
-    local northeast_touch = fget (mget (x2, y2), flag_solidity)
-    local southeast_touch = fget (mget (x2, y1), flag_solidity)
-
-    ecs_single_entity.has_collided = northwest_touch
-                  or southwest_touch
-                  or northeast_touch
-                  or southeast_touch
-    if northwest_touch == true then
-      ecs_single_entity.touched_who = fget (mget (x1, y1) )
-    elseif southwest_touch == true then
-      ecs_single_entity.touched_who = fget (mget (x1, y2) )
-    elseif northeast_touch == true then
-      ecs_single_entity.touched_who = fget (mget (x2, y2) )
-    elseif southeast_touch == true then
-      ecs_single_entity.touched_who = fget (mget (x2, y1) )
-    end
+-- the collision demo
+check_solidity = function(x_placement, y_placement)
+	local value = mget(x_placement, y_placement)
+	return fget(value, 1)
+end
 
 
-    local my_x = ecs_single_entity.x_position
-    local my_y = ecs_single_entity.y_position
-    local your_x = other.position.x
-    local your_y = other.position.y
-
-    if your_x + sprite_size > my_x
-    and your_y + sprite_size > my_y
-    and your_x < my_x + sprite_size
-    and your_y < my_y + sprite_size then
-      ecs_single_entity.has_collided = true
-      ecs_single_entity.touched_who = other
-    end
-  end)
+solid_area = function(x_position, y_position, width, height)
+	return check_solidity(x_position - width, y_position - height)
+		or check_solidity(x_position + width, y_position - height)
+		or check_solidity(x_position - width, y_position + height)
+		or check_solidity(x_position + width, y_position + height)
+end
 
 
-move_collider_system = ecs_system({"has_collided",
-                              "x_position", "y_position",
-                              "x_movement", "y_movement"},
-  function(ecs_single_entity)
-    if normal_phase or panic_phase == true then
-      if ecs_single_entity.has_collided == false then
-        ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
-        ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
-      end
-    end
-  end)
+collision_system = ecs_system({"x_movement", "y_movement"
+									"x_position", "y_position"},
+	function(ecs_single_entity)
+		if solid_area(ecs_single_entity.x_position + ecs_single_entity.x_movement,
+						ecs_single_entity.y_position + ecs_single_entity.y_movement,
+						actor_width, actor_height) == true then
+			ecs_single_entity.solidity = true
+		end
+
+		for every_entity, other_entity in pairs(world) do
+			if other_entity ~= ecs_single_entity then
+				local x_bounce = (ecs_single_entity.x_position + ecs_single_entity.x_movement) - other.entity.x_position
+				local y_bounce = (ecs_single_entity.y_position + ecs_single_entity.y_movement) - other.entity.y_position
+
+				if abs(x_bounce) < actor_width + actor_width
+				and abs(y_bounce) < actor_height + actor_height then
+
+					if ecs_single_entity.x_movement ~= 0
+					and abs(x_bounce) < abs(ecs_single_entity.x_position - other_entity.x_position) then
+						local velocity = ecs_single_entity.x_movement + other_entity.x_movement
+						ecs_single_entity.x_movement = velocity / 2
+						other_entity.x_movement = velocity / 2
+						ecs_single_entity.solidity = true
+            ecs_single_entity.touched_who = fget(other_entity.sprite)
+					end
+
+					if ecs_single_entity.y_movement ~= 0
+					and abs(y_bounce) < abs(ecs_single_entity.y_position - other_entity.y_position) then
+						local velocity = ecs_single_entity.y_movement + other_entity.y_movement
+						ecs_single_entity.y_movement = velocity / 2
+						other_entity.y_movement = velocity / 2
+						ecs_single_entity.solidity = true
+            ecs_single_entity.touched_who = fget(other_entity.sprite)
+					end
+
+				end
+			end
+		end
+
+		ecs_single_entity.solidity = false
+	end)
+
+
+motion_system = ecs_system({"solidity",
+							"x_position", "y_position",
+							"x_movement", "y_movement",
+							"current_frame", "total_frames"},
+	function(ecs_single_entity)
+		if ecs_single_entity.solidity == false then
+			ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
+			ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
+		else
+			ecs_single_entity.x_movement = ecs_single_entity.x_movement * bounce_force
+			ecs_single_entity.y_movement = ecs_single_entity.y_movement * bounce_force
+		end
+
+		ecs_single_entity.current_frame = ecs_single_entity.current_frame + abs(ecs_single_entity.x_movement) * 4
+		ecs_single_entity.current_frame = ecs_single_entity.current_frame + abs(ecs_single_entity.y_movement) * 4
+		ecs_single_entity.current_frame = ecs_single_entity.current_frame % ecs_single_entity.total_frames
+	end)
+
+
+actor_drawing_system = ecs_system({"x_position", "y_position", "sprite"},
+	function(ecs_single_entity)
+		local x_sprite = (ecs_single_entity.x_position * 8) - 4
+		local y_sprite = (ecs_single_entity.y_position * 8) - 4
+		spr( ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite )
+	end)
 
 
 collector_of_safe_cells = function()
@@ -829,11 +869,14 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_left,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = -0.4,
                 y_movement = 0,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -841,11 +884,14 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_right,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = 0.4,
                 y_movement = 0,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -853,11 +899,14 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_up,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = 0,
                 y_movement = -0.4,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -865,11 +914,14 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_down,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = 0,
                 y_movement = 0.4,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -1252,9 +1304,12 @@ patrol_system = ecs_system({"actor",
             add(world, {
               actor = dynamite,
               sprite = sprite_dynamite_off,
+              current_frame = 0,
+              total_frames = 2,
               location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
               x_position = location["1"],
               y_position = location["2"],
+              solidity = false,
               has_collided = false,
               touched_who = nil,
               fuse_count = flr (rnd (9) )
@@ -1374,11 +1429,14 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
               add(world, {
                 actor = arrow,
                 sprite = sprite_arrow_left,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = -0.4,
                 y_movement = 0,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -1387,11 +1445,14 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
               add(world, {
                 actor = arrow,
                 sprite = sprite_arrow_left,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = 0.4,
                 y_movement = 0,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -1399,12 +1460,15 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
             elseif ecs_single_entity.orientation == north then
               add(world, {
                 actor = arrow,
-                prite = sprite_arrow_left,
+                sprite = sprite_arrow_left,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = 0,
                 y_movement = -0.4,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -1413,11 +1477,14 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
               add(world, {
                 actor = arrow,
                 sprite = sprite_arrow_left,
+                current_frame = 0,
+                total_frames = 2,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
                 x_position = location["1"],
                 y_position = location["2"],
                 x_movement = 0,
                 y_movement = 0.4,
+                solidity = false,
                 has_collided = false,
                 touched_who = nil
               })
@@ -1727,7 +1794,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "sprite"},
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press ", 50, 96)
+  print("press ï¿½", 50, 96)
   music(music_game_over)
 
   if btn(4) then
@@ -2263,4 +2330,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
