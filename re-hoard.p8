@@ -825,9 +825,11 @@ motion_system = ecs_system({"solidity",
 
 actor_drawing_system = ecs_system({"x_position", "y_position", "sprite"},
 	function(ecs_single_entity)
-		local x_sprite = (ecs_single_entity.x_position * 8) - 4
-		local y_sprite = (ecs_single_entity.y_position * 8) - 4
-		spr( ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite )
+    if title_phase and intermission_phase and setup_phase == false then
+  		local x_sprite = (ecs_single_entity.x_position * 8) - 4
+  		local y_sprite = (ecs_single_entity.y_position * 8) - 4
+  		spr( ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite )
+    end
 	end)
 
 
@@ -1669,14 +1671,6 @@ dynamite_system = ecs_system({"fuse_count", "touched_who", "has_collided"},
   end)
 
 
-draw_actor_system = ecs_system({"sprite", "x_location", "y_location"},
-  function(ecs_single_entity)
-    if title_phase and intermission_phase and setup_phase == false then
-      spr(ecs_single_entity.sprite, ecs_single_entity.x_location, ecs_single_entity.y_location)
-    end
-  end)
-
-
 did_that_hurt_system = ecs_system({"touched_who", "actor", "is_hurt"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon then
@@ -1892,7 +1886,7 @@ end
 
 function _draw()
   draw_dungeon()
-  draw_actor_system(world)
+  actor_drawing_system(world)
 end
 
 function _update()
