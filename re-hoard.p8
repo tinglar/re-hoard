@@ -635,7 +635,7 @@ run_gameplay = function()
     orientation_system(world)
     set_cross_of_sight_system(world)
     collision_system(world)
-    move_collider_system(world)
+    motion_system(world)
     collector_of_safe_cells(world)
     control_dragon_system(world)
     fireball_system(world)
@@ -753,11 +753,11 @@ check_solidity = function(x_placement, y_placement)
 end
 
 
-solid_area = function(x_position, y_position, width, height)
-	return check_solidity(x_position - width, y_position - height)
-		or check_solidity(x_position + width, y_position - height)
-		or check_solidity(x_position - width, y_position + height)
-		or check_solidity(x_position + width, y_position + height)
+solid_area = function(x_position, y_position)
+	return check_solidity(x_position - actor_width, y_position - actor_height)
+		or check_solidity(x_position + actor_width, y_position - actor_height)
+		or check_solidity(x_position - actor_width, y_position + actor_height)
+		or check_solidity(x_position + actor_width, y_position + actor_height)
 end
 
 
