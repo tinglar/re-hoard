@@ -548,6 +548,7 @@ populate = function()
     location = {2, 2},
     x_position = location["1"],
     y_position = location["2"],
+    orientation = south,
     is_hurt = false,
     x_movement = 0,
     y_movement = 0,
@@ -638,6 +639,7 @@ run_gameplay = function()
     motion_system(world)
     collector_of_safe_cells(world)
     control_dragon_system(world)
+    dragon_sprite_system(world)
     fireball_system(world)
     locate_dragon_system(world)
     patrol_system(world)
@@ -823,11 +825,11 @@ motion_system = ecs_system({"solidity",
 	end)
 
 
-actor_drawing_system = ecs_system({"x_position", "y_position", "sprite"},
+actor_drawing_system = ecs_system({"x_position", "y_position", "sprite", "current_frame"},
 	function(ecs_single_entity)
     if title_phase and intermission_phase and setup_phase == false then
-  		local x_sprite = (ecs_single_entity.x_position * 8) - 4
-  		local y_sprite = (ecs_single_entity.y_position * 8) - 4
+  		local x_sprite = (ecs_single_entity.x_position * 8) - 2
+  		local y_sprite = (ecs_single_entity.y_position * 8) - 2
   		spr( ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite )
     end
 	end)
@@ -867,12 +869,12 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
         if btnp(4) then
           if is_fireball_there == false then
             is_fireball_there = true
-            if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
+            if ecs_single_entity.orientation == west then
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_left,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -882,12 +884,12 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 has_collided = false,
                 touched_who = nil
               })
-            elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
+            elseif ecs_single_entity.orientation == east then
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_right,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -897,12 +899,12 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 has_collided = false,
                 touched_who = nil
               })
-            elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
+            elseif ecs_single_entity.orientation == north then
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_up,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -912,12 +914,12 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 has_collided = false,
                 touched_who = nil
               })
-            elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
+            elseif ecs_single_entity.orientation == south then
               add(world, {
                 actor = fireball,
                 sprite = sprite_fireball_down,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -935,7 +937,7 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
   end)
 
 
-draw_normal_dragon_system = ecs_system({"actor", "x_movement", "y_movement", "sprite"},
+dragon_sprite_system = ecs_system({"actor", "x_movement", "y_movement", "sprite"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon then
       if ecs_single_entity.x_movement < 0 then
@@ -1307,7 +1309,7 @@ patrol_system = ecs_system({"actor",
               actor = dynamite,
               sprite = sprite_dynamite_off,
               current_frame = 0,
-              total_frames = 2,
+              total_frames = 1,
               location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
               x_position = location["1"],
               y_position = location["2"],
@@ -1432,7 +1434,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 actor = arrow,
                 sprite = sprite_arrow_left,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -1448,7 +1450,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 actor = arrow,
                 sprite = sprite_arrow_left,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -1464,7 +1466,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 actor = arrow,
                 sprite = sprite_arrow_left,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -1480,7 +1482,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 actor = arrow,
                 sprite = sprite_arrow_left,
                 current_frame = 0,
-                total_frames = 2,
+                total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
                 x_position = location["1"],
                 y_position = location["2"],
@@ -1691,9 +1693,10 @@ did_that_hurt_system = ecs_system({"touched_who", "actor", "is_hurt"},
   end)
 
 
-attack_dragon_system = ecs_system({"location", "actor", "sprite", "orientation"},
+attack_dragon_system = ecs_system({"location", "actor", "sprite", "total_frames", "orientation"},
   function(ecs_single_entity)
     if ecs_single_entity.location == dragon_location then
+      ecs_single_entity,total_frames = 1
       if ecs_single_entity.actor == joy then
         ecs_single_entity.sprite = sprite_joy_attack
         sfx(sound_effect_bump, 3)
@@ -1743,23 +1746,24 @@ lance_system = ecs_system({"sprite", "orientation", "x_location", "y_location"},
   end)
 
 
-embarrass_dragon_system = ecs_system({"actor", "is_hurt", "sprite"},
+embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite", "total_frames"},
   function(ecs_single_entity)
     if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == true then
       normal_phase = false
       panic_phase = false
       music(-1)
 
-      if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left or sprite_dragon_fire_left then
+      ecs_single_entity.total_frames = 1
+      if ecs_single_entity.orientation == west then
         ecs_single_entity.sprite = sprite_dragon_embarrassed_left
       end
-      if ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right or sprite_dragon_fire_right then
+      if ecs_single_entity.orientation == east then
         ecs_single_entity.sprite = sprite_dragon_embarrassed_right
       end
-      if ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up or sprite_dragon_fire_up then
+      if ecs_single_entity.orientation == north then
         ecs_single_entity.sprite = sprite_dragon_embarrassed_up
       end
-      if ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down or sprite_dragon_fire_down then
+      if ecs_single_entity.orientation == south then
         ecs_single_entity.sprite = sprite_dragon_embarrassed_down
       end
 
@@ -1799,7 +1803,7 @@ lost_game = function()
 end
 
 
-hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite",
+hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite", "total_frames",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
     if ecs_single_entity.is_hurt == true and ecs_single_entity.actor == joy
@@ -1809,6 +1813,7 @@ hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite",
                                                                       or anger
                                                                       or surprise then
 
+      ecs_single_entity.total_frames = 1
       if ecs_single_entity.actor == joy then
         ecs_single_entity.sprite = sprite_joy_got_hurt
       elseif ecs_single_entity.actor == sadness then
