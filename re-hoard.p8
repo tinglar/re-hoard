@@ -226,7 +226,7 @@ title_screen = function()
     startup = true
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press ï¿½", 48, 84)
+    print("press Ž", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
     music(music_title)
 
@@ -1332,7 +1332,7 @@ patrol_to_hunt_system = ecs_system({"actor", "is_patrolling", "is_hunting"},
       end
 
       local look_around = ecs_single_entity.cross_of_sight
-      for check in all(look_around) do
+      for key, check in pairs(look_around) do
         if dragon_location == look_around["check"] then
           ecs_single_entity.is_patrolling = false
           ecs_single_entity.is_hunting = true
@@ -1740,7 +1740,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press ï¿½", 50, 96)
+  print("press Ž", 50, 96)
   music(music_game_over)
 
   if btn(4) then
@@ -2277,3 +2277,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
