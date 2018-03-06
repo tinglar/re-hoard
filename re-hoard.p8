@@ -286,7 +286,7 @@ end
 build_dungeon = function()
   local travelled_cells = {}
   local immediate_cells = {}
-  local current_cell = nil
+  local current_cell = {}
 
   local cell_content_back  = dungeon[current_cell[1] - 1][current_cell[2]]
   local cell_content_front = dungeon[current_cell[1] + 1][current_cell[2]]
