@@ -284,8 +284,8 @@ end
 
 
 build_dungeon = function()
-  local travelled_cells = plain_queue_new()
-  local immediate_cells = plain_queue_new()
+  local travelled_cells = {}
+  local immediate_cells = {}
   local current_cell = nil
 
   local cell_content_back  = dungeon[current_cell[1] - 1][current_cell[2]]
@@ -313,17 +313,17 @@ build_dungeon = function()
   -- is an optimization of the cases of the cells
   -- that surround the north-west corner.
   dungeon[2][2] = true
-  travelled_cells:plain_queue_push({2,2})
+  queue_push(travelled_cells, {2,2}, 0)
 
   if flr(rnd(1)) then
     dungeon[2][3] = true
     current_cell = {2,3}
-    travelled_cells:plain_queue_push({2,3})
+    queue_push(travelled_cells, {2,3}, 0)
     dungeon[3][2] = false
   else
     dungeon[3][2] = true
     current_cell = {3,2}
-    travelled_cells:plain_queue_push({3,2})
+    queue_push(travelled_cells, {3,2}, 0)
     dungeon[2][3] = false
   end
 
@@ -331,24 +331,24 @@ build_dungeon = function()
     -- if current_cell holds {x,y}, then
     -- current_cell[1] holds x while current_cell[2] holds y.
     if cell_content_back ~= nil then
-      immediate_cells:plain_queue_push(cell_location_back)
+      queue_push(immediate_cells, cell_location_back, 0)
       -- immediate_cells is a queue that holds tables.
       -- after all, immediate_cells needs the locations, not their contents.
     end
     if cell_content_front ~= nil then
-      immediate_cells:plain_queue_push(cell_location_front)
+      queue_push(immediate_cells, cell_location_front, 0)
     end
     if cell_content_above ~= nil then
-      immediate_cells:plain_queue_push(cell_location_above)
+      queue_push(immediate_cells, cell_location_above, 0)
     end
     if cell_content_below ~= nil then
-      immediate_cells:plain_queue_push(cell_location_below)
+      queue_push(immediate_cells, cell_location_below, 0)
     end
 
-    if immediate_cells:plain_queue_length() == 0 then
-      current_cell = travelled_cells:plain_queue_pop()
+    if #immediate_cells == 0 then
+      current_cell = queue_pop(travelled_cells)
     else
-      local randomly = flr (rdm (immediate_cells:plain_queue_length() ) ) + 1
+      local randomly = flr (rdm (#immediate_cells) ) + 1
 
       -- the program goes to the randomly-picked cell.
       current_cell = {immediate_cells["randomly"]}
@@ -370,10 +370,10 @@ build_dungeon = function()
         end
       end
 
-      travelled_cells:plain_queue_push( {current_cell[1], current_cell[2]} )
+      queue_push(travelled_cells, {current_cell[1], current_cell[2]}, 0)
       dungeon[current_cell] = true
     end
-  until travelled_cells:plain_queue_length() == 0
+  until #travelled_cells == 0
 end
 
 
@@ -1048,8 +1048,8 @@ end
 astar_search = function(my_location, my_target)
 	local astar_start_location = my_location
 	local astar_goal_location = my_target
-	local astar_frontier = priority_queue_new()
-	astar_frontier:priority_queue_push(0, astar_start_location)
+	local astar_frontier = {}
+	queue_push(astar_frontier, astar_start_location, 0)
 	local astar_came_from = {}
 	astar_came_from[astar_vector_to_index(astar_start_location)] = nil
 	local astar_cost_so_far = {}
@@ -1075,12 +1075,12 @@ astar_search = function(my_location, my_target)
 	local astar_new_cost = nil
 	local astar_new_priority = nil
 
-  local astar_final_path = plain_queue_new()
+  local astar_final_path = {}
   local next_x = nil
   local next_y = nil
 
-	while astar_frontier:priority_queue_length() > 0 do
-		astar_current_location = astar_frontier:priority_queue_pop()
+	while #astar_frontier > 0 do
+		astar_current_location = queue_pop(astar_frontier)
 		if astar_vector_to_index(astar_current_location) == astar_vector_to_index(astar_goal_location) then
 			break
 		end
@@ -1092,13 +1092,13 @@ astar_search = function(my_location, my_target)
 			if (astar_cost_so_far[astar_next_index] == nil) or (astar_new_cost < astar_cost_so_far[astar_next_index]) then
 				astar_cost_so_far[astar_next_index] = astar_new_cost
 				astar_new_priority = astar_new_cost + astar_heuristic(astar_goal_location, next_step)
-				astar_frontier:priority_queue_push(astar_new_priority, next_step) -- is the order reversed?
+				queue_push(astar_frontier, next_step, astar_new_priority) -- is the order reversed?
 				astar_came_from[astar_next_index] = astar_current_location
 
         if (astar_next_index ~= astar_vector_to_index(astar_start_location) ) then
           next_x = next_step[1]
           next_y = next_step[2]
-          astar_final_path:plain_queue_push({next_x, next_y}) -- is the order reversed, too?
+          queue_push(astar_final_path, {next_x, next_y}, 0) -- is the order reversed, too?
         end
 			end
 		end
@@ -1165,48 +1165,48 @@ patrol_system = ecs_system({"actor",
       local knight_path = {}
       local knight_step = 1
     else
-      local my_path = plain_queue_new()
+      local my_path = {}
     end
 
     if ecs_single_entity.is_patrolling == true then
       if ecs_single_entity.actor == joy then
-        if my_path:plain_queue_length() == 0 then
+        if #my_path == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations["random_pick"]
           my_path = astar_search(ecs_single_entity.location, picked_target)
         else
-          ecs_single_entity.target = my_path:plain_queue_pop()
+          ecs_single_entity.target = queue_pop(my_path)
           move_opponent()
         end
 
       -- sadness stays still when "patrolling".
 
       elseif ecs_single_entity.actor == fear then
-        if my_path:plain_queue_length() == 0 then
-          my_path:plain_queue_push(ecs_single_entity.location)
+        if #my_path == 0 then
+          queue_push(my_path, ecs_single_entity.location, 0)
           for key, value in pairs(safe_floor_locations) do
             if {ecs_single_entity.x_location, ecs_single_entity.y_location - 1} == value then
-              my_path:plain_queue_push(value)
+              queue_push(my_path, value, 0)
               break
             elseif {ecs_single_entity.x_location, ecs_single_entity.y_location + 1} == value then
-              my_path:plain_queue_push(value)
+              queue_push(my_path, value, 0)
               break
             elseif {ecs_single_entity.x_location - 1, ecs_single_entity.y_location} == value then
-              my_path:plain_queue_push(value)
+              queue_push(my_path, value, 0)
               break
             elseif {ecs_single_entity.x_location + 1, ecs_single_entity.y_location} == value then
-              my_path:plain_queue_push(value)
+              queue_push(my_path, value, 0)
               break
             end
           end
         else
-          ecs_single_entity.target = my_path:plain_queue_pop()
-          my_path:plain_queue_push(ecs_single_entity.target)
+          ecs_single_entity.target = queue_pop(my_path)
+          queue_push(my_path, ecs_single_entity.target, 0)
           move_opponent()
         end
 
       elseif ecs_single_entity.actor == disgust then
-        if my_path:plain_queue_length() == 0 then
+        if #my_path == 0 then
           for key, value in pairs(safe_floor_locations) do
             if ecs_single_entity.location ~= value then
               local check_x_location = value["1"]
@@ -1228,26 +1228,26 @@ patrol_system = ecs_system({"actor",
           my_path = astar_search(ecs_single_entity.location, picked_target)
 
         else
-          ecs_single_entity.target = my_path:plain_queue_pop()
+          ecs_single_entity.target = queue_pop(my_path)
           move_opponent()
         end
 
       elseif ecs_single_entity.actor == anger then
-        if my_path:plain_queue_length() == 0 then
+        if #my_path == 0 then
           local top_right_corner = flr(#safe_floor_locations / 2) - 1
           local bottom_left_corner = flr(#safe_floor_locations / 2) + 1
-          my_path:plain_queue_push(safe_floor_locations["1"])
-          my_path:plain_queue_push(safe_floor_locations["top_right_corner"])
-          my_path:plain_queue_push(safe_floor_locations["#safe_floor_locations"])
-          my_path:plain_queue_push(safe_floor_locations["bottom_left_corner"])
+          queue_push(my_path, safe_floor_locations["1"], 0)
+          queue_push(my_path, safe_floor_locations["top_right_corner"], 0)
+          queue_push(my_path, safe_floor_locations["#safe_floor_locations"], 0)
+          queue_push(my_path, safe_floor_locations["bottom_left_corner"], 0)
         else
-          ecs_single_entity.target = my_path:plain_queue_pop()
-          my_path:plain_queue_push(ecs_single_entity.target)
+          ecs_single_entity.target = queue_pop(my_path)
+          queue_push(my_path, ecs_single_entity.target, 0)
           move_opponent()
         end
 
       elseif ecs_single_entity.actor == surprise then
-        if my_path:plain_queue_length() == 0 then
+        if #my_path == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations["random_pick"]
           my_path = astar_search(ecs_single_entity.location, picked_target)
@@ -1268,7 +1268,7 @@ patrol_system = ecs_system({"actor",
             dynamite_count = dynamite_count + 1
           end
         else
-          ecs_single_entity.target = my_path:plain_queue_pop()
+          ecs_single_entity.target = queue_pop(my_path)
           move_opponent()
         end
 
@@ -1362,10 +1362,10 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
             end
           end
 
-          if my_path:plain_queue_length() == 0 then
+          if #my_path == 0 then
             my_path = astar_search(ecs_single_entity.location, dragon_location)
           else
-            ecs_single_entity.target = my_path:plain_queue_pop()
+            ecs_single_entity.target = queue_pop(my_path)
             move_opponent()
           end
 
@@ -1444,7 +1444,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
           end
 
         elseif ecs_single_entity.actor == disgust then
-          if my_path:plain_queue_length() == 0 then
+          if #my_path == 0 then
             local my_goal = dragon_location
             local seed = flr(rnd(3))
 
@@ -1460,16 +1460,16 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
 
             my_path = astar_search(ecs_single_entity.location, my_goal)
           else
-            ecs_single_entity.target = my_path:plain_queue_pop()
+            ecs_single_entity.target = queue_pop(my_path)
             move_opponent()
           end
 
         elseif ecs_single_entity.actor == anger or knight then
-          if my_path:plain_queue_length() == 0 then
+          if #my_path == 0 then
             my_path = astar_search(ecs_single_entity.location, dragon_location)
 
           else
-            ecs_single_entity.target = my_path:plain_queue_pop()
+            ecs_single_entity.target = queue_pop(my_path)
             while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
               and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
 
