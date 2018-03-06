@@ -1087,7 +1087,7 @@ astar_search = function(my_location, my_target)
 		astar_current_neighbors = astar_get_neighbor_locations(astar_current_location)
 
 		for next_step in all(astar_current_neighbors) do
-			astar_next_index = astar_vector_to_index(next)
+			astar_next_index = astar_vector_to_index(next_step)
 			astar_new_cost = astar_cost_so_far[astar_vector_to_index(astar_current_location)]
 			if (astar_cost_so_far[astar_next_index] == nil) or (astar_new_cost < astar_cost_so_far[astar_next_index]) then
 				astar_cost_so_far[astar_next_index] = astar_new_cost
@@ -1095,7 +1095,8 @@ astar_search = function(my_location, my_target)
 				queue_push(astar_frontier, next_step, astar_new_priority) -- is the order reversed?
 				astar_came_from[astar_next_index] = astar_current_location
 
-        if (astar_next_index ~= astar_vector_to_index(astar_start_location) ) then
+        if (astar_next_index ~= astar_vector_to_index(astar_start_location) )
+        and (astar_next_index ~= astar_vector_to_index(astar_goal_location) )then
           next_x = next_step[1]
           next_y = next_step[2]
           queue_push(astar_final_path, {next_x, next_y}, 0) -- is the order reversed, too?
