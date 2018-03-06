@@ -148,8 +148,8 @@ dungeon = {}
 total_floor_locations = {}
 opponent_setup_floor_locations = {}
 safe_floor_locations = {}
-dragon_location = nil
-treasure_location = nil
+dragon_location = {}
+treasure_location = {}
 got_treasure = false
 is_fireball_there = false
 fear_count = 0
@@ -394,7 +394,7 @@ end
 collector_of_opponent_setup_cells = function()
   local collector_key = 1
   local top_half_of_dungeon = flr(current_dungeon_size / 2)
-  local current_location = nil
+  local current_location = {}
 
   for x = 1, current_dungeon_size do
     for y = 1, current_dungeon_size do
@@ -438,7 +438,7 @@ world = {}
 
 populate = function()
   treasure_location = opponent_floor_locations["#opponent_floor_locations"]
-  opponent_setup_floor_locations["#opponent_setup_floor_locations"] = nil
+  opponent_setup_floor_locations["#opponent_setup_floor_locations"] = {}
 
   add(world, {
     actor = knight,
@@ -509,7 +509,7 @@ end
 place_knight = function()
   local knight_location = opponent_setup_floor_locations["#opponent_setup_floor_locations"]
 
-  opponent_setup_floor_locations["#opponent_setup_floor_locations"] = nil
+  opponent_setup_floor_locations["#opponent_setup_floor_locations"] = {}
 
   return knight_location
 end
@@ -521,7 +521,7 @@ place_subordinate = function()
   until opponent_setup_floor_locations["random_location"] ~= nil
 
   local subordinate_location = opponent_setup_floor_locations["random_location"]
-  opponent_setup_floor_locations["random_location"] = nil
+  opponent_setup_floor_locations["random_location"] = {}
 
   return subordinate_location
 end
@@ -710,7 +710,7 @@ solid_area = function(x_position, y_position)
 end
 
 
-collision_system = ecs_system({"x_movement", "y_movement", 
+collision_system = ecs_system({"x_movement", "y_movement",
 									"x_position", "y_position"},
 	function(ecs_single_entity)
 		if solid_area(ecs_single_entity.x_position + ecs_single_entity.x_movement,
@@ -1069,8 +1069,8 @@ astar_search = function(my_location, my_target)
     astar_goal_location["2"] = current_dungeon_size - 1
   end
 
-	local astar_current_location = nil
-	local astar_current_neighbors = nil
+	local astar_current_location = {}
+	local astar_current_neighbors = {}
 	local astar_next_index = nil
 	local astar_new_cost = nil
 	local astar_new_priority = nil
@@ -1347,7 +1347,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                       "x_movement", "y_movement", "orientation"},
   function(ecs_single_entity)
     local picked_target = {}
-    local my_path = nil
+    local my_path = {}
     local pause_counter = 3
 
       if ecs_single_entity.is_hunting == true then
