@@ -710,7 +710,7 @@ solid_area = function(x_position, y_position)
 end
 
 
-collision_system = ecs_system({"x_movement", "y_movement"
+collision_system = ecs_system({"x_movement", "y_movement", 
 									"x_position", "y_position"},
 	function(ecs_single_entity)
 		if solid_area(ecs_single_entity.x_position + ecs_single_entity.x_movement,
