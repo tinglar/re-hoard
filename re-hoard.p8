@@ -188,85 +188,32 @@ end
 
 
 -- queue code adapted from:
--- deque implementation by pierre "catwell" chapuis
-plain_queue_new = function()
-  local queue_instance = {head = 0, tail = 0}
-  return setmetatable(plain_queue_instance, {__index = methods})
-end
-
-plain_queue_length = function(self)
-  return self.tail - self.head
-end
-
-plain_queue_push = function(self, item)
-  assert(item ~= nil)
-  self.tail = self.tail + 1
-  self[self.tail] = item
-end
-
-plain_queue_pop = function(self)
-  if self:queue_length() == 0 then
-    return nil
-  end
-
-  local queue_instance = self[self.tail]
-  self[self.tail] = nil
-  self.tail = self.tail - 1
-  return queue_instance
-end
-
-
--- priority queue code adapted from:
--- rosetta code
-priority_queue = {
-    __index = {
-        priority_queue_push = function(self, element_priority, element_value)
-            local current_queue = self[element_priority]
-            if not current_queue then
-                current_queue = {first = 1, last = 0}
-                self[element_priority] = current_queue
-            end
-            current_queue.last = current_queue.last + 1
-            current_queue[current_queue.last] = element_value
-        end,
-
-        priority_queue_pop = function(self)
-            for element_priority, current_queue in pairs(self) do
-                if current_queue.first <= current_queue.last then
-                    local element_value = current_queue[current_queue.first]
-                    current_queue[current_queue.first] = nil
-                    current_queue.first = current_queue.first + 1
-                    return element_priority, element_value
-                else
-                    self[element_priority] = nil
-                end
-            end
-        end,
-
-        priority_queue_pour = function(self) --returns value without the priority
-            for element_priority, current_queue in pairs(self) do
-                if current_queue.first <= current_queue.last then
-                    local element_value = current_queue[current_queue.first]
-                    current_queue[current_queue.first] = nil
-                    current_queue.first = current_queue.first + 1
-                    return element_value
-                else
-                    self[element_priority] = nil
-                end
-            end
-        end,
-
-		priority_queue_length = function(self)
-			return self.last - self.first + 1
+-- the pico-8 zine
+function queue_push(table, value, priority)
+	if #table >= 1 then
+		add(table, {})
+		for index = (#table), 2, -1 do
+			local next = table[index - 1]
+			if priority < next[2] then
+				table[index] = {value, priority}
+				return
+			else
+				table[index] = next
+			end
 		end
 
-    },
-    __call = function(cls)
-        return setmetatable({}, cls)
-    end
-}
+		table[1] = {value, priority}
+	else
+		add(table, {value, priority})
+	end
+end
 
-setmetatable(priority_queue, priority_queue)
+
+function queue_pop(table)
+	local top = table[#table]
+	del(table, table[#table])
+	return top["1"]
+end
 
 
 
