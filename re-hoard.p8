@@ -125,6 +125,12 @@ flag_hurts_dragon = 1        -- adds 2
 flag_hurts_subordinate = 2   -- adds 4
 flag_is_fireproof = 3        -- adds 8
 
+corners = {
+	{x = 0, y = -2}, -- north
+	{x = 2, y = 0}, -- east
+	{x = -2, y = 0}, -- west
+	{x = 0, y = 2}, -- south
+}
 initial_dungeon_size = 15
 bounce_force = -2
 actor_width = 0.4
@@ -226,7 +232,7 @@ title_screen = function()
     startup = true
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press Ž", 48, 84)
+    print("press ï¿½", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
     music(music_title)
 
@@ -283,97 +289,63 @@ game_setup = function()
 end
 
 
+-- maze-building code by
+-- rosetta code
+
+initialize_grid = function(width, height)
+	local grid = {}
+
+	for horizontal = 1, height do
+		add(grid, {})
+		for vertical = 1, width do
+			add(grid[horizontal], true)
+		end
+	end
+
+	return grid
+end
+
+
+-- Fisher-Yates shuffle from http://santos.nfshost.com/shuffling.html
+shuffle = function(queue)
+	for index = 1, #queue - 1 do
+		local random = flr (rnd (index) )
+		queue[index], queue[random] = queue[random], queue[index]
+	end
+end
+
+
+average = function(a, b)
+	return (a + b) / 2
+end
+
+
 build_dungeon = function()
-  local travelled_cells = {}
-  local immediate_cells = {}
-  local current_cell = {}
+	local width = current_dungeon_size
+	local height = current_dungeon_size
+  local destroyer = 0
 
-  local cell_content_back  = dungeon[current_cell[1] - 1][current_cell[2]]
-  local cell_content_front = dungeon[current_cell[1] + 1][current_cell[2]]
-  local cell_content_above = dungeon[current_cell[1]][current_cell[2] - 1]
-  local cell_content_below = dungeon[current_cell[1]][current_cell[2] + 1]
-  local cell_location_back  = {current_cell[1] - 1, current_cell[2]}
-  local cell_location_front = {current_cell[1] + 1, current_cell[2]}
-  local cell_location_above = {current_cell[1], current_cell[2] - 1}
-  local cell_location_below = {current_cell[1], current_cell[2] + 1}
+	dungeon = initialize_grid(width * 2 + 1, height * 2 + 1)
+	walk( flr(rnd (width - 1)) * 2, flr(rnd (height - 1)) * 2)
 
-  for x = 1, current_dungeon_size do
-    dungeon[x] = {}
-    for y = 1, current_dungeon_size do
-      if y == (1 or current_dungeon_size) then
-        dungeon[x][y] = false
-      end
-    end
-    if x == (1 or current_dungeon_size) then
-      dungeon[x][y] = false
-    end
-  end
+  --destroy random walls
+end
 
-  -- this hard-coded section of the dungeon builder
-  -- is an optimization of the cases of the cells
-  -- that surround the north-west corner.
-  dungeon[2][2] = true
-  queue_push(travelled_cells, {2,2}, 0)
 
-  if flr(rnd(1)) then
-    dungeon[2][3] = true
-    current_cell = {2,3}
-    queue_push(travelled_cells, {2,3}, 0)
-    dungeon[3][2] = false
-  else
-    dungeon[3][2] = true
-    current_cell = {3,2}
-    queue_push(travelled_cells, {3,2}, 0)
-    dungeon[2][3] = false
-  end
+walk = function(width, height)
+	dungeon[height][width] = false
+	local directions = { 1, 2, 3, 4 }
 
-  repeat
-    -- if current_cell holds {x,y}, then
-    -- current_cell[1] holds x while current_cell[2] holds y.
-    if cell_content_back ~= nil then
-      queue_push(immediate_cells, cell_location_back, 0)
-      -- immediate_cells is a queue that holds tables.
-      -- after all, immediate_cells needs the locations, not their contents.
-    end
-    if cell_content_front ~= nil then
-      queue_push(immediate_cells, cell_location_front, 0)
-    end
-    if cell_content_above ~= nil then
-      queue_push(immediate_cells, cell_location_above, 0)
-    end
-    if cell_content_below ~= nil then
-      queue_push(immediate_cells, cell_location_below, 0)
-    end
+	shuffle(directions)
+	for index, direction_count in pairs(directions) do
+		local horizontal = width + corners[direction_count].width
+		local vertical = height + corners[direction_count].height
+		if dungeon[vertical] and dungeon[vertical][horizontal] then
+			dungeon[average(height, vertical)][average(width, horizontal)] = false
+			walk(horizontal, vertical)
+		end
+	end
 
-    if #immediate_cells == 0 then
-      current_cell = queue_pop(travelled_cells)
-    else
-      local randomly = flr (rdm (#immediate_cells) ) + 1
-
-      -- the program goes to the randomly-picked cell.
-      current_cell = {immediate_cells["randomly"]}
-
-      -- if the program travelled horizontally...
-      if randomly < 3 then
-        if cell_content_back == nil then
-          cell_content_back = false
-        end
-        if cell_content_front == nil then
-          cell_content_front = false
-        end
-      else
-        if cell_content_above == nil then
-          cell_content_above = false
-        end
-        if cell_content_below == nil then
-          cell_content_below = false
-        end
-      end
-
-      queue_push(travelled_cells, {current_cell[1], current_cell[2]}, 0)
-      dungeon[current_cell] = true
-    end
-  until #travelled_cells == 0
 end
 
 
@@ -1740,7 +1712,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press Ž", 50, 96)
+  print("press ï¿½", 50, 96)
   music(music_game_over)
 
   if btn(4) then
@@ -2277,4 +2249,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
