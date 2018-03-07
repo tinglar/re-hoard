@@ -134,6 +134,7 @@ corners = {
 wall_cell = true
 floor_cell = false
 initial_dungeon_size = 15
+wall_strength = 0.5
 bounce_force = -2
 actor_width = 0.4
 actor_height = 0.4
@@ -297,10 +298,10 @@ end
 initialize_grid = function(width, height)
 	local grid = {}
 
-	for horizontal = 1, height do
+	for vertical = 1, height do
 		add(grid, {})
-		for vertical = 1, width do
-			add(grid[horizontal], wall_cell)
+		for horizontal = 1, width do
+			add(grid[vertical], wall_cell)
 		end
 	end
 
@@ -325,12 +326,10 @@ end
 build_dungeon = function()
 	local width = current_dungeon_size
 	local height = current_dungeon_size
-  local destroyer = 0
 
 	dungeon = initialize_grid(width * 2 + 1, height * 2 + 1)
 	walk( flr(rnd (width - 1)) * 2, flr(rnd (height - 1)) * 2)
-
-  --destroy random walls
+  demolish(width, height)
 end
 
 
@@ -351,6 +350,20 @@ walk = function(width, height)
 end
 
 
+demolish = function(width, height)
+  local demolition_force = 0
+
+  for vertical = 2, height - 1 do
+		for horizontal = 2, width - 1 do
+
+      demolition_force = rdm(1)
+			if demolition_force >= wall_strength then
+        dungeon[vertical][horizontal] = floor_cell
+      end
+
+		end
+	end
+end
 
 
 collector_of_floor_cells = function()
@@ -386,12 +399,12 @@ end
 
 draw_dungeon = function()
   if title_phase and intermission_phase and setup_phase == false then
-    for x in all(dungeon[1]) do
-      for y in all(dungeon[1][2]) do
-        if dungeon(x,y) == wall_cell then
-          mset(sprite_wall, x, y)
+    for vertical in all(dungeon[1]) do
+      for horizontal in all(dungeon[1][2]) do
+        if dungeon(horizontal, vertical) == wall_cell then
+          mset(sprite_wall, horizontal, vertical)
         else
-          mset(sprite_floor, x, y)
+          mset(sprite_floor, horizontal, vertical)
         end
       end
     end
