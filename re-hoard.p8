@@ -126,15 +126,15 @@ flag_hurts_subordinate = 2   -- adds 4
 flag_is_fireproof = 3        -- adds 8
 
 corners = {
-	{x = 0, y = -2}, -- north
-	{x = 2, y = 0}, -- east
-	{x = -2, y = 0}, -- west
-	{x = 0, y = 2}, -- south
+	{width = 0, height = -2}, -- north
+	{width = 2, height = 0}, -- east
+	{width = -2, height = 0}, -- west
+	{width = 0, height = 2}, -- south
 }
 wall_cell = true
 floor_cell = false
 initial_dungeon_size = 15
-wall_strength = 0.5
+wall_strength = 0.8
 bounce_force = -2
 actor_width = 0.4
 actor_height = 0.4
@@ -152,7 +152,9 @@ panic_phase = false
 current_level = 0
 previous_level = 0
 opportunities = 3
-current_dungeon_size = initial_dungeon_size + flr(current_level / 3)
+-- the maze-generator only works with even dungeon-sizes.
+incrementor = flr(current_level / 2) * 2
+current_dungeon_size = initial_dungeon_size + incrementor
 dungeon = {}
 total_floor_locations = {}
 opponent_setup_floor_locations = {}
@@ -235,7 +237,7 @@ title_screen = function()
     startup = true
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press ï¿½", 48, 84)
+    print("press Ž", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
     music(music_title)
 
@@ -309,27 +311,45 @@ initialize_grid = function(width, height)
 end
 
 
--- Fisher-Yates shuffle from http://santos.nfshost.com/shuffling.html
-shuffle = function(queue)
-	for index = 1, #queue - 1 do
-		local random = flr (rnd (index) )
-		queue[index], queue[random] = queue[random], queue[index]
-	end
-end
-
-
 average = function(a, b)
 	return (a + b) / 2
 end
 
 
 build_dungeon = function()
-	local width = current_dungeon_size
-	local height = current_dungeon_size
+	dungeon = initialize_grid(current_dungeon_size, current_dungeon_size)
+  -- randomly generate a position between the dungeon walls.
+	-- then, push that position in by 1.
+	-- otherwise, you may risk indexing a cell at a position of 0.
+  horizontal = flr(rnd (current_dungeon_size - 1) + 1)
+	if horizontal % 2 == 1 then
+		if horizontal == current_dungeon_size then
+			horizontal = current_dungeon_size - 1
+		else
+			horizontal = horizontal + 1
+		end
+	end
 
-	dungeon = initialize_grid(width * 2 + 1, height * 2 + 1)
-	walk( flr(rnd (width - 1)) * 2, flr(rnd (height - 1)) * 2)
-  demolish(width, height)
+	vertical = flr(rnd (current_dungeon_size - 1) + 1)
+	if vertical % 2 == 1 then
+		if vertical == current_dungeon_size then
+			vertical = current_dungeon_size - 1
+		else
+			vertical = vertical + 1
+		end
+	end
+
+	walk(horizontal, vertical)
+  demolish(current_dungeon_size, current_dungeon_size)
+end
+
+
+-- fisher-yates shuffle from http://santos.nfshost.com/shuffling.html
+shuffle = function(queue)
+	for index = 1, #queue - 1 do
+		local random = flr (rnd (index) )
+		queue[index], queue[random] = queue[random], queue[index]
+	end
 end
 
 
@@ -356,7 +376,7 @@ demolish = function(width, height)
   for vertical = 2, height - 1 do
 		for horizontal = 2, width - 1 do
 
-      demolition_force = rdm(1)
+      demolition_force = rnd(1)
 			if demolition_force >= wall_strength then
         dungeon[vertical][horizontal] = floor_cell
       end
@@ -369,10 +389,10 @@ end
 collector_of_floor_cells = function()
   local collector_key = 1
 
-  for x = 1, current_dungeon_size do
-    for y = 1, current_dungeon_size do
-      if dungeon[x][y] == floor_cell then
-        total_floor_locations["collector_key"] = {x,y}
+  for horizontal = 1, current_dungeon_size do
+    for vertical = 1, current_dungeon_size do
+      if dungeon[horizontal][vertical] == floor_cell then
+        total_floor_locations["collector_key"] = {horizontal, vertical}
         collector_key = collector_key + 1
       end
     end
@@ -385,8 +405,8 @@ collector_of_opponent_setup_cells = function()
   local top_half_of_dungeon = flr(current_dungeon_size / 2)
   local current_location = {}
 
-  for x = 1, current_dungeon_size do
-    for y = 1, current_dungeon_size do
+  for horizontal = 1, current_dungeon_size do
+    for vertical = 1, current_dungeon_size do
       current_location = total_floor_locations["collector_key"]
       if current_location["1"] ~= top_half_of_dungeon or current_location["2"] ~= top_half_of_dungeon then
         opponent_setup_floor_locations["collector_key"] = current_location
@@ -399,9 +419,9 @@ end
 
 draw_dungeon = function()
   if title_phase and intermission_phase and setup_phase == false then
-    for vertical in all(dungeon[1]) do
-      for horizontal in all(dungeon[1][2]) do
-        if dungeon(horizontal, vertical) == wall_cell then
+    for vertical = 1, current_dungeon_size do
+      for horizontal = 1, current_dungeon_size do
+        if dungeon[vertical][horizontal] == wall_cell then
           mset(sprite_wall, horizontal, vertical)
         else
           mset(sprite_floor, horizontal, vertical)
@@ -1729,7 +1749,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press ï¿½", 50, 96)
+  print("press Ž", 50, 96)
   music(music_game_over)
 
   if btn(4) then
@@ -2266,3 +2286,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
