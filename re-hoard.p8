@@ -131,6 +131,8 @@ corners = {
 	{x = -2, y = 0}, -- west
 	{x = 0, y = 2}, -- south
 }
+wall_cell = true
+floor_cell = false
 initial_dungeon_size = 15
 bounce_force = -2
 actor_width = 0.4
@@ -298,7 +300,7 @@ initialize_grid = function(width, height)
 	for horizontal = 1, height do
 		add(grid, {})
 		for vertical = 1, width do
-			add(grid[horizontal], true)
+			add(grid[horizontal], wall_cell)
 		end
 	end
 
@@ -333,7 +335,7 @@ end
 
 
 walk = function(width, height)
-	dungeon[height][width] = false
+	dungeon[height][width] = floor_cell
 	local directions = { 1, 2, 3, 4 }
 
 	shuffle(directions)
@@ -341,7 +343,7 @@ walk = function(width, height)
 		local horizontal = width + corners[direction_count].width
 		local vertical = height + corners[direction_count].height
 		if dungeon[vertical] and dungeon[vertical][horizontal] then
-			dungeon[average(height, vertical)][average(width, horizontal)] = false
+			dungeon[average(height, vertical)][average(width, horizontal)] = floor_cell
 			walk(horizontal, vertical)
 		end
 	end
@@ -349,12 +351,14 @@ walk = function(width, height)
 end
 
 
+
+
 collector_of_floor_cells = function()
   local collector_key = 1
 
   for x = 1, current_dungeon_size do
     for y = 1, current_dungeon_size do
-      if dungeon[x][y] == true then
+      if dungeon[x][y] == floor_cell then
         total_floor_locations["collector_key"] = {x,y}
         collector_key = collector_key + 1
       end
@@ -384,7 +388,7 @@ draw_dungeon = function()
   if title_phase and intermission_phase and setup_phase == false then
     for x in all(dungeon[1]) do
       for y in all(dungeon[1][2]) do
-        if dungeon(x,y) == false then
+        if dungeon(x,y) == wall_cell then
           mset(sprite_wall, x, y)
         else
           mset(sprite_floor, x, y)
