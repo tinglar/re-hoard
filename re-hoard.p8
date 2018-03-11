@@ -231,18 +231,39 @@ end
 --
 -- algorithms
 --
+
+-- music-regulating code by
+-- ultrabrite
+music_start = function(current_music)
+	if music_playing == false then
+		music(current_music)
+		music_playing = true
+	end
+end
+
+
+music_stop = function()
+	music(-1)
+	music_playing = false
+end
+
+
 title_screen = function()
   if title_phase == true then
     cls()
-    startup = true
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press Ž", 48, 84)
+    print("press ï¿½", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
+  end
+end
+
+
+title_run = function()
+	if title_phase == true then
     music(music_title)
 
     if btn(4) then
-      cls()
       title_phase = false
       intermission_phase = true
       intermission_screen()
@@ -253,12 +274,18 @@ end
 
 intermission_screen = function()
   if intermission_phase == true then
+		cls()
+    print("round "..(current_level + 1), 50, 56)
+    print("opportunities: "..opportunities, 31, 70)
+  end
+end
+
+
+intermission_run = function()
+  if intermission_phase == true then
     music(-1)
-    print("round "..(current_level + 1), 56, 56)
-    print("opportunities: "..opportunities, 50, 70)
 
     if btn(4) then
-      cls()
       intermission_phase = false
       setup_phase = true
       game_setup()
@@ -1749,7 +1776,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press Ž", 50, 96)
+  print("press ï¿½", 50, 96)
   music(music_game_over)
 
   if btn(4) then
@@ -1841,24 +1868,38 @@ end
 --basic pico-8 stuff
 --
 function _init()
-  cartdata("re_hoard_high_score")
-  highest_round = dget(0)
+	-- phase-switching code by
+	-- pico-8 wikia
   title_screen()
+	music_start(music_title)
 end
 
-function _draw()
-  draw_dungeon()
-  actor_drawing_system(world)
-end
 
 function _update()
-  if title_phase == true and btn(4) then
-    cls()
-    title_phase = false
-    intermission_phase = true
-    intermission_screen()
-  end
-  run_gameplay()
+	if title_phase == true then
+		title_run()
+	elseif intermission_phase == true then
+		intermission_run()
+	elseif setup_phase == true then
+		game_setup()
+	elseif normal_phase or panic_phase == true then
+		run_gameplay()
+	end
+end
+
+
+function _draw()
+	if title_phase == true then
+		title_screen()
+	elseif intermission_phase == true then
+		intermission_screen()
+	elseif setup_phase == true then
+		cls()
+	elseif normal_phase or panic_phase == true then
+		draw_dungeon()
+		actor_drawing_system(world)
+		lance_system(world)
+	end
 end
 
 __gfx__
@@ -2286,4 +2327,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
