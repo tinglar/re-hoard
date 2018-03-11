@@ -236,14 +236,14 @@ end
 -- ultrabrite
 music_start = function(current_music)
 	if music_playing == false then
-		music(current_music)
+		music(current_music, 0, 7)
 		music_playing = true
 	end
 end
 
 
 music_stop = function()
-	music(-1)
+	music_stop()
 	music_playing = false
 end
 
@@ -261,7 +261,7 @@ end
 
 title_run = function()
 	if title_phase == true then
-    music(music_title)
+    music_start(music_title)
 
     if btn(4) then
       title_phase = false
@@ -283,7 +283,7 @@ end
 
 intermission_run = function()
   if intermission_phase == true then
-    music(-1)
+    music_stop()
 
     if btn(4) then
       intermission_phase = false
@@ -316,7 +316,7 @@ game_setup = function()
     setup_phase = false
     normal_phase = true
     start_patrolling_system(world)
-    music(music_gameplay)
+    music_start(music_gameplay)
   end
 end
 
@@ -1389,7 +1389,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
       if ecs_single_entity.is_hunting == true then
         if panic_phase == false then
           panic_phase = true
-          music(music_panic)
+          music_start(music_panic)
         end
 
         if ecs_single_entity.actor == joy or surprise then
@@ -1544,7 +1544,7 @@ back_to_normal = function()
 
     if calm_down == true then
       panic_phase = false
-      music(music_gameplay)
+      music_start(music_gameplay)
     end
   end
 end
@@ -1735,7 +1735,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
     if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == true then
       normal_phase = false
       panic_phase = false
-      music(-1)
+      music_stop()
 
       ecs_single_entity.total_frames = 1
       if ecs_single_entity.orientation == west then
@@ -1751,7 +1751,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
         ecs_single_entity.sprite = sprite_dragon_embarrassed_down
       end
 
-      music(music_failure)
+      music_start(music_failure)
       repeat
         -- wait until the music is over
       until stat(16) == nil
@@ -1777,7 +1777,7 @@ lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
   print("press �", 50, 96)
-  music(music_game_over)
+  music_start(music_game_over)
 
   if btn(4) then
     cls()
@@ -1849,7 +1849,7 @@ won_stage = function()
   if dragon_location == {2, 1} and got_treasure == true then
     normal_phase = false
     panic_phase = false
-    music(music_success)
+    music_start(music_success)
     repeat
       -- wait until the music is over
     until stat(16) == nil
