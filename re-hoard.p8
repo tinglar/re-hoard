@@ -142,7 +142,7 @@ actor_height = 0.4
 
 
 -- variables
-startup = true
+music_playing = false
 title_phase = true
 intermission_phase = false
 setup_phase = false
@@ -253,7 +253,7 @@ title_screen = function()
     cls()
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press ï¿½", 48, 84)
+    print("press Ž", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
   end
 end
@@ -1776,7 +1776,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press ï¿½", 50, 96)
+  print("press Ž", 50, 96)
   music_start(music_game_over)
 
   if btn(4) then
@@ -1870,8 +1870,8 @@ end
 function _init()
 	-- phase-switching code by
 	-- pico-8 wikia
-  title_screen()
 	music_start(music_title)
+  title_screen()
 end
 
 
@@ -2327,3 +2327,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
