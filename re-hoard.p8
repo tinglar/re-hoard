@@ -243,7 +243,7 @@ end
 
 
 music_stop = function()
-	music_stop()
+	music(-1)
 	music_playing = false
 end
 
