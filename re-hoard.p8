@@ -263,7 +263,7 @@ title_run = function()
 	if title_phase == true then
     music_start(music_title)
 
-    if btn(4) then
+    if btnp(4) then
       title_phase = false
       intermission_phase = true
       intermission_screen()
@@ -285,7 +285,7 @@ intermission_run = function()
   if intermission_phase == true then
     music_stop()
 
-    if btn(4) then
+    if btnp(4) then
       intermission_phase = false
       setup_phase = true
       game_setup()
@@ -296,6 +296,7 @@ end
 
 game_setup = function()
   if setup_phase == true then
+		cls()
     if current_level > previous_level or startup == true then
       if startup == true then
         startup = false
@@ -309,8 +310,7 @@ game_setup = function()
       return_to_your_places_system(world)
     end
 
-    draw_dungeon()
-    subordinate_sprite_system(world)
+		subordinate_sprite_system(world)
     got_treasure = false
 
     setup_phase = false
@@ -1779,7 +1779,7 @@ lost_game = function()
   print("press Ž", 50, 96)
   music_start(music_game_over)
 
-  if btn(4) then
+  if btnp(4) then
     cls()
     title_phase = true
     title_screen()
