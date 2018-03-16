@@ -301,6 +301,7 @@ game_setup = function()
       if startup == true then
         startup = false
       end
+      plan_dungeon()
       build_dungeon()
       collector_of_floor_cells()
       collector_of_opponent_setup_cells()
@@ -343,7 +344,10 @@ average = function(a, b)
 end
 
 
-build_dungeon = function()
+plan_dungeon = function()
+	if current_dungeon_size > 64 then
+		current_dungeon_size = 64
+	end
 	dungeon = initialize_grid(current_dungeon_size, current_dungeon_size)
   -- randomly generate a position between the dungeon walls.
 	-- then, push that position in by 1.
@@ -444,7 +448,7 @@ collector_of_opponent_setup_cells = function()
 end
 
 
-draw_dungeon = function()
+build_dungeon = function()
   if title_phase and intermission_phase and setup_phase == false then
     for vertical = 1, current_dungeon_size do
       for horizontal = 1, current_dungeon_size do
@@ -1893,10 +1897,8 @@ function _draw()
 		title_screen()
 	elseif intermission_phase == true then
 		intermission_screen()
-	elseif setup_phase == true then
-		cls()
 	elseif normal_phase or panic_phase == true then
-		draw_dungeon()
+		map(0, 0, 0, 0, current_dungeon_size, current_dungeon_size)
 		actor_drawing_system(world)
 		lance_system(world)
 	end
