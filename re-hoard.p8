@@ -148,12 +148,12 @@ intermission_phase = false
 setup_phase = false
 normal_phase = false
 panic_phase = false
-
+startup = true
 current_level = 0
 previous_level = 0
 opportunities = 3
 -- the maze-generator only works with even dungeon-sizes.
-incrementor = flr(current_level / 2) * 2
+incrementor = flr(current_level / 2) * 2 + 1
 current_dungeon_size = initial_dungeon_size + incrementor
 dungeon = {}
 total_floor_locations = {}
@@ -223,7 +223,7 @@ end
 function queue_pop(table)
 	local top = table[#table]
 	del(table, table[#table])
-	return top["1"]
+	return top[1]
 end
 
 
@@ -253,7 +253,7 @@ title_screen = function()
     cls()
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press Ž", 48, 84)
+    print("press ï¿½", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
   end
 end
@@ -345,33 +345,52 @@ end
 
 
 plan_dungeon = function()
-	if current_dungeon_size > 64 then
-		current_dungeon_size = 64
-	end
-	dungeon = initialize_grid(current_dungeon_size, current_dungeon_size)
+	--if current_dungeon_size > 64 then
+		--current_dungeon_size = 64
+	--end
+	--dungeon = initialize_grid(current_dungeon_size, current_dungeon_size)
   -- randomly generate a position between the dungeon walls.
 	-- then, push that position in by 1.
 	-- otherwise, you may risk indexing a cell at a position of 0.
-  horizontal = flr(rnd (current_dungeon_size - 1) + 1)
-	if horizontal % 2 == 1 then
-		if horizontal == current_dungeon_size then
-			horizontal = current_dungeon_size - 1
-		else
-			horizontal = horizontal + 1
-		end
-	end
+  --horizontal = flr(rnd (current_dungeon_size - 1) + 1)
+	--if horizontal % 2 == 1 then
+		--if horizontal == current_dungeon_size then
+			--horizontal = current_dungeon_size - 1
+		--else
+			--horizontal = horizontal + 1
+		--end
+	--end
 
-	vertical = flr(rnd (current_dungeon_size - 1) + 1)
-	if vertical % 2 == 1 then
-		if vertical == current_dungeon_size then
-			vertical = current_dungeon_size - 1
-		else
-			vertical = vertical + 1
-		end
-	end
+	--vertical = flr(rnd (current_dungeon_size - 1) + 1)
+	--if vertical % 2 == 1 then
+		--if vertical == current_dungeon_size then
+			--vertical = current_dungeon_size - 1
+		--else
+			--vertical = vertical + 1
+		--end
+	--end
 
-	walk(horizontal, vertical)
-  demolish(current_dungeon_size, current_dungeon_size)
+	--walk(horizontal, vertical)
+  --demolish(current_dungeon_size, current_dungeon_size)
+
+	dungeon = {
+		{wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, false, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
+		{wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell}
+	}
 end
 
 
@@ -418,13 +437,10 @@ end
 
 
 collector_of_floor_cells = function()
-  local collector_key = 1
-
   for horizontal = 1, current_dungeon_size do
     for vertical = 1, current_dungeon_size do
       if dungeon[horizontal][vertical] == floor_cell then
-        total_floor_locations["collector_key"] = {horizontal, vertical}
-        collector_key = collector_key + 1
+				total_floor_locations[#total_floor_locations + 1] = {horizontal, vertical}
       end
     end
   end
@@ -432,16 +448,14 @@ end
 
 
 collector_of_opponent_setup_cells = function()
-  local collector_key = 1
   local top_half_of_dungeon = flr(current_dungeon_size / 2)
-  local current_location = {}
+	local collector_key = 1
 
   for horizontal = 1, current_dungeon_size do
     for vertical = 1, current_dungeon_size do
-      current_location = total_floor_locations["collector_key"]
-      if current_location["1"] ~= top_half_of_dungeon or current_location["2"] ~= top_half_of_dungeon then
-        opponent_setup_floor_locations["collector_key"] = current_location
-        collector_key = collector_key + 1
+      if total_floor_locations[collector_key][1] ~= top_half_of_dungeon or total_floor_locations[collector_key][2] ~= top_half_of_dungeon then
+        opponent_setup_floor_locations[#opponent_setup_floor_locations + 1] = total_floor_locations[collector_key]
+				collector_key = collector_key + 1
       end
     end
   end
@@ -462,10 +476,10 @@ build_dungeon = function()
 
     if got_treasure == true then
       mset(sprite_open_door, 2, 1)
-      spr(sprite_open_treasure, treasure_location["1"], treasure_location["2"])
+      spr(sprite_open_treasure, treasure_location[1], treasure_location[2])
     else
       mset(sprite_closed_door, 2, 1)
-      spr(sprite_closed_treasure, treasure_location["1"], treasure_location["2"])
+      spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
     end
   end
 end
@@ -477,8 +491,8 @@ end
 world = {}
 
 populate = function()
-  treasure_location = opponent_floor_locations["#opponent_floor_locations"]
-  opponent_setup_floor_locations["#opponent_setup_floor_locations"] = {}
+  treasure_location = opponent_setup_floor_locations[#opponent_setup_floor_locations]
+  opponent_setup_floor_locations[#opponent_setup_floor_locations] = nil
 
   add(world, {
     actor = knight,
@@ -486,13 +500,13 @@ populate = function()
     current_frame = 0,
     total_frames = 2,
     location = place_knight(),
-    x_position = location["1"],
-    y_position = location["2"],
+    x_position = location[1],
+    y_position = location[2],
     orientation = north,
     cross_of_sight = {},
     target = {},
-    x_goal = target["1"],
-    y_goal = target["2"],
+    x_goal = target[1],
+    y_goal = target[2],
     is_patrolling = false,
     is_hunting = false,
     x_movement = 0,
@@ -509,13 +523,13 @@ populate = function()
       current_frame = 0,
       total_frames = 2,
       location = place_subordinate(),
-      x_position = location["1"],
-      y_position = location["2"],
+      x_position = location[1],
+      y_position = location[2],
       orientation = north,
       cross_of_sight = {},
       target = {},
-      x_goal = target["1"],
-      y_goal = target["2"],
+      x_goal = target[1],
+      y_goal = target[2],
       is_patrolling = false,
       is_hunting = false,
       is_hurt = false,
@@ -533,8 +547,8 @@ populate = function()
     current_frame = 0,
     total_frames = 2,
     location = {2, 2},
-    x_position = location["1"],
-    y_position = location["2"],
+    x_position = location[1],
+    y_position = location[2],
     orientation = south,
     is_hurt = false,
     x_movement = 0,
@@ -547,9 +561,9 @@ end
 
 
 place_knight = function()
-  local knight_location = opponent_setup_floor_locations["#opponent_setup_floor_locations"]
+  local knight_location = opponent_setup_floor_locations[#opponent_setup_floor_locations]
 
-  opponent_setup_floor_locations["#opponent_setup_floor_locations"] = {}
+  opponent_setup_floor_locations[#opponent_setup_floor_locations] = {}
 
   return knight_location
 end
@@ -558,10 +572,10 @@ end
 place_subordinate = function()
   repeat
     local random_location = flr(rdm(#opponent_setup_floor_locations))
-  until opponent_setup_floor_locations["random_location"] ~= nil
+  until opponent_setup_floor_locations[random_location] ~= nil
 
-  local subordinate_location = opponent_setup_floor_locations["random_location"]
-  opponent_setup_floor_locations["random_location"] = {}
+  local subordinate_location = opponent_setup_floor_locations[random_location]
+  opponent_setup_floor_locations[random_location] = {}
 
   return subordinate_location
 end
@@ -823,11 +837,9 @@ actor_drawing_system = ecs_system({"x_position", "y_position", "sprite", "curren
 
 
 collector_of_safe_cells = function()
-  local collector_key = 1
-
-  repeat
-    safe_floor_locations["collector_key"] = total_floor_locations["collector_key"]
-  until total_floor_locations["collector_key"] == nil
+  for iterator = 1, #total_floor_locations do
+    safe_floor_locations[iterator] = total_floor_locations[iterator]
+  end
 end
 
 
@@ -863,8 +875,8 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = -0.4,
                 y_movement = 0,
                 solidity = false,
@@ -878,8 +890,8 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = 0.4,
                 y_movement = 0,
                 solidity = false,
@@ -893,8 +905,8 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = 0,
                 y_movement = -0.4,
                 solidity = false,
@@ -908,8 +920,8 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = 0,
                 y_movement = 0.4,
                 solidity = false,
@@ -1098,15 +1110,15 @@ astar_search = function(my_location, my_target)
   -- if the target is out of bounds,
   -- then the following conditionals readjust the target
   -- to within the bounds
-  if astar_goal_location["1"] < 2 then
-    astar_goal_location["1"] = 2
-  elseif astar_goal_location["1"] > current_dungeon_size - 1 then
-    astar_goal_location["1"] = current_dungeon_size - 1
+  if astar_goal_location[1] < 2 then
+    astar_goal_location[1] = 2
+  elseif astar_goal_location[1] > current_dungeon_size - 1 then
+    astar_goal_location[1] = current_dungeon_size - 1
   end
-  if astar_goal_location["2"] < 2 then
-    astar_goal_location["2"] = 2
-  elseif astar_goal_location["2"] > current_dungeon_size - 1 then
-    astar_goal_location["2"] = current_dungeon_size - 1
+  if astar_goal_location[2] < 2 then
+    astar_goal_location[2] = 2
+  elseif astar_goal_location[2] > current_dungeon_size - 1 then
+    astar_goal_location[2] = current_dungeon_size - 1
   end
 
 	local astar_current_location = {}
@@ -1213,7 +1225,7 @@ patrol_system = ecs_system({"actor",
       if ecs_single_entity.actor == joy then
         if #my_path == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
-          picked_target = safe_floor_locations["random_pick"]
+          picked_target = safe_floor_locations[random_pick]
           my_path = astar_search(ecs_single_entity.location, picked_target)
         else
           ecs_single_entity.target = queue_pop(my_path)
@@ -1250,8 +1262,8 @@ patrol_system = ecs_system({"actor",
         if #my_path == 0 then
           for key, value in pairs(safe_floor_locations) do
             if ecs_single_entity.location ~= value then
-              local check_x_location = value["1"]
-              local check_y_location = value["2"]
+              local check_x_location = value[1]
+              local check_y_location = value[2]
 
               if mget(check_x_location - 1, check_y_location) == sprite_floor
               and mget(check_x_location + 1, check_y_location) == sprite_floor
@@ -1277,10 +1289,10 @@ patrol_system = ecs_system({"actor",
         if #my_path == 0 then
           local top_right_corner = flr(#safe_floor_locations / 2) - 1
           local bottom_left_corner = flr(#safe_floor_locations / 2) + 1
-          queue_push(my_path, safe_floor_locations["1"], 0)
-          queue_push(my_path, safe_floor_locations["top_right_corner"], 0)
-          queue_push(my_path, safe_floor_locations["#safe_floor_locations"], 0)
-          queue_push(my_path, safe_floor_locations["bottom_left_corner"], 0)
+          queue_push(my_path, safe_floor_locations[1], 0)
+          queue_push(my_path, safe_floor_locations[top_right_corner], 0)
+          queue_push(my_path, safe_floor_locations[#safe_floor_locations], 0)
+          queue_push(my_path, safe_floor_locations[bottom_left_corner], 0)
         else
           ecs_single_entity.target = queue_pop(my_path)
           queue_push(my_path, ecs_single_entity.target, 0)
@@ -1290,7 +1302,7 @@ patrol_system = ecs_system({"actor",
       elseif ecs_single_entity.actor == surprise then
         if #my_path == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
-          picked_target = safe_floor_locations["random_pick"]
+          picked_target = safe_floor_locations[random_pick]
           my_path = astar_search(ecs_single_entity.location, picked_target)
           if dynamite_count < surprise_count then
             add(world, {
@@ -1299,8 +1311,8 @@ patrol_system = ecs_system({"actor",
               current_frame = 0,
               total_frames = 1,
               location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
-              x_position = location["1"],
-              y_position = location["2"],
+              x_position = location[1],
+              y_position = location[2],
               solidity = false,
               has_collided = false,
               touched_who = nil,
@@ -1315,24 +1327,24 @@ patrol_system = ecs_system({"actor",
 
       elseif ecs_single_entity.actor == knight then
         if #knight_path == 0 then
-          if mget(last_location["1"] - 1, last_location["2"]) == sprite_floor then
-            add (knight_path, {last_location["1"] - 1, last_location["2"]} )
+          if mget(last_location[1] - 1, last_location[2]) == sprite_floor then
+            add (knight_path, {last_location[1] - 1, last_location[2]} )
           end
-          if mget(last_location["1"] - 1, last_location["2"] - 1) == sprite_floor then
-            add (knight_path, {last_location["1"] - 1, last_location["2"] - 1} )
+          if mget(last_location[1] - 1, last_location[2] - 1) == sprite_floor then
+            add (knight_path, {last_location[1] - 1, last_location[2] - 1} )
           end
-          if mget(last_location["1"], last_location["2"] - 1) == sprite_floor then
-            add (knight_path, {last_location["1"], last_location["2"] - 1} )
+          if mget(last_location[1], last_location[2] - 1) == sprite_floor then
+            add (knight_path, {last_location[1], last_location[2] - 1} )
           end
         else
           if knight_step <= #knight_path then
-            ecs_single_entity.target = knight_path["knight_step"]
+            ecs_single_entity.target = knight_path[knight_step]
             move_opponent()
             knight_step = knight_step + 1
           else
-            local hold = knight_path["knight_path"]
-            knight_path["knight_path"] = knight_path["1"]
-            knight_path["1"] = hold
+            local hold = knight_path[knight_path]
+            knight_path[knight_path] = knight_path[1]
+            knight_path[1] = hold
             knight_step = 1
           end
         end
@@ -1373,7 +1385,7 @@ patrol_to_hunt_system = ecs_system({"actor", "is_patrolling", "is_hunting"},
 
       local look_around = ecs_single_entity.cross_of_sight
       for key, check in pairs(look_around) do
-        if dragon_location == look_around["check"] then
+        if dragon_location == look_around[check] then
           ecs_single_entity.is_patrolling = false
           ecs_single_entity.is_hunting = true
         end
@@ -1424,8 +1436,8 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = -0.4,
                 y_movement = 0,
                 solidity = false,
@@ -1440,8 +1452,8 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = 0.4,
                 y_movement = 0,
                 solidity = false,
@@ -1456,8 +1468,8 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = 0,
                 y_movement = -0.4,
                 solidity = false,
@@ -1472,8 +1484,8 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 current_frame = 0,
                 total_frames = 1,
                 location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
-                x_position = location["1"],
-                y_position = location["2"],
+                x_position = location[1],
+                y_position = location[2],
                 x_movement = 0,
                 y_movement = 0.4,
                 solidity = false,
@@ -1490,13 +1502,13 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
             local seed = flr(rnd(3))
 
             if seed == 0 then
-              my_goal["1"] = my_goal["1"] - 2
+              my_goal[1] = my_goal[1] - 2
             elseif seed == 1 then
-              my_goal["1"] = my_goal["1"] + 2
+              my_goal[1] = my_goal[1] + 2
             elseif seed == 2 then
-              my_goal["2"] = my_goal["2"] - 2
+              my_goal[2] = my_goal[2] - 2
             else
-              my_goal["2"] = my_goal["2"] + 2
+              my_goal[2] = my_goal[2] + 2
             end
 
             my_path = astar_search(ecs_single_entity.location, my_goal)
@@ -1621,8 +1633,8 @@ fight_system = ecs_system({"actor", "x_location", "y_location"},
 
 
 relocate_opponent_to_dragon = function()
-  ecs_single_entity.x_location = dragon_location["1"]
-  ecs_single_entity.y_location = dragon_location["2"]
+  ecs_single_entity.x_location = dragon_location[1]
+  ecs_single_entity.y_location = dragon_location[2]
 end
 
 
@@ -1780,7 +1792,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press Ž", 50, 96)
+  print("press ï¿½", 50, 96)
   music_start(music_game_over)
 
   if btnp(4) then
@@ -2329,4 +2341,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
