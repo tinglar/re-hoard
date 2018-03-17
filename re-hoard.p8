@@ -500,13 +500,9 @@ populate = function()
     current_frame = 0,
     total_frames = 2,
     location = place_knight(),
-    x_position = location[1],
-    y_position = location[2],
     orientation = north,
     cross_of_sight = {},
     target = {},
-    x_goal = target[1],
-    y_goal = target[2],
     is_patrolling = false,
     is_hunting = false,
     x_movement = 0,
@@ -516,20 +512,16 @@ populate = function()
     touched_who = nil
   })
 
-  while sentinel <= (flr (current_dungeon_size / 3) + 1) do
+  for iterator = 1, (flr (current_dungeon_size / 3) + 1) do
     add(world, {
       actor = generate_emotion(),
       sprite = sprite_knight_walk1,
       current_frame = 0,
       total_frames = 2,
       location = place_subordinate(),
-      x_position = location[1],
-      y_position = location[2],
       orientation = north,
       cross_of_sight = {},
       target = {},
-      x_goal = target[1],
-      y_goal = target[2],
       is_patrolling = false,
       is_hunting = false,
       is_hurt = false,
@@ -547,8 +539,6 @@ populate = function()
     current_frame = 0,
     total_frames = 2,
     location = {2, 2},
-    x_position = location[1],
-    y_position = location[2],
     orientation = south,
     is_hurt = false,
     x_movement = 0,
@@ -570,12 +560,14 @@ end
 
 
 place_subordinate = function()
+	local random_location = {}
+
   repeat
-    local random_location = flr(rdm(#opponent_setup_floor_locations))
+    random_location = flr (rnd (#opponent_setup_floor_locations) )
   until opponent_setup_floor_locations[random_location] ~= nil
 
   local subordinate_location = opponent_setup_floor_locations[random_location]
-  opponent_setup_floor_locations[random_location] = {}
+  opponent_setup_floor_locations[random_location] = nil
 
   return subordinate_location
 end
@@ -765,24 +757,24 @@ end
 
 
 collision_system = ecs_system({"x_movement", "y_movement",
-									"x_position", "y_position"},
+									"location"},
 	function(ecs_single_entity)
-		if solid_area(ecs_single_entity.x_position + ecs_single_entity.x_movement,
-						ecs_single_entity.y_position + ecs_single_entity.y_movement,
+		if solid_area(ecs_single_entity.location[1] + ecs_single_entity.x_movement,
+						ecs_single_entity.location[2] + ecs_single_entity.y_movement,
 						actor_width, actor_height) == true then
 			ecs_single_entity.solidity = true
 		end
 
 		for every_entity, other_entity in pairs(world) do
 			if other_entity ~= ecs_single_entity then
-				local x_bounce = (ecs_single_entity.x_position + ecs_single_entity.x_movement) - other.entity.x_position
-				local y_bounce = (ecs_single_entity.y_position + ecs_single_entity.y_movement) - other.entity.y_position
+				local x_bounce = (ecs_single_entity.location[1] + ecs_single_entity.x_movement) - other_entity.location[1]
+				local y_bounce = (ecs_single_entity.location[2] + ecs_single_entity.y_movement) - other_entity.location[2]
 
 				if abs(x_bounce) < actor_width + actor_width
 				and abs(y_bounce) < actor_height + actor_height then
 
 					if ecs_single_entity.x_movement ~= 0
-					and abs(x_bounce) < abs(ecs_single_entity.x_position - other_entity.x_position) then
+					and abs(x_bounce) < abs(ecs_single_entity.location[1] - other_entity.location[1]) then
 						local velocity = ecs_single_entity.x_movement + other_entity.x_movement
 						ecs_single_entity.x_movement = velocity / 2
 						other_entity.x_movement = velocity / 2
@@ -791,7 +783,7 @@ collision_system = ecs_system({"x_movement", "y_movement",
 					end
 
 					if ecs_single_entity.y_movement ~= 0
-					and abs(y_bounce) < abs(ecs_single_entity.y_position - other_entity.y_position) then
+					and abs(y_bounce) < abs(ecs_single_entity.location[2] - other_entity.location[2]) then
 						local velocity = ecs_single_entity.y_movement + other_entity.y_movement
 						ecs_single_entity.y_movement = velocity / 2
 						other_entity.y_movement = velocity / 2
@@ -808,13 +800,13 @@ collision_system = ecs_system({"x_movement", "y_movement",
 
 
 motion_system = ecs_system({"solidity",
-							"x_position", "y_position",
+							"location",
 							"x_movement", "y_movement",
 							"current_frame", "total_frames"},
 	function(ecs_single_entity)
 		if ecs_single_entity.solidity == false then
-			ecs_single_entity.x_position = ecs_single_entity.x_position + ecs_single_entity.x_movement
-			ecs_single_entity.y_position = ecs_single_entity.y_position + ecs_single_entity.y_movement
+			ecs_single_entity.location[1] = ecs_single_entity.location[1] + ecs_single_entity.x_movement
+			ecs_single_entity.location[2] = ecs_single_entity.location[2] + ecs_single_entity.y_movement
 		else
 			ecs_single_entity.x_movement = ecs_single_entity.x_movement * bounce_force
 			ecs_single_entity.y_movement = ecs_single_entity.y_movement * bounce_force
@@ -826,11 +818,11 @@ motion_system = ecs_system({"solidity",
 	end)
 
 
-actor_drawing_system = ecs_system({"x_position", "y_position", "sprite", "current_frame"},
+actor_drawing_system = ecs_system({"location", "sprite", "current_frame"},
 	function(ecs_single_entity)
     if title_phase and intermission_phase and setup_phase == false then
-  		local x_sprite = (ecs_single_entity.x_position * 8) - 2
-  		local y_sprite = (ecs_single_entity.y_position * 8) - 2
+  		local x_sprite = (ecs_single_entity.location[1] * 8) - 2
+  		local y_sprite = (ecs_single_entity.location[2] * 8) - 2
   		spr( ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite )
     end
 	end)
@@ -874,9 +866,7 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 sprite = sprite_fireball_left,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]},
                 x_movement = -0.4,
                 y_movement = 0,
                 solidity = false,
@@ -889,9 +879,7 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 sprite = sprite_fireball_right,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]},
                 x_movement = 0.4,
                 y_movement = 0,
                 solidity = false,
@@ -904,9 +892,7 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 sprite = sprite_fireball_up,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1},
                 x_movement = 0,
                 y_movement = -0.4,
                 solidity = false,
@@ -919,9 +905,7 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
                 sprite = sprite_fireball_down,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1},
                 x_movement = 0,
                 y_movement = 0.4,
                 solidity = false,
@@ -1173,33 +1157,33 @@ remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sp
 
       if ecs_single_entity.actor == fireball or arrow then
         if ecs_single_entity.sprite == sprite_fireball_up or sprite_arrow_up then
-          if {ecs_single_entity.x_position, ecs_single_entity.y_position - 1} == value then
+          if {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1} == value then
             del(key, value)
           end
         elseif ecs_single_entity.sprite == sprite_fireball_down or sprite_arrow_down then
-          if {ecs_single_entity.x_position, ecs_single_entity.y_position + 1} == value then
+          if {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1} == value then
             del(key, value)
           end
         elseif ecs_single_entity.sprite == sprite_fireball_left or sprite_arrow_left then
-          if {ecs_single_entity.x_position - 1, ecs_single_entity.y_position} == value then
+          if {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]} == value then
             del(key, value)
           end
         elseif ecs_single_entity.sprite == sprite_fireball_right or sprite_arrow_right then
-          if {ecs_single_entity.x_position + 1, ecs_single_entity.y_position} == value then
+          if {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]} == value then
             del(key, value)
           end
         end
       end
 
       if ecs_single_entity.actor == dynamite then
-        if value == {ecs_single_entity.x_position - 1, ecs_single_entity.y_position}
-        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position}
-        or {ecs_single_entity.x_position, ecs_single_entity.y_position - 1}
-        or {ecs_single_entity.x_position, ecs_single_entity.y_position + 1}
-        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position - 1}
-        or {ecs_single_entity.x_position - 1, ecs_single_entity.y_position + 1}
-        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position - 1}
-        or {ecs_single_entity.x_position + 1, ecs_single_entity.y_position + 1} then
+        if value == {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]}
+        or {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]}
+        or {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1}
+        or {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1}
+        or {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2] - 1}
+        or {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2] + 1}
+        or {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2] - 1}
+        or {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2] + 1} then
           del(key, value)
         end
       end
@@ -1210,8 +1194,8 @@ remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sp
 
 patrol_system = ecs_system({"actor",
                         "is_patrolling", "x_movement", "y_movement",
-                        "location", "x_position", "y_position",
-                        "target", "x_goal", "y_goal"},
+                        "location",
+                        "target"},
   function(ecs_single_entity)
     local picked_target = {}
     if ecs_single_entity.actor == knight then
@@ -1310,9 +1294,7 @@ patrol_system = ecs_system({"actor",
               sprite = sprite_dynamite_off,
               current_frame = 0,
               total_frames = 1,
-              location = {ecs_single_entity.x_position, ecs_single_entity.y_position},
-              x_position = location[1],
-              y_position = location[2],
+              location = {ecs_single_entity.location[1], ecs_single_entity.location[2]},
               solidity = false,
               has_collided = false,
               touched_who = nil,
@@ -1355,18 +1337,18 @@ patrol_system = ecs_system({"actor",
 
 
 move_opponent = function()
-  while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
-    and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+  while ecs_single_entity.location[1] ~= ecs_single_entity.target[1]
+    and ecs_single_entity.location[2] ~= ecs_single_entity.target[2] do
 
       if ecs_single_entity.touched_who < 1 then
-        if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+        if ecs_single_entity.location[1] < ecs_single_entity.target[1] then
           ecs_single_entity.x_movement = 0.1
-        elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+        elseif ecs_single_entity.location[1] > ecs_single_entity.target[1] then
           ecs_single_entity.x_movement = -0.1
         end
-        if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+        if ecs_single_entity.location[2] < ecs_single_entity.target[2] then
           ecs_single_entity.y_movement = 0.1
-        elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+        elseif ecs_single_entity.location[2] > ecs_single_entity.target[2] then
           ecs_single_entity.y_movement = -0.1
         end
       end
@@ -1395,7 +1377,6 @@ patrol_to_hunt_system = ecs_system({"actor", "is_patrolling", "is_hunting"},
 
 
 hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
-                      "x_position", "y_position", "x_goal", "y_goal",
                       "x_movement", "y_movement", "orientation"},
   function(ecs_single_entity)
     local picked_target = {}
@@ -1435,9 +1416,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 sprite = sprite_arrow_left,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position - 1, ecs_single_entity.y_position},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]},
                 x_movement = -0.4,
                 y_movement = 0,
                 solidity = false,
@@ -1451,9 +1430,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 sprite = sprite_arrow_left,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position + 1, ecs_single_entity.y_position},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]},
                 x_movement = 0.4,
                 y_movement = 0,
                 solidity = false,
@@ -1467,9 +1444,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 sprite = sprite_arrow_left,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position, ecs_single_entity.y_position - 1},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1},
                 x_movement = 0,
                 y_movement = -0.4,
                 solidity = false,
@@ -1483,9 +1458,7 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
                 sprite = sprite_arrow_left,
                 current_frame = 0,
                 total_frames = 1,
-                location = {ecs_single_entity.x_position, ecs_single_entity.y_position + 1},
-                x_position = location[1],
-                y_position = location[2],
+                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1},
                 x_movement = 0,
                 y_movement = 0.4,
                 solidity = false,
@@ -1523,18 +1496,18 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
 
           else
             ecs_single_entity.target = queue_pop(my_path)
-            while ecs_single_entity.x_position ~= ecs_single_entity.x_goal
-              and ecs_single_entity.y_position ~= ecs_single_entity.y_goal do
+            while ecs_single_entity.location[1] ~= ecs_single_entity.target[1]
+              and ecs_single_entity.location[2] ~= ecs_single_entity.target[2] do
 
                 if ecs_single_entity.touched_who < 1 then
-                  if ecs_single_entity.x_position < ecs_single_entity.x_goal then
+                  if ecs_single_entity.location[1] < ecs_single_entity.target[1] then
                     ecs_single_entity.x_movement = 0.2
-                  elseif ecs_single_entity.x_position > ecs_single_entity.x_goal then
+                  elseif ecs_single_entity.location[1] > ecs_single_entity.target[1] then
                     ecs_single_entity.x_movement = -0.2
                   end
-                  if ecs_single_entity.y_position < ecs_single_entity.y_goal then
+                  if ecs_single_entity.location[2] < ecs_single_entity.target[2] then
                     ecs_single_entity.y_movement = 0.2
-                  elseif ecs_single_entity.y_position > ecs_single_entity.y_goal then
+                  elseif ecs_single_entity.location[2] > ecs_single_entity.target[2] then
                     ecs_single_entity.y_movement = -0.2
                   end
                 end
@@ -1663,7 +1636,7 @@ dynamite_system = ecs_system({"fuse_count", "touched_who", "has_collided"},
     elseif fuse_count <= 0 then
       ecs_single_entity.sprite = sprite_dynamite_on
       sfx(sound_effect_explode, 3)
-      for sentinel = 1, 3 do
+      for iterator = 1, 3 do
         --nothing
       end
 
@@ -1773,10 +1746,10 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
       until stat(16) == nil
 
       repeat
-        ecs_single_entity.x_position = ecs_single_entity.x_position - 1
-        ecs_single_entity.y_position = ecs_single_entity.y_position - 1
+        ecs_single_entity.location[1] = ecs_single_entity.location[1] - 1
+        ecs_single_entity.location[2] = ecs_single_entity.location[2] - 1
         sfx(sound_effect_retreat, 3)
-      until ecs_single_entity.x_position < 0 and ecs_single_entity.y_position < 0
+      until ecs_single_entity.location[1] < 0 and ecs_single_entity.location[2] < 0
 
       if opportunities < 1 then
         lost_game()
