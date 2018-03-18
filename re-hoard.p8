@@ -467,18 +467,20 @@ build_dungeon = function()
     for vertical = 1, current_dungeon_size do
       for horizontal = 1, current_dungeon_size do
         if dungeon[vertical][horizontal] == wall_cell then
-          mset(sprite_wall, horizontal, vertical)
+          mset(horizontal - 1, vertical - 1, sprite_wall)
         else
-          mset(sprite_floor, horizontal, vertical)
+          mset(horizontal - 1, vertical - 1, sprite_floor)
         end
       end
     end
 
     if got_treasure == true then
-      mset(sprite_open_door, 2, 1)
+			--mset order: x, y, sprite
+			--spr order: sprite, x, y
+      mset(1, 0, sprite_open_door)
       spr(sprite_open_treasure, treasure_location[1], treasure_location[2])
     else
-      mset(sprite_closed_door, 2, 1)
+      mset(1, 0, sprite_closed_door)
       spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
     end
   end
