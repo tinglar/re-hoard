@@ -474,15 +474,7 @@ build_dungeon = function()
       end
     end
 
-    if got_treasure == true then
-			--mset order: x, y, sprite
-			--spr order: sprite, x, y
-      mset(1, 0, sprite_open_door)
-      spr(sprite_open_treasure, treasure_location[1], treasure_location[2])
-    else
-      mset(1, 0, sprite_closed_door)
-      spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
-    end
+    mset(1, 0, sprite_closed_door)
   end
 end
 
@@ -495,6 +487,7 @@ world = {}
 populate = function()
   treasure_location = opponent_setup_floor_locations[#opponent_setup_floor_locations]
   opponent_setup_floor_locations[#opponent_setup_floor_locations] = nil
+	spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
 
   add(world, {
     actor = knight,
@@ -1006,6 +999,12 @@ return_to_your_places_system = ecs_system({"actor", "location"},
     else
       ecs_single_entity.location = place_subordinate()
     end
+
+		if got_treasure == true then
+			spr(sprite_open_treasure, treasure_location[1], treasure_location[2])
+		else
+			spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
+		end
   end)
 
 
@@ -1831,13 +1830,14 @@ treasure_system = ecs_system({"actor", "touched_who"},
     if ecs_single_entity.actor == dragon
     and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
       got_treasure = true
+			mset(1, 0, sprite_open_door)
       sfx(sound_effect_treasure, 3)
     end
   end)
 
 
 won_stage = function()
-  if dragon_location == {2, 1} and got_treasure == true then
+  if dragon_location == {1, 0} and got_treasure == true then
     normal_phase = false
     panic_phase = false
     music_start(music_success)
