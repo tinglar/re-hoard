@@ -153,7 +153,7 @@ current_level = 0
 previous_level = 0
 opportunities = 3
 -- the maze-generator only works with even dungeon-sizes.
-incrementor = flr(current_level / 2) * 2 + 1
+incrementor = flr(current_level / 2) * 2
 current_dungeon_size = initial_dungeon_size + incrementor
 dungeon = {}
 total_floor_locations = {}
@@ -345,52 +345,33 @@ end
 
 
 plan_dungeon = function()
-	--if current_dungeon_size > 64 then
-		--current_dungeon_size = 64
-	--end
-	--dungeon = initialize_grid(current_dungeon_size, current_dungeon_size)
+	if current_dungeon_size > 63 then
+		current_dungeon_size = 63
+	end
+	dungeon = initialize_grid(current_dungeon_size, current_dungeon_size)
   -- randomly generate a position between the dungeon walls.
 	-- then, push that position in by 1.
 	-- otherwise, you may risk indexing a cell at a position of 0.
-  --horizontal = flr(rnd (current_dungeon_size - 1) + 1)
-	--if horizontal % 2 == 1 then
-		--if horizontal == current_dungeon_size then
-			--horizontal = current_dungeon_size - 1
-		--else
-			--horizontal = horizontal + 1
-		--end
-	--end
+  horizontal = flr(rnd (current_dungeon_size - 1) + 1)
+	if horizontal % 2 == 1 then
+		if horizontal == current_dungeon_size then
+			horizontal = current_dungeon_size - 1
+		else
+			horizontal = horizontal + 1
+		end
+	end
 
-	--vertical = flr(rnd (current_dungeon_size - 1) + 1)
-	--if vertical % 2 == 1 then
-		--if vertical == current_dungeon_size then
-			--vertical = current_dungeon_size - 1
-		--else
-			--vertical = vertical + 1
-		--end
-	--end
+	vertical = flr(rnd (current_dungeon_size - 1) + 1)
+	if vertical % 2 == 1 then
+		if vertical == current_dungeon_size then
+			vertical = current_dungeon_size - 1
+		else
+			vertical = vertical + 1
+		end
+	end
 
-	--walk(horizontal, vertical)
-  --demolish(current_dungeon_size, current_dungeon_size)
-
-	dungeon = {
-		{wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, false, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, floor_cell, wall_cell},
-		{wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell, wall_cell}
-	}
+	walk(horizontal, vertical)
+  demolish(current_dungeon_size, current_dungeon_size)
 end
 
 
@@ -449,14 +430,10 @@ end
 
 collector_of_opponent_setup_cells = function()
   local top_half_of_dungeon = flr(current_dungeon_size / 2)
-	local collector_key = 1
 
-  for horizontal = 1, current_dungeon_size do
-    for vertical = 1, current_dungeon_size do
-      if total_floor_locations[collector_key][1] ~= top_half_of_dungeon or total_floor_locations[collector_key][2] ~= top_half_of_dungeon then
-        opponent_setup_floor_locations[#opponent_setup_floor_locations + 1] = total_floor_locations[collector_key]
-				collector_key = collector_key + 1
-      end
+  for iterator = 1, #total_floor_locations do
+    if total_floor_locations[iterator][1] ~= top_half_of_dungeon or total_floor_locations[iterator][2] ~= top_half_of_dungeon then
+      opponent_setup_floor_locations[#opponent_setup_floor_locations + 1] = total_floor_locations[iterator]
     end
   end
 end
@@ -2316,3 +2293,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
