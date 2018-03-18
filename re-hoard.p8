@@ -463,7 +463,7 @@ end
 
 
 build_dungeon = function()
-  if title_phase and intermission_phase and setup_phase == false then
+  if setup_phase == true then
     for vertical = 1, current_dungeon_size do
       for horizontal = 1, current_dungeon_size do
         if dungeon[vertical][horizontal] == wall_cell then
