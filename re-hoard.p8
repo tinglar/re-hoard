@@ -160,7 +160,7 @@ total_floor_locations = {}
 opponent_setup_floor_locations = {}
 safe_floor_locations = {}
 dragon_location = {}
-treasure_location = {}
+treasure_location = {(current_dungeon_size - 2) * 8, (current_dungeon_size - 2) * 8}
 got_treasure = false
 is_fireball_there = false
 fear_count = 0
@@ -307,11 +307,12 @@ game_setup = function()
       collector_of_opponent_setup_cells()
       collector_of_safe_cells()
       populate()
+			subordinate_sprite_system(world)
     else
       return_to_your_places_system(world)
     end
 
-		subordinate_sprite_system(world)
+
     got_treasure = false
 
     setup_phase = false
@@ -418,10 +419,10 @@ end
 
 
 collector_of_floor_cells = function()
-  for horizontal = 1, current_dungeon_size do
-    for vertical = 1, current_dungeon_size do
-      if dungeon[horizontal][vertical] == floor_cell then
-				total_floor_locations[#total_floor_locations + 1] = {horizontal, vertical}
+  for vertical = 1, current_dungeon_size - 1 do
+    for horizontal = 1, current_dungeon_size - 1 do
+      if dungeon[vertical][horizontal] == floor_cell then
+				total_floor_locations[#total_floor_locations + 1] = {horizontal - 1, vertical - 1}
       end
     end
   end
@@ -431,8 +432,8 @@ end
 collector_of_opponent_setup_cells = function()
   local top_half_of_dungeon = flr(current_dungeon_size / 2)
 
-  for iterator = 1, #total_floor_locations do
-    if total_floor_locations[iterator][1] ~= top_half_of_dungeon or total_floor_locations[iterator][2] ~= top_half_of_dungeon then
+  for iterator = 1, #total_floor_locations - 1 do
+    if total_floor_locations[iterator][1] > top_half_of_dungeon or total_floor_locations[iterator][2] > top_half_of_dungeon then
       opponent_setup_floor_locations[#opponent_setup_floor_locations + 1] = total_floor_locations[iterator]
     end
   end
@@ -462,10 +463,6 @@ end
 world = {}
 
 populate = function()
-  treasure_location = opponent_setup_floor_locations[#opponent_setup_floor_locations]
-  opponent_setup_floor_locations[#opponent_setup_floor_locations] = nil
-	spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
-
   add(world, {
     actor = knight,
     sprite = sprite_knight_walk1,
@@ -510,7 +507,7 @@ populate = function()
     sprite = sprite_dragon_fly1_down,
     current_frame = 0,
     total_frames = 2,
-    location = {2, 2},
+    location = {1, 1},
     orientation = south,
     is_hurt = false,
     x_movement = 0,
@@ -792,10 +789,10 @@ motion_system = ecs_system({"solidity",
 
 actor_drawing_system = ecs_system({"location", "sprite", "current_frame"},
 	function(ecs_single_entity)
-    if title_phase and intermission_phase and setup_phase == false then
-  		local x_sprite = (ecs_single_entity.location[1] * 8) - 2
-  		local y_sprite = (ecs_single_entity.location[2] * 8) - 2
-  		spr( ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite )
+    if normal_phase == true or panic_phase == true then
+  		local x_sprite = (ecs_single_entity.location[1] * 8)
+  		local y_sprite = (ecs_single_entity.location[2] * 8)
+  		spr (ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite)
     end
 	end)
 
@@ -976,12 +973,6 @@ return_to_your_places_system = ecs_system({"actor", "location"},
     else
       ecs_single_entity.location = place_subordinate()
     end
-
-		if got_treasure == true then
-			spr(sprite_open_treasure, treasure_location[1], treasure_location[2])
-		else
-			spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
-		end
   end)
 
 
@@ -1683,15 +1674,15 @@ lance_system = ecs_system({"sprite", "orientation", "x_location", "y_location"},
   function(ecs_single_entity)
     if ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
       if ecs_single_entity.orientation == west then
-        spr(sprite_lance_up, ecs_single_entity.x_location - 1, ecs_single_entity.y_location)
+        spr(sprite_lance_up, (ecs_single_entity.x_location - 1) * 8, ecs_single_entity.y_location * 8)
       elseif ecs_single_entity.orientation == east then
-        spr(sprite_lance_up, ecs_single_entity.x_location + 1, ecs_single_entity.y_location)
+        spr(sprite_lance_up, (ecs_single_entity.x_location + 1) * 8, ecs_single_entity.y_location * 8)
       end
     elseif ecs_single_entity.sprite == sprite_disgust_attack_vertical then
       if ecs_single_entity.orientation == north then
-        spr(sprite_lance_up, ecs_single_entity.x_location, ecs_single_entity.y_location - 1)
+        spr(sprite_lance_up, ecs_single_entity.x_location * 8, (ecs_single_entity.y_location - 1) * 8)
       elseif ecs_single_entity.orientation == south then
-        spr(sprite_lance_up, ecs_single_entity.x_location, ecs_single_entity.y_location + 1)
+        spr(sprite_lance_up, ecs_single_entity.x_location * 8, (ecs_single_entity.y_location + 1) * 8)
       end
     end
   end)
@@ -1863,6 +1854,11 @@ function _draw()
 		intermission_screen()
 	elseif normal_phase or panic_phase == true then
 		map(0, 0, 0, 0, current_dungeon_size, current_dungeon_size)
+		if got_treasure == true then
+			spr(sprite_open_treasure, treasure_location[1], treasure_location[2])
+		else
+			spr(sprite_closed_treasure, treasure_location[1], treasure_location[2])
+		end
 		actor_drawing_system(world)
 		lance_system(world)
 	end
@@ -1901,13 +1897,13 @@ __gfx__
 00494004940049994000000494004940049999400499999404940004999994000000000000000000000000000000000000000000000000000000000000000000
 04944049940049994000000494004940044994000499949404994000499949400000000000000000000000000000000000000000000000000000000000000000
 44440044440044440000000444004440004444000044404400444000044404440000000000000000000000000000000000000000000000000000000000000000
-6660066655555555333b33bb5b5b55b5664444666633b36600000000554440000022220000022000066600000666000006660700066607000666000006660000
-66600666555555553bb33b33555555556444444663333bb6000000000054440002000020000000000fff00000fff00000fff07000fff07000fff00000fff0000
-0000000055555555b333b33bbb555555444444444333b3b40004400000054440002222000e0000e00fff07000fff07000fff07000fff07000fff00000fff0000
-0066666655555555b33b333355555555444444444333333400444400000054400000000000eeee00006007000060070060606110606061106060100000600000
-0066666655555555b33bbbb3555555554444444443b3333404444440000005400888888000000000066607000666070006660100066601000666677766666000
-0066666655555555b33b333bb555555544444444433bb33405555550044444508000000880000008606061106060611000600000006000000060100000600000
-0000000055555555b3bbbb3355555555444444444333bb3405444440044444408000000880000008060601000606010006060000060600000606000006060000
+6660066655555555333b33bb5b5b55b5664444666633b36600000000664440000022220000022000066600000666000006660700066607000666000006660000
+66600666555555553bb33b33555555556444444663333bb6000000000064440002000020000000000fff00000fff00000fff07000fff07000fff00000fff0000
+0000000055555555b333b33bbb555555444444444333b3b40004400000064440002222000e0000e00fff07000fff07000fff07000fff07000fff00000fff0000
+0066666655555555b33b333355555555444444444333333400444400000064400000000000eeee00006007000060070060606110606061106060100000600000
+0066666655555555b33bbbb3555555554444444443b3333404444440000006400888888000000000066607000666070006660100066601000666677766666000
+0066666655555555b33b333bb555555544444444433bb33406666660044444608000000880000008606061106060611000600000006000000060100000600000
+0000000055555555b3bbbb3355555555444444444333bb3406444440044444408000000880000008060601000606010006060000060600000606000006060000
 66600666555555553b3b33b355555555444444444333b33404444440044444400888888008888880600060000606000060006000060600006000600060006000
 0aaa00000aaa00000aaaaaa00aaaaaa00aaa00000aaa00000ccc00000ccc00000ccc0c000ccc0c000ccc00000ccc000000000000000000000002000000002000
 0aaa00000aaa00000aaaaaa00aaaaaa00aaa00000aaa00000ccc0c000ccc0c000ccc0cc00ccc0cc00ccc00000ccc000000000000000002000022200000002000
@@ -2293,4 +2289,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
