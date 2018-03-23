@@ -253,7 +253,7 @@ title_screen = function()
     cls()
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press Ž", 48, 84)
+    print("press ï¿½", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
   end
 end
@@ -1126,26 +1126,26 @@ remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sp
 
       if ecs_single_entity["actor"] == "fireball" or "arrow" or "dynamite" then
         if ecs_single_entity["location"] == value then
-          del(key, value)
+          ecs_single_entity[key] = nil
         end
       end
 
       if ecs_single_entity["actor"] == "fireball" or "arrow" then
         if ecs_single_entity["sprite"] == sprite_fireball_up or sprite_arrow_up then
           if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1} == value then
-            del(key, value)
+            ecs_single_entity[key] = nil
           end
         elseif ecs_single_entity["sprite"] == sprite_fireball_down or sprite_arrow_down then
           if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1} == value then
-            del(key, value)
+            ecs_single_entity[key] = nil
           end
         elseif ecs_single_entity["sprite"] == sprite_fireball_left or sprite_arrow_left then
           if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]} == value then
-            del(key, value)
+            ecs_single_entity[key] = nil
           end
         elseif ecs_single_entity["sprite"] == sprite_fireball_right or sprite_arrow_right then
           if {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]} == value then
-            del(key, value)
+            ecs_single_entity[key] = nil
           end
         end
       end
@@ -1159,7 +1159,7 @@ remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sp
         or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] + 1}
         or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] - 1}
         or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] + 1} then
-          del(key, value)
+          ecs_single_entity[key] = nil
         end
       end
 
@@ -1746,7 +1746,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press Ž", 50, 96)
+  print("press ï¿½", 50, 96)
   music_start(music_game_over)
 
   if btnp(4) then
