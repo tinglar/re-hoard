@@ -253,7 +253,7 @@ title_screen = function()
     cls()
     sspr(0, 16, 64, 16, 32, 32)
     print("tinglar 2018", 40, 64)
-    print("press ï¿½", 48, 84)
+    print("press Ž", 48, 84)
     print("highest round: "..(highest_round + 1), 0, 120)
   end
 end
@@ -496,7 +496,7 @@ populate = function()
   world[2]["has_collided"] = false
   world[2]["touched_who"] = nil
 
-  for iterator = 1, (flr (current_dungeon_size / 3) + 1) do
+  for iterator = 3, (flr (current_dungeon_size / 3) + 1) do
     world[iterator] = {}
     world[iterator]["actor"] = generate_emotion()
     world[iterator]["sprite"] = sprite_knight_walk1
@@ -1737,7 +1737,7 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
 lost_game = function()
   print("game over", 50, 42)
   print("final round: "..(current_level + 1), 48, 84)
-  print("press ï¿½", 50, 96)
+  print("press Ž", 50, 96)
   music_start(music_game_over)
 
   if btnp(4) then
@@ -2292,3 +2292,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
