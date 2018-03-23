@@ -466,55 +466,55 @@ world = {}
 
 populate = function()
 	world[1] = {
-		["actor"] = dragon
-		["sprite"] = sprite_dragon_fly1_down
-		["current_frame"] = 0
-		["total_frames"] = 2
-		["location"]= {1, 1}
-		["orientation"] = south
-		["is_hurt"] = false
-		["x_movement"] = 0
-		["y_movement"] = 0
-		["solidity"] = false
-		["has_collided"] = false
-		["touched_who"] = nil
+		["actor"] = dragon,
+		["sprite"] = sprite_dragon_fly1_down,
+		["current_frame"] = 0,
+		["total_frames"] = 2,
+		["location"]= {1, 1},
+		["orientation"] = south,
+		["is_hurt"] = false,
+		["x_movement"] = 0,
+		["y_movement"] = 0,
+		["solidity"] = false,
+		["has_collided"] = false,
+		["touched_who"] = nil,
 	}
 
   world[2] = {
-	  ["actor"] = knight
-	  ["sprite"] = sprite_knight_walk1
-	  ["current_frame"] = 0
-	  ["total_frames"] = 2
-	  ["location"] = place_knight()
-	  ["orientation"] = north
-	  ["cross_of_sight"] = {}
-	  ["target"] = {}
-	  ["is_patrolling"] = false
-	  ["is_hunting"] = false
-	  ["x_movement"] = 0
-	  ["y_movement"] = 0
-	  ["solidity"] = false
-	  ["has_collided"] = false
+	  ["actor"] = knight,
+	  ["sprite"] = sprite_knight_walk1,
+	  ["current_frame"] = 0,
+	  ["total_frames"] = 2,
+	  ["location"] = place_knight(),
+	  ["orientation"] = north,
+	  ["cross_of_sight"] = {},
+	  ["target"] = {},
+	  ["is_patrolling"] = false,
+	  ["is_hunting"] = false,
+	  ["x_movement"] = 0,
+	  ["y_movement"] = 0,
+	  ["solidity"] = false,
+	  ["has_collided"] = false,
 	  ["touched_who"] = nil
 	}
 
   for iterator = 3, (flr (current_dungeon_size / 3) + 1) do
     world[iterator] = {
-	    ["actor"] = generate_emotion()
-	    ["sprite"] = sprite_knight_walk1
-	    ["current_frame"] = 0
-	    ["total_frames"] = 2
-	    ["location"] = place_subordinate()
-	    ["orientation"] = north
-	    ["cross_of_sight"] = {}
-	    ["target"] = {}
-	    ["is_patrolling"] = false
-	    ["is_hunting"] = false
-	    ["is_hurt"] = false
-	    ["x_movement"] = 0
-	    ["y_movement"] = 0
-	    ["solidity"] = false
-	    ["has_collided"] = false
+	    ["actor"] = generate_emotion(),
+	    ["sprite"] = sprite_knight_walk1,
+	    ["current_frame"] = 0,
+	    ["total_frames"] = 2,
+	    ["location"] = place_subordinate(),
+	    ["orientation"] = north,
+	    ["cross_of_sight"] = {},
+	    ["target"] = {},
+	    ["is_patrolling"] = false,
+	    ["is_hunting"] = false,
+	    ["is_hurt"] = false,
+	    ["x_movement"] = 0,
+	    ["y_movement"] = 0,
+	    ["solidity"] = false,
+	    ["has_collided"] = false,
 	    ["touched_who"] = nil
 		}
   end
@@ -833,60 +833,60 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "x_movement", "y_movemen
             if ecs_single_entity["orientation"] == west then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = fireball
-	              ["sprite"] = sprite_fireball_left
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
-	              ["x_movement"] = -0.4
-	              ["y_movement"] = 0
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = fireball,
+	              ["sprite"] = sprite_fireball_left,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]},
+	              ["x_movement"] = -0.4,
+	              ["y_movement"] = 0,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
             elseif ecs_single_entity["orientation"] == east then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = fireball
-	              ["sprite"] = sprite_fireball_right
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
-	              ["x_movement"] = 0.4
-	              ["y_movement"] = 0
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = fireball,
+	              ["sprite"] = sprite_fireball_right,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]},
+	              ["x_movement"] = 0.4,
+	              ["y_movement"] = 0,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
             elseif ecs_single_entity["orientation"] == north then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = fireball
-	              ["sprite"] = sprite_fireball_up
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
-	              ["x_movement"] = 0
-	              ["y_movement"] = -0.4
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = fireball,
+	              ["sprite"] = sprite_fireball_up,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1},
+	              ["x_movement"] = 0,
+	              ["y_movement"] = -0.4,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
             elseif ecs_single_entity["orientation"] == south then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = fireball
-	              ["sprite"] = sprite_fireball_down
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
-	              ["x_movement"] = 0
-	              ["y_movement"] = 0.4
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = fireball,
+	              ["sprite"] = sprite_fireball_down,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1},
+	              ["x_movement"] = 0,
+	              ["y_movement"] = 0.4,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
@@ -1269,15 +1269,15 @@ patrol_system = ecs_system({"actor",
           if dynamite_count < surprise_count then
 						local new_entry = #world + 1
 						world[new_entry] = {
-	            ["actor"] = dynamite
-	            ["sprite"] = sprite_dynamite_off
-	            ["current_frame"] = 0
-	            ["total_frames"] = 1
-	            ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2]}
-	            ["solidity"] = false
-	            ["has_collided"] = false
-	            ["touched_who"] = nil
-	            ["fuse_count"] = flr (rnd (9) )
+	            ["actor"] = dynamite,
+	            ["sprite"] = sprite_dynamite_off,
+	            ["current_frame"] = 0,
+	            ["total_frames"] = 1,
+	            ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2]},
+	            ["solidity"] = false,
+	            ["has_collided"] = false,
+	            ["touched_who"] = nil,
+	            ["fuse_count"] = flr (rnd (9) ),
 	            ["dynamite_count"] = dynamite_count + 1
 						}
           end
@@ -1392,60 +1392,60 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
             if ecs_single_entity["orientation"] == west then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = arrow
-	              ["sprite"] = sprite_arrow_left
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
-	              ["x_movement"] = -0.4
-	              ["y_movement"] = 0
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = arrow,
+	              ["sprite"] = sprite_arrow_left,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]},
+	              ["x_movement"] = -0.4,
+	              ["y_movement"] = 0,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
             elseif ecs_single_entity["orientation"] == east then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = arrow
-	              ["sprite"] = sprite_arrow_right
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
-	              ["x_movement"] = 0.4
-	              ["y_movement"] = 0
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = arrow,
+	              ["sprite"] = sprite_arrow_right,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]},
+	              ["x_movement"] = 0.4,
+	              ["y_movement"] = 0,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
             elseif ecs_single_entity["orientation"] == north then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = arrow
-	              ["sprite"] = sprite_arrow_up
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
-	              ["x_movement"] = 0
-	              ["y_movement"] = -0.4
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = arrow,
+	              ["sprite"] = sprite_arrow_up,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1},
+	              ["x_movement"] = 0,
+	              ["y_movement"] = -0.4,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
             elseif ecs_single_entity["orientation"] == south then
 							local new_entry = #world + 1
               world[new_entry] = {
-	              ["actor"] = arrow
-	              ["sprite"] = sprite_arrow_down
-	              ["current_frame"] = 0
-	              ["total_frames"] = 1
-	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
-	              ["x_movement"] = 0
-	              ["y_movement"] = 0.4
-	              ["solidity"] = false
-	              ["has_collided"] = false
+	              ["actor"] = arrow,
+	              ["sprite"] = sprite_arrow_down,
+	              ["current_frame"] = 0,
+	              ["total_frames"] = 1,
+	              ["location"] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1},
+	              ["x_movement"] = 0,
+	              ["y_movement"] = 0.4,
+	              ["solidity"] = false,
+	              ["has_collided"] = false,
 	              ["touched_who"] = nil
 							}
 
