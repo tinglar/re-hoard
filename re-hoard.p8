@@ -307,6 +307,8 @@ game_setup = function()
       collector_of_opponent_setup_cells()
       collector_of_safe_cells()
       populate()
+			--something broke here...
+			--all of the keys are nil!
 			subordinate_sprite_system(world)
     else
       return_to_your_places_system(world)
@@ -463,59 +465,57 @@ end
 world = {}
 
 populate = function()
-  add(world, {
-    actor = knight,
-    sprite = sprite_knight_walk1,
-    current_frame = 0,
-    total_frames = 2,
-    location = place_knight(),
-    orientation = north,
-    cross_of_sight = {},
-    target = {},
-    is_patrolling = false,
-    is_hunting = false,
-    x_movement = 0,
-    y_movement = 0,
-    solidity = false,
-    has_collided = false,
-    touched_who = nil
-  })
+	world[1] = {}
+	world[1]["actor"] = dragon
+	world[1]["sprite"] = sprite_dragon_fly1_down
+	world[1]["current_frame"] = 0
+	world[1]["total_frames"] = 2
+	world[1]["location"]= {1, 1}
+	world[1]["orientation"] = south
+	world[1]["is_hurt"] = false
+	world[1]["x_movement"] = 0
+	world[1]["y_movement"] = 0
+	world[1]["solidity"] = false
+	world[1]["has_collided"] = false
+	world[1]["touched_who"] = nil
+
+  world[2] = {}
+  world[2]["actor"] = knight
+  world[2]["sprite"] = sprite_knight_walk1
+  world[2]["current_frame"] = 0
+  world[2]["total_frames"] = 2
+  world[2]["location"] = place_knight()
+  world[2]["orientation"] = north
+  world[2]["cross_of_sight"] = {}
+  world[2]["target"] = {}
+  world[2]["is_patrolling"] = false
+  world[2]["is_hunting"] = false
+  world[2]["x_movement"] = 0
+  world[2]["y_movement"] = 0
+  world[2]["solidity"] = false
+  world[2]["has_collided"] = false
+  world[2]["touched_who"] = nil
 
   for iterator = 1, (flr (current_dungeon_size / 3) + 1) do
-    add(world, {
-      actor = generate_emotion(),
-      sprite = sprite_knight_walk1,
-      current_frame = 0,
-      total_frames = 2,
-      location = place_subordinate(),
-      orientation = north,
-      cross_of_sight = {},
-      target = {},
-      is_patrolling = false,
-      is_hunting = false,
-      is_hurt = false,
-      x_movement = 0,
-      y_movement = 0,
-      solidity = false,
-      has_collided = false,
-      touched_who = nil
-    })
+    world[iterator] = {}
+    world[iterator]["actor"] = generate_emotion()
+    world[iterator]["sprite"] = sprite_knight_walk1
+    world[iterator]["current_frame"] = 0
+    world[iterator]["total_frames"] = 2
+    world[iterator]["location"] = place_subordinate()
+    world[iterator]["orientation"] = north
+    world[iterator]["cross_of_sight"] = {}
+    world[iterator]["target"] = {}
+    world[iterator]["is_patrolling"] = false
+    world[iterator]["is_hunting"] = false
+    world[iterator]["is_hurt"] = false
+    world[iterator]["x_movement"] = 0
+    world[iterator]["y_movement"] = 0
+    world[iterator]["solidity"] = false
+    world[iterator]["has_collided"] = false
+    world[iterator]["touched_who"] = nil
   end
 
-  add(world, {
-    actor = dragon,
-    sprite = sprite_dragon_fly1_down,
-    current_frame = 0,
-    total_frames = 2,
-    location = {1, 1},
-    orientation = south,
-    is_hurt = false,
-    x_movement = 0,
-    y_movement = 0,
-    solidity = false,
-    has_collided = false,
-    touched_who = nil
-  })
 end
 
 
@@ -566,18 +566,18 @@ end
 subordinate_sprite_system = ecs_system({"actor", "sprite"},
   function(ecs_single_entity)
     if setup_phase == true then
-      if ecs_single_entity.actor == joy then
-        ecs_single_entity.sprite = sprite_joy_walk1
-      elseif ecs_single_entity.actor == sadness then
-        ecs_single_entity.sprite = sprite_sadness_walk1
-      elseif ecs_single_entity.actor == fear then
-        ecs_single_entity.sprite = sprite_fear_walk1
-      elseif ecs_single_entity.actor == disgust then
-        ecs_single_entity.sprite = sprite_disgust_walk1
-      elseif ecs_single_entity.actor == anger then
-        ecs_single_entity.sprite = sprite_anger_walk1
-      elseif ecs_single_entity.actor == surprise then
-        ecs_single_entity.sprite = sprite_surprise_walk1
+      if ecs_single_entity["actor"] == joy then
+        ecs_single_entity["sprite"] = sprite_joy_walk1
+      elseif ecs_single_entity["actor"] == sadness then
+        ecs_single_entity["sprite"] = sprite_sadness_walk1
+      elseif ecs_single_entity["actor"] == fear then
+        ecs_single_entity["sprite"] = sprite_fear_walk1
+      elseif ecs_single_entity["actor"] == disgust then
+        ecs_single_entity["sprite"] = sprite_disgust_walk1
+      elseif ecs_single_entity["actor"] == anger then
+        ecs_single_entity["sprite"] = sprite_anger_walk1
+      elseif ecs_single_entity["actor"] == surprise then
+        ecs_single_entity["sprite"] = sprite_surprise_walk1
       end
     end
   end)
@@ -585,10 +585,8 @@ subordinate_sprite_system = ecs_system({"actor", "sprite"},
 
 start_patrolling_system = ecs_system({"is_patrolling"},
   function(ecs_single_entity)
-    if normal_phase ==  true then
-      if ecs_single_entity.is_patrolling == false then
-        ecs_single_entity.is_patrolling = true
-      end
+    if ecs_single_entity["is_patrolling"] == false then
+      ecs_single_entity["is_patrolling"] = true
     end
   end)
 
@@ -625,16 +623,16 @@ end
 
 orientation_system = ecs_system({"orientation", "x_movement", "y_movement"},
   function(ecs_single_entity)
-      if ecs_single_entity.x_movement < 0 then
-        ecs_single_entity.orientation = west
-      elseif ecs_single_entity.x_movement > 0 then
-        ecs_single_entity.orientation = east
+      if ecs_single_entity["x_movement"] < 0 then
+        ecs_single_entity["orientation"] = west
+      elseif ecs_single_entity["x_movement"] > 0 then
+        ecs_single_entity["orientation"] = east
       end
 
-      if ecs_single_entity.y_movement < 0 then
-        ecs_single_entity.orientation = north
-      elseif ecs_single_entity.y_movement > 0 then
-        ecs_single_entity.orientation = south
+      if ecs_single_entity["y_movement"] < 0 then
+        ecs_single_entity["orientation"] = north
+      elseif ecs_single_entity["y_movement"] > 0 then
+        ecs_single_entity["orientation"] = south
       end
   end)
 
@@ -642,67 +640,67 @@ orientation_system = ecs_system({"orientation", "x_movement", "y_movement"},
 set_cross_of_sight_system = ecs_system({"orientation", "cross_of_sight",
                                   "x_location", "y_location"},
   function(ecs_single_entity)
-    ecs_single_entity.cross_of_sight = {}
+    ecs_single_entity["cross_of_sight"] = {}
     local look = 1
 
-    if ecs_single_entity.orientation == west then
-      while mget(ecs_single_entity.x_location - look, ecs_single_entity.y_location) == sprite_floor do
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - look, ecs_single_entity.y_location} )
+    if ecs_single_entity["orientation"] == west then
+      while mget(ecs_single_entity["x_location"] - look, ecs_single_entity["y_location"]) == sprite_floor do
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] - look, ecs_single_entity["y_location"]} )
         look = look + 1
       end
-      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1} )
+      if mget(ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] - 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] - 1} )
       end
-      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} )
+      if mget(ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] + 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] + 1} )
       end
 
-    elseif ecs_single_entity.orientation == east then
-      while mget(ecs_single_entity.x_location + look, ecs_single_entity.y_location) == sprite_floor do
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + look, ecs_single_entity.y_location} )
+    elseif ecs_single_entity["orientation"] == east then
+      while mget(ecs_single_entity["x_location"] + look, ecs_single_entity["y_location"]) == sprite_floor do
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] + look, ecs_single_entity["y_location"]} )
         look = look + 1
       end
-      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} )
+      if mget(ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] - 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] - 1} )
       end
-      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
+      if mget(ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] + 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] + 1} )
       end
 
-    elseif ecs_single_entity.orientation == north then
-      while mget(ecs_single_entity.x_location, ecs_single_entity.y_location - look) == sprite_floor do
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location, ecs_single_entity.y_location - look} )
+    elseif ecs_single_entity["orientation"] == north then
+      while mget(ecs_single_entity["x_location"], ecs_single_entity["y_location"] - look) == sprite_floor do
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"], ecs_single_entity["y_location"] - look} )
         look = look + 1
       end
-      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1} )
+      if mget(ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] - 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] - 1} )
       end
-      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} )
+      if mget(ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] - 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] - 1} )
       end
 
-    elseif ecs_single_entity.orientation == south then
-      while mget(ecs_single_entity.x_location, ecs_single_entity.y_location + look) == sprite_floor do
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location, ecs_single_entity.y_location + look} )
+    elseif ecs_single_entity["orientation"] == south then
+      while mget(ecs_single_entity["x_location"], ecs_single_entity["y_location"] + look) == sprite_floor do
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"], ecs_single_entity["y_location"] + look} )
         look = look + 1
       end
-      if mget(ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} )
+      if mget(ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] + 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] + 1} )
       end
-      if mget(ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1) == sprite_floor then
-        add (ecs_single_entity.cross_of_sight,
-              {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} )
+      if mget(ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] + 1) == sprite_floor then
+        add (ecs_single_entity["cross_of_sight"],
+              {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] + 1} )
       end
 
     end
@@ -728,43 +726,43 @@ end
 collision_system = ecs_system({"x_movement", "y_movement",
 									"location"},
 	function(ecs_single_entity)
-		if solid_area(ecs_single_entity.location[1] + ecs_single_entity.x_movement,
-						ecs_single_entity.location[2] + ecs_single_entity.y_movement,
+		if solid_area(ecs_single_entity["location"][1] + ecs_single_entity["x_movement"],
+						ecs_single_entity["location"][2] + ecs_single_entity["y_movement"],
 						actor_width, actor_height) == true then
-			ecs_single_entity.solidity = true
+			ecs_single_entity["solidity"] = true
 		end
 
 		for every_entity, other_entity in pairs(world) do
 			if other_entity ~= ecs_single_entity then
-				local x_bounce = (ecs_single_entity.location[1] + ecs_single_entity.x_movement) - other_entity.location[1]
-				local y_bounce = (ecs_single_entity.location[2] + ecs_single_entity.y_movement) - other_entity.location[2]
+				local x_bounce = (ecs_single_entity["location"][1] + ecs_single_entity["x_movement"]) - other_entity.["location"][1]
+				local y_bounce = (ecs_single_entity["location"][2] + ecs_single_entity["y_movement"]) - other_entity.["location"][2]
 
 				if abs(x_bounce) < actor_width + actor_width
 				and abs(y_bounce) < actor_height + actor_height then
 
-					if ecs_single_entity.x_movement ~= 0
-					and abs(x_bounce) < abs(ecs_single_entity.location[1] - other_entity.location[1]) then
-						local velocity = ecs_single_entity.x_movement + other_entity.x_movement
-						ecs_single_entity.x_movement = velocity / 2
-						other_entity.x_movement = velocity / 2
-						ecs_single_entity.solidity = true
-            ecs_single_entity.touched_who = fget(other_entity.sprite)
+					if ecs_single_entity["x_movement"] ~= 0
+					and abs(x_bounce) < abs(ecs_single_entity["location"][1] - other_entity.["location"][1]) then
+						local velocity = ecs_single_entity["x_movement"] + other_entity["x_movement"]
+						ecs_single_entity["x_movement"] = velocity / 2
+						other_entity["x_movement"] = velocity / 2
+						ecs_single_entity["solidity"] = true
+            ecs_single_entity["touched_who"] = fget(other_entity["sprite"])
 					end
 
-					if ecs_single_entity.y_movement ~= 0
-					and abs(y_bounce) < abs(ecs_single_entity.location[2] - other_entity.location[2]) then
-						local velocity = ecs_single_entity.y_movement + other_entity.y_movement
-						ecs_single_entity.y_movement = velocity / 2
-						other_entity.y_movement = velocity / 2
-						ecs_single_entity.solidity = true
-            ecs_single_entity.touched_who = fget(other_entity.sprite)
+					if ecs_single_entity["y_movement"] ~= 0
+					and abs(y_bounce) < abs(ecs_single_entity["location"][2] - other_entity.["location"][2]) then
+						local velocity = ecs_single_entity["y_movement"] + other_entity.["y_movement"]
+						ecs_single_entity["y_movement"] = velocity / 2
+						other_entity["y_movement"] = velocity / 2
+						ecs_single_entity["solidity"] = true
+            ecs_single_entity["touched_who"] = fget(other_entity["sprite"])
 					end
 
 				end
 			end
 		end
 
-		ecs_single_entity.solidity = false
+		ecs_single_entity["solidity"] = false
 	end)
 
 
@@ -773,26 +771,26 @@ motion_system = ecs_system({"solidity",
 							"x_movement", "y_movement",
 							"current_frame", "total_frames"},
 	function(ecs_single_entity)
-		if ecs_single_entity.solidity == false then
-			ecs_single_entity.location[1] = ecs_single_entity.location[1] + ecs_single_entity.x_movement
-			ecs_single_entity.location[2] = ecs_single_entity.location[2] + ecs_single_entity.y_movement
+		if ecs_single_entity["solidity"] == false then
+			ecs_single_entity["location"][1] = ecs_single_entity["location"][1] + ecs_single_entity["x_movement"]
+			ecs_single_entity["location"][2] = ecs_single_entity["location"][2] + ecs_single_entity["y_movement"]
 		else
-			ecs_single_entity.x_movement = ecs_single_entity.x_movement * bounce_force
-			ecs_single_entity.y_movement = ecs_single_entity.y_movement * bounce_force
+			ecs_single_entity["x_movement"] = ecs_single_entity["x_movement"] * bounce_force
+			ecs_single_entity["y_movement"] = ecs_single_entity["y_movement"] * bounce_force
 		end
 
-		ecs_single_entity.current_frame = ecs_single_entity.current_frame + abs(ecs_single_entity.x_movement) * 4
-		ecs_single_entity.current_frame = ecs_single_entity.current_frame + abs(ecs_single_entity.y_movement) * 4
-		ecs_single_entity.current_frame = ecs_single_entity.current_frame % ecs_single_entity.total_frames
+		ecs_single_entity["current_frame"] = ecs_single_entity["current_frame"] + abs(ecs_single_entity["x_movement"]) * 4
+		ecs_single_entity["current_frame"] = ecs_single_entity["current_frame"] + abs(ecs_single_entity["y_movement"]) * 4
+		ecs_single_entity["current_frame"] = ecs_single_entity["current_frame"] % ecs_single_entity["total_frames"]
 	end)
 
 
 actor_drawing_system = ecs_system({"location", "sprite", "current_frame"},
 	function(ecs_single_entity)
-    if normal_phase == true or panic_phase == true then
-  		local x_sprite = (ecs_single_entity.location[1] * 8)
-  		local y_sprite = (ecs_single_entity.location[2] * 8)
-  		spr (ecs_single_entity.sprite + ecs_single_entity.current_frame, x_sprite, y_sprite)
+    if normal_phase or panic_phase == true then
+  		local x_sprite = (ecs_single_entity["location"][1] * 8)
+  		local y_sprite = (ecs_single_entity["location"][2] * 8)
+  		spr (ecs_single_entity["sprite"] + ecs_single_entity["current_frame"], x_sprite, y_sprite)
     end
 	end)
 
@@ -804,83 +802,87 @@ collector_of_safe_cells = function()
 end
 
 
-control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", "y_movement"},
+control_dragon_system = ecs_system({"actor", "is_hurt", "x_movement", "y_movement"},
   function(ecs_single_entity)
     if normal_phase or panic_phase == true then
-      if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == false then
+      if ecs_single_entity["actor"] == dragon and ecs_single_entity["is_hurt"] == false then
         if btn(0) then
-          ecs_single_entity.x_movement = -0.2
+          ecs_single_entity["x_movement"] = -0.2
         end
         if btn(1) then
-          ecs_single_entity.x_movement = 0.2
+          ecs_single_entity["x_movement"] = 0.2
         end
         if not btn(0) and not btn(1) then
-          ecs_single_entity.x_movement = 0
+          ecs_single_entity["x_movement"] = 0
         end
         if btn(2) then
-          ecs_single_entity.y_movement = -0.2
+          ecs_single_entity["y_movement"] = -0.2
         end
         if btn(3) then
-          ecs_single_entity.y_movement = 0.2
+          ecs_single_entity["y_movement"] = 0.2
         end
         if not btn(2) and not btn(3) then
-          ecs_single_entity.y_movement = 0
+          ecs_single_entity["y_movement"] = 0
         end
         if btnp(4) then
           if is_fireball_there == false then
             is_fireball_there = true
-            if ecs_single_entity.orientation == west then
-              add(world, {
-                actor = fireball,
-                sprite = sprite_fireball_left,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]},
-                x_movement = -0.4,
-                y_movement = 0,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
-            elseif ecs_single_entity.orientation == east then
-              add(world, {
-                actor = fireball,
-                sprite = sprite_fireball_right,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]},
-                x_movement = 0.4,
-                y_movement = 0,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
-            elseif ecs_single_entity.orientation == north then
-              add(world, {
-                actor = fireball,
-                sprite = sprite_fireball_up,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1},
-                x_movement = 0,
-                y_movement = -0.4,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
-            elseif ecs_single_entity.orientation == south then
-              add(world, {
-                actor = fireball,
-                sprite = sprite_fireball_down,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1},
-                x_movement = 0,
-                y_movement = 0.4,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
+            if ecs_single_entity["orientation"] == west then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = fireball
+              world[new_entry][sprite] = sprite_fireball_left
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
+              world[new_entry][x_movement] = -0.4
+              world[new_entry][y_movement] = 0
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
+
+            elseif ecs_single_entity["orientation"] == east then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = fireball
+              world[new_entry][sprite] = sprite_fireball_right
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
+              world[new_entry][x_movement] = 0.4
+              world[new_entry][y_movement] = 0
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
+
+            elseif ecs_single_entity["orientation"] == north then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = fireball
+              world[new_entry][sprite] = sprite_fireball_up
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
+              world[new_entry][x_movement] = 0
+              world[new_entry][y_movement] = -0.4,
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
+
+            elseif ecs_single_entity["orientation"] == south then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = fireball
+              world[new_entry][sprite] = sprite_fireball_down
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
+              world[new_entry][x_movement] = 0
+              world[new_entry][y_movement] = 0.4
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
+
             end
           end
         end
@@ -891,46 +893,46 @@ control_dragon_system = ecs_system({"actor", "is_hurt", "sprite", "x_movement", 
 
 dragon_sprite_system = ecs_system({"actor", "x_movement", "y_movement", "sprite"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == dragon then
-      if ecs_single_entity.x_movement < 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_left then
-          ecs_single_entity.sprite = sprite_dragon_fly1_left
+    if ecs_single_entity["actor"] == dragon then
+      if ecs_single_entity["x_movement"] < 0 then
+        if ecs_single_entity["sprite"] == sprite_dragon_fly2_left then
+          ecs_single_entity["sprite"] = sprite_dragon_fly1_left
         else
-          ecs_single_entity.sprite = sprite_dragon_fly2_left
+          ecs_single_entity["sprite"] = sprite_dragon_fly2_left
         end
       end
-      if ecs_single_entity.x_movement > 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_right then
-          ecs_single_entity.sprite = sprite_dragon_fly1_right
+      if ecs_single_entity["x_movement"] > 0 then
+        if ecs_single_entity["sprite"] == sprite_dragon_fly2_right then
+          ecs_single_entity["sprite"] = sprite_dragon_fly1_right
         else
-          ecs_single_entity.sprite = sprite_dragon_fly2_right
+          ecs_single_entity["sprite"] = sprite_dragon_fly2_right
         end
       end
-      if ecs_single_entity.y_movement < 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_up then
-          ecs_single_entity.sprite = sprite_dragon_fly1_up
+      if ecs_single_entity["y_movement"] < 0 then
+        if ecs_single_entity["sprite"] == sprite_dragon_fly2_up then
+          ecs_single_entity["sprite"] = sprite_dragon_fly1_up
         else
-          ecs_single_entity.sprite = sprite_dragon_fly2_up
+          ecs_single_entity["sprite"] = sprite_dragon_fly2_up
         end
       end
-      if ecs_single_entity.y_movement > 0 then
-        if ecs_single_entity.sprite == sprite_dragon_fly2_down then
-          ecs_single_entity.sprite = sprite_dragon_fly1_down
+      if ecs_single_entity["y_movement"] > 0 then
+        if ecs_single_entity["sprite"] == sprite_dragon_fly2_down then
+          ecs_single_entity["sprite"] = sprite_dragon_fly1_down
         else
-          ecs_single_entity.sprite = sprite_dragon_fly2_down
+          ecs_single_entity["sprite"] = sprite_dragon_fly2_down
         end
       end
 
       if btnp(4) then
         if normal_phase or panic_phase == true then
-          if ecs_single_entity.sprite == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
-            ecs_single_entity.sprite = sprite_dragon_fire_left
-          elseif ecs_single_entity.sprite == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
-            ecs_single_entity.sprite = sprite_dragon_fire_right
-          elseif ecs_single_entity.sprite == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
-            ecs_single_entity.sprite = sprite_dragon_fire_up
-          elseif ecs_single_entity.sprite == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
-            ecs_single_entity.sprite = sprite_dragon_fire_down
+          if ecs_single_entity["sprite"] == sprite_dragon_fly1_left or sprite_dragon_fly2_left then
+            ecs_single_entity["sprite"] = sprite_dragon_fire_left
+          elseif ecs_single_entity["sprite"] == sprite_dragon_fly1_right or sprite_dragon_fly2_right then
+            ecs_single_entity["sprite"] = sprite_dragon_fire_right
+          elseif ecs_single_entity["sprite"] == sprite_dragon_fly1_up or sprite_dragon_fly2_up then
+            ecs_single_entity["sprite"] = sprite_dragon_fire_up
+          elseif ecs_single_entity["sprite"] == sprite_dragon_fly1_down or sprite_dragon_fly2_down then
+            ecs_single_entity["sprite"] = sprite_dragon_fire_down
           end
         end
       end
@@ -940,13 +942,13 @@ dragon_sprite_system = ecs_system({"actor", "x_movement", "y_movement", "sprite"
 
 fireball_system = ecs_system({"actor", "touched_who", "has_collided"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == fireball
-    and ecs_single_entity.has_collided == true then
-      if ecs_single_entity.touched_who == flag_solidity then
+    if ecs_single_entity["actor"] == fireball
+    and ecs_single_entity["has_collided"] == true then
+      if ecs_single_entity["touched_who"] == flag_solidity then
         sfx(sound_effect_bump, 3)
-      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon then
+      elseif ecs_single_entity["touched_who"] == flag_solidity + flag_hurts_dragon then
         sfx(sound_effect_fire_hit, 3)
-      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon + flag_is_fireproof then
+      elseif ecs_single_entity["touched_who"] == flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         sfx(sound_effect_blocked_fire, 3)
       end
 
@@ -959,19 +961,19 @@ fireball_system = ecs_system({"actor", "touched_who", "has_collided"},
 locate_dragon_system = ecs_system({"actor"},
   function(ecs_single_entity)
     if actor == dragon then
-      dragon_location = ecs_single_entity.location
+      dragon_location = ecs_single_entity["location"]
     end
   end)
 
 
 return_to_your_places_system = ecs_system({"actor", "location"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == knight then
-      ecs_single_entity.location = place_knight()
-    elseif ecs_single_entity.actor == dragon then
-      ecs_single_entity.location = {2, 2}
+    if ecs_single_entity["actor"] == knight then
+      ecs_single_entity["location"] = place_knight()
+    elseif ecs_single_entity["actor"] == dragon then
+      ecs_single_entity["location"] = {2, 2}
     else
-      ecs_single_entity.location = place_subordinate()
+      ecs_single_entity["location"] = place_subordinate()
     end
   end)
 
@@ -1118,41 +1120,41 @@ remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sp
   function(ecs_single_entity)
     for key, value in pairs(safe_floor_locations) do
 
-      if ecs_single_entity.actor == fireball or arrow or dynamite then
-        if ecs_single_entity.location == value then
+      if ecs_single_entity["actor"] == fireball or arrow or dynamite then
+        if ecs_single_entity["location"] == value then
           del(key, value)
         end
       end
 
-      if ecs_single_entity.actor == fireball or arrow then
-        if ecs_single_entity.sprite == sprite_fireball_up or sprite_arrow_up then
-          if {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1} == value then
+      if ecs_single_entity["actor"] == fireball or arrow then
+        if ecs_single_entity["sprite"] == sprite_fireball_up or sprite_arrow_up then
+          if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1} == value then
             del(key, value)
           end
-        elseif ecs_single_entity.sprite == sprite_fireball_down or sprite_arrow_down then
-          if {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1} == value then
+        elseif ecs_single_entity["sprite"] == sprite_fireball_down or sprite_arrow_down then
+          if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1} == value then
             del(key, value)
           end
-        elseif ecs_single_entity.sprite == sprite_fireball_left or sprite_arrow_left then
-          if {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]} == value then
+        elseif ecs_single_entity["sprite"] == sprite_fireball_left or sprite_arrow_left then
+          if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]} == value then
             del(key, value)
           end
-        elseif ecs_single_entity.sprite == sprite_fireball_right or sprite_arrow_right then
-          if {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]} == value then
+        elseif ecs_single_entity["sprite"] == sprite_fireball_right or sprite_arrow_right then
+          if {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]} == value then
             del(key, value)
           end
         end
       end
 
-      if ecs_single_entity.actor == dynamite then
-        if value == {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]}
-        or {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]}
-        or {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1}
-        or {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1}
-        or {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2] - 1}
-        or {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2] + 1}
-        or {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2] - 1}
-        or {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2] + 1} then
+      if ecs_single_entity["actor"] == dynamite then
+        if value == {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
+        or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
+        or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
+        or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
+        or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] - 1}
+        or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] + 1}
+        or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] - 1}
+        or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] + 1} then
           del(key, value)
         end
       end
@@ -1167,54 +1169,54 @@ patrol_system = ecs_system({"actor",
                         "target"},
   function(ecs_single_entity)
     local picked_target = {}
-    if ecs_single_entity.actor == knight then
+    if ecs_single_entity["actor"] == knight then
       local knight_path = {}
       local knight_step = 1
     else
       local my_path = {}
     end
 
-    if ecs_single_entity.is_patrolling == true then
-      if ecs_single_entity.actor == joy then
+    if ecs_single_entity["is_patrolling"] == true then
+      if ecs_single_entity["actor"] == joy then
         if #my_path == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations[random_pick]
-          my_path = astar_search(ecs_single_entity.location, picked_target)
+          my_path = astar_search(ecs_single_entity["location"], picked_target)
         else
-          ecs_single_entity.target = queue_pop(my_path)
+          ecs_single_entity["target"] = queue_pop(my_path)
           move_opponent()
         end
 
       -- sadness stays still when "patrolling".
 
-      elseif ecs_single_entity.actor == fear then
+      elseif ecs_single_entity["actor"] == fear then
         if #my_path == 0 then
-          queue_push(my_path, ecs_single_entity.location, 0)
+          queue_push(my_path, ecs_single_entity["location"], 0)
           for key, value in pairs(safe_floor_locations) do
-            if {ecs_single_entity.x_location, ecs_single_entity.y_location - 1} == value then
+            if {ecs_single_entity["x_location"], ecs_single_entity["y_location"] - 1} == value then
               queue_push(my_path, value, 0)
               break
-            elseif {ecs_single_entity.x_location, ecs_single_entity.y_location + 1} == value then
+            elseif {ecs_single_entity["x_location"], ecs_single_entity["y_location"] + 1} == value then
               queue_push(my_path, value, 0)
               break
-            elseif {ecs_single_entity.x_location - 1, ecs_single_entity.y_location} == value then
+            elseif {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"]} == value then
               queue_push(my_path, value, 0)
               break
-            elseif {ecs_single_entity.x_location + 1, ecs_single_entity.y_location} == value then
+            elseif {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"]} == value then
               queue_push(my_path, value, 0)
               break
             end
           end
         else
-          ecs_single_entity.target = queue_pop(my_path)
-          queue_push(my_path, ecs_single_entity.target, 0)
+          ecs_single_entity["target"] = queue_pop(my_path)
+          queue_push(my_path, ecs_single_entity["target"], 0)
           move_opponent()
         end
 
-      elseif ecs_single_entity.actor == disgust then
+      elseif ecs_single_entity["actor"] == disgust then
         if #my_path == 0 then
           for key, value in pairs(safe_floor_locations) do
-            if ecs_single_entity.location ~= value then
+            if ecs_single_entity["location"] ~= value then
               local check_x_location = value[1]
               local check_y_location = value[2]
 
@@ -1231,14 +1233,14 @@ patrol_system = ecs_system({"actor",
               end
             end
           end
-          my_path = astar_search(ecs_single_entity.location, picked_target)
+          my_path = astar_search(ecs_single_entity["location"], picked_target)
 
         else
-          ecs_single_entity.target = queue_pop(my_path)
+          ecs_single_entity["target"] = queue_pop(my_path)
           move_opponent()
         end
 
-      elseif ecs_single_entity.actor == anger then
+      elseif ecs_single_entity["actor"] == anger then
         if #my_path == 0 then
           local top_right_corner = flr(#safe_floor_locations / 2) - 1
           local bottom_left_corner = flr(#safe_floor_locations / 2) + 1
@@ -1247,36 +1249,36 @@ patrol_system = ecs_system({"actor",
           queue_push(my_path, safe_floor_locations[#safe_floor_locations], 0)
           queue_push(my_path, safe_floor_locations[bottom_left_corner], 0)
         else
-          ecs_single_entity.target = queue_pop(my_path)
-          queue_push(my_path, ecs_single_entity.target, 0)
+          ecs_single_entity["target"] = queue_pop(my_path)
+          queue_push(my_path, ecs_single_entity["target"], 0)
           move_opponent()
         end
 
-      elseif ecs_single_entity.actor == surprise then
+      elseif ecs_single_entity["actor"] == surprise then
         if #my_path == 0 then
           random_pick = flr (rnd (#safe_floor_locations) )
           picked_target = safe_floor_locations[random_pick]
-          my_path = astar_search(ecs_single_entity.location, picked_target)
+          my_path = astar_search(ecs_single_entity["location"], picked_target)
           if dynamite_count < surprise_count then
-            add(world, {
-              actor = dynamite,
-              sprite = sprite_dynamite_off,
-              current_frame = 0,
-              total_frames = 1,
-              location = {ecs_single_entity.location[1], ecs_single_entity.location[2]},
-              solidity = false,
-              has_collided = false,
-              touched_who = nil,
-              fuse_count = flr (rnd (9) )
-            })
-            dynamite_count = dynamite_count + 1
+						local new_entry = #world + 1
+						world[new_entry] = {}
+            world[new_entry][actor] = dynamite
+            world[new_entry][sprite] = sprite_dynamite_off
+            world[new_entry][current_frame] = 0
+            world[new_entry][total_frames] = 1
+            world[new_entry][location] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2]}
+            world[new_entry][solidity] = false
+            world[new_entry][has_collided] = false
+            world[new_entry][touched_who] = nil
+            world[new_entry][fuse_count] = flr (rnd (9) )
+            world[new_entry][dynamite_count] = dynamite_count + 1
           end
         else
-          ecs_single_entity.target = queue_pop(my_path)
+          ecs_single_entity["target"] = queue_pop(my_path)
           move_opponent()
         end
 
-      elseif ecs_single_entity.actor == knight then
+      elseif ecs_single_entity["actor"] == knight then
         if #knight_path == 0 then
           if mget(last_location[1] - 1, last_location[2]) == sprite_floor then
             add (knight_path, {last_location[1] - 1, last_location[2]} )
@@ -1289,7 +1291,7 @@ patrol_system = ecs_system({"actor",
           end
         else
           if knight_step <= #knight_path then
-            ecs_single_entity.target = knight_path[knight_step]
+            ecs_single_entity["target"] = knight_path[knight_step]
             move_opponent()
             knight_step = knight_step + 1
           else
@@ -1306,19 +1308,19 @@ patrol_system = ecs_system({"actor",
 
 
 move_opponent = function()
-  while ecs_single_entity.location[1] ~= ecs_single_entity.target[1]
-    and ecs_single_entity.location[2] ~= ecs_single_entity.target[2] do
+  while ecs_single_entity["location"][1] ~= ecs_single_entity["target"][1]
+    and ecs_single_entity["location"][2] ~= ecs_single_entity["target"][2] do
 
-      if ecs_single_entity.touched_who < 1 then
-        if ecs_single_entity.location[1] < ecs_single_entity.target[1] then
-          ecs_single_entity.x_movement = 0.1
-        elseif ecs_single_entity.location[1] > ecs_single_entity.target[1] then
-          ecs_single_entity.x_movement = -0.1
+      if ecs_single_entity["touched_who"] < 1 then
+        if ecs_single_entity["location"][1] < ecs_single_entity["target"][1] then
+          ecs_single_entity["x_movement"] = 0.1
+        elseif ecs_single_entity["location"][1] > ecs_single_entity["target"][1] then
+          ecs_single_entity["x_movement"] = -0.1
         end
-        if ecs_single_entity.location[2] < ecs_single_entity.target[2] then
-          ecs_single_entity.y_movement = 0.1
-        elseif ecs_single_entity.location[2] > ecs_single_entity.target[2] then
-          ecs_single_entity.y_movement = -0.1
+        if ecs_single_entity["location"][2] < ecs_single_entity["target"][2] then
+          ecs_single_entity["y_movement"] = 0.1
+        elseif ecs_single_entity["location"][2] > ecs_single_entity["target"][2] then
+          ecs_single_entity["y_movement"] = -0.1
         end
       end
 
@@ -1328,17 +1330,17 @@ end
 
 patrol_to_hunt_system = ecs_system({"actor", "is_patrolling", "is_hunting"},
   function(ecs_single_entity)
-    if ecs_single_entity.is_hunting == false then
-      if ecs_single_entity.actor == knight and got_treasure == true then
-        ecs_single_entity.is_patrolling = false
-        ecs_single_entity.is_hunting = true
+    if ecs_single_entity["is_hunting"] == false then
+      if ecs_single_entity["actor"] == knight and got_treasure == true then
+        ecs_single_entity["is_patrolling"] = false
+        ecs_single_entity["is_hunting"] = true
       end
 
-      local look_around = ecs_single_entity.cross_of_sight
+      local look_around = ecs_single_entity["cross_of_sight"]
       for key, check in pairs(look_around) do
         if dragon_location == look_around[check] then
-          ecs_single_entity.is_patrolling = false
-          ecs_single_entity.is_hunting = true
+          ecs_single_entity["is_patrolling"] = false
+          ecs_single_entity["is_hunting"] = true
         end
       end
     end
@@ -1352,93 +1354,94 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
     local my_path = {}
     local pause_counter = 3
 
-      if ecs_single_entity.is_hunting == true then
+      if ecs_single_entity["is_hunting"] == true then
         if panic_phase == false then
           panic_phase = true
           music_start(music_panic)
         end
 
-        if ecs_single_entity.actor == joy or surprise then
-          if ecs_single_entity.actor == surprise then
+        if ecs_single_entity["actor"] == joy or surprise then
+          if ecs_single_entity["actor"] == surprise then
             while pause_counter > 0 do
               pause_counter = pause_counter - 1
             end
           end
 
           if #my_path == 0 then
-            my_path = astar_search(ecs_single_entity.location, dragon_location)
+            my_path = astar_search(ecs_single_entity["location"], dragon_location)
           else
-            ecs_single_entity.target = queue_pop(my_path)
+            ecs_single_entity["target"] = queue_pop(my_path)
             move_opponent()
           end
 
         -- sadness stays still when "hunting".
 
-        elseif ecs_single_entity.actor == fear then
+        elseif ecs_single_entity["actor"] == fear then
           while pause_counter > 0 do
             pause_counter = pause_counter - 1
           end
           if arrow_count < fear_count then
-            if ecs_single_entity.orientation == west then
-              add(world, {
-                actor = arrow,
-                sprite = sprite_arrow_left,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1] - 1, ecs_single_entity.location[2]},
-                x_movement = -0.4,
-                y_movement = 0,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
+            if ecs_single_entity["orientation"] == west then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = arrow
+              world[new_entry][sprite] = sprite_arrow_left
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
+              world[new_entry][x_movement] = -0.4
+              world[new_entry][y_movement] = 0
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
 
-            elseif ecs_single_entity.orientation == east then
-              add(world, {
-                actor = arrow,
-                sprite = sprite_arrow_left,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1] + 1, ecs_single_entity.location[2]},
-                x_movement = 0.4,
-                y_movement = 0,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
+            elseif ecs_single_entity["orientation"] == east then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = arrow
+              world[new_entry][sprite] = sprite_arrow_right
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
+              world[new_entry][x_movement] = 0.4
+              world[new_entry][y_movement] = 0
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
 
-            elseif ecs_single_entity.orientation == north then
-              add(world, {
-                actor = arrow,
-                sprite = sprite_arrow_left,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] - 1},
-                x_movement = 0,
-                y_movement = -0.4,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
+            elseif ecs_single_entity["orientation"] == north then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = arrow
+              world[new_entry][sprite] = sprite_arrow_up
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
+              world[new_entry][x_movement] = 0
+              world[new_entry][y_movement] = -0.4
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
 
-            elseif ecs_single_entity.orientation == south then
-              add(world, {
-                actor = arrow,
-                sprite = sprite_arrow_left,
-                current_frame = 0,
-                total_frames = 1,
-                location = {ecs_single_entity.location[1], ecs_single_entity.location[2] + 1},
-                x_movement = 0,
-                y_movement = 0.4,
-                solidity = false,
-                has_collided = false,
-                touched_who = nil
-              })
+            elseif ecs_single_entity["orientation"] == south then
+							local new_entry = #world + 1
+              world[new_entry] = {}
+              world[new_entry][actor] = arrow
+              world[new_entry][sprite] = sprite_arrow_down
+              world[new_entry][current_frame] = 0
+              world[new_entry][total_frames] = 1
+              world[new_entry][location] = {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
+              world[new_entry][x_movement] = 0
+              world[new_entry][y_movement] = 0.4
+              world[new_entry][solidity] = false
+              world[new_entry][has_collided] = false
+              world[new_entry][touched_who] = nil
+
             end
             arrow_count = arrow_count + 1
           end
 
-        elseif ecs_single_entity.actor == disgust then
+        elseif ecs_single_entity["actor"] == disgust then
           if #my_path == 0 then
             local my_goal = dragon_location
             local seed = flr(rnd(3))
@@ -1453,31 +1456,31 @@ hunt_system = ecs_system({"actor", "is_hunting", "location", "target",
               my_goal[2] = my_goal[2] + 2
             end
 
-            my_path = astar_search(ecs_single_entity.location, my_goal)
+            my_path = astar_search(ecs_single_entity["location"], my_goal)
           else
-            ecs_single_entity.target = queue_pop(my_path)
+            ecs_single_entity["target"] = queue_pop(my_path)
             move_opponent()
           end
 
-        elseif ecs_single_entity.actor == anger or knight then
+        elseif ecs_single_entity["actor"] == anger or knight then
           if #my_path == 0 then
-            my_path = astar_search(ecs_single_entity.location, dragon_location)
+            my_path = astar_search(ecs_single_entity["location"], dragon_location)
 
           else
-            ecs_single_entity.target = queue_pop(my_path)
-            while ecs_single_entity.location[1] ~= ecs_single_entity.target[1]
-              and ecs_single_entity.location[2] ~= ecs_single_entity.target[2] do
+            ecs_single_entity["target"] = queue_pop(my_path)
+            while ecs_single_entity["location"][1] ~= ecs_single_entity["target"][1]
+              and ecs_single_entity["location"][2] ~= ecs_single_entity["target"][2] do
 
-                if ecs_single_entity.touched_who < 1 then
-                  if ecs_single_entity.location[1] < ecs_single_entity.target[1] then
-                    ecs_single_entity.x_movement = 0.2
-                  elseif ecs_single_entity.location[1] > ecs_single_entity.target[1] then
-                    ecs_single_entity.x_movement = -0.2
+                if ecs_single_entity["touched_who"] < 1 then
+                  if ecs_single_entity["location"][1] < ecs_single_entity["target"][1] then
+                    ecs_single_entity["x_movement"] = 0.2
+                  elseif ecs_single_entity["location"][1] > ecs_single_entity["target"][1] then
+                    ecs_single_entity["x_movement"] = -0.2
                   end
-                  if ecs_single_entity.location[2] < ecs_single_entity.target[2] then
-                    ecs_single_entity.y_movement = 0.2
-                  elseif ecs_single_entity.location[2] > ecs_single_entity.target[2] then
-                    ecs_single_entity.y_movement = -0.2
+                  if ecs_single_entity["location"][2] < ecs_single_entity["target"][2] then
+                    ecs_single_entity["y_movement"] = 0.2
+                  elseif ecs_single_entity["location"][2] > ecs_single_entity["target"][2] then
+                    ecs_single_entity["y_movement"] = -0.2
                   end
                 end
 
@@ -1510,61 +1513,61 @@ end
 
 fight_system = ecs_system({"actor", "x_location", "y_location"},
   function(ecs_single_entity)
-    if ecs_single_entity.orientation == north then
-      if {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1}
-      or {ecs_single_entity.x_location, ecs_single_entity.y_location - 1}
-      or {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1} == dragon_location then
+    if ecs_single_entity["orientation"] == north then
+      if {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] - 1}
+      or {ecs_single_entity["x_location"], ecs_single_entity["y_location"] - 1}
+      or {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] - 1} == dragon_location then
         relocate_opponent_to_dragon()
       end
-    elseif ecs_single_entity.orientation == south then
-      if {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1}
-      or {ecs_single_entity.x_location, ecs_single_entity.y_location + 1}
-      or {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} == dragon_location then
+    elseif ecs_single_entity["orientation"] == south then
+      if {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] + 1}
+      or {ecs_single_entity["x_location"], ecs_single_entity["y_location"] + 1}
+      or {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] + 1} == dragon_location then
         relocate_opponent_to_dragon()
       end
-    elseif ecs_single_entity.orientation == west then
-      if {ecs_single_entity.x_location - 1, ecs_single_entity.y_location - 1}
-      or {ecs_single_entity.x_location - 1, ecs_single_entity.y_location}
-      or {ecs_single_entity.x_location - 1, ecs_single_entity.y_location + 1} == dragon_location then
+    elseif ecs_single_entity["orientation"] == west then
+      if {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] - 1}
+      or {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"]}
+      or {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"] + 1} == dragon_location then
         relocate_opponent_to_dragon()
       end
-    elseif ecs_single_entity.orientation == east then
-      if {ecs_single_entity.x_location + 1, ecs_single_entity.y_location - 1}
-      or {ecs_single_entity.x_location + 1, ecs_single_entity.y_location}
-      or {ecs_single_entity.x_location + 1, ecs_single_entity.y_location + 1} == dragon_location then
+    elseif ecs_single_entity["orientation"] == east then
+      if {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] - 1}
+      or {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"]}
+      or {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"] + 1} == dragon_location then
         relocate_opponent_to_dragon()
       end
     end
 
-    if ecs_single_entity.actor == sadness then
-      if ecs_single_entity.orientation == west or east then
-        if {ecs_single_entity.x_location, ecs_single_entity.y_location - 1}
-        or {ecs_single_entity.x_location, ecs_single_entity.y_location + 1} == dragon_location then
+    if ecs_single_entity["actor"] == sadness then
+      if ecs_single_entity["orientation"] == west or east then
+        if {ecs_single_entity["x_location"], ecs_single_entity["y_location"] - 1}
+        or {ecs_single_entity["x_location"], ecs_single_entity["y_location"] + 1} == dragon_location then
           relocate_opponent_to_dragon()
         end
-      elseif ecs_single_entity.orientation == north or south then
-        if {ecs_single_entity.x_location - 1, ecs_single_entity.y_location}
-        or {ecs_single_entity.x_location + 1, ecs_single_entity.y_location} == dragon_location then
+      elseif ecs_single_entity["orientation"] == north or south then
+        if {ecs_single_entity["x_location"] - 1, ecs_single_entity["y_location"]}
+        or {ecs_single_entity["x_location"] + 1, ecs_single_entity["y_location"]} == dragon_location then
           relocate_opponent_to_dragon()
         end
       end
 
-    elseif ecs_single_entity.actor == disgust then
-      if ecs_single_entity.orientation == west then
-        if {ecs_single_entity.x_location - 2, ecs_single_entity.y_location} then
+    elseif ecs_single_entity["actor"] == disgust then
+      if ecs_single_entity["orientation"] == west then
+        if {ecs_single_entity["x_location"] - 2, ecs_single_entity["y_location"]} then
           relocate_opponent_to_dragon()
           -- actually, disgust should stay in place with the lance touching the dragon.
         end
-      elseif ecs_single_entity.orientation == east then
-        if {ecs_single_entity.x_location + 2, ecs_single_entity.y_location} then
+      elseif ecs_single_entity["orientation"] == east then
+        if {ecs_single_entity["x_location"] + 2, ecs_single_entity["y_location"]} then
           relocate_opponent_to_dragon()
         end
-      elseif ecs_single_entity.orientation == north then
-        if {ecs_single_entity.x_location, ecs_single_entity.y_location - 2} then
+      elseif ecs_single_entity["orientation"] == north then
+        if {ecs_single_entity["x_location"], ecs_single_entity["y_location"] - 2} then
           relocate_opponent_to_dragon()
         end
-      elseif ecs_single_entity.orientation == south then
-        if {ecs_single_entity.x_location, ecs_single_entity.y_location + 2} then
+      elseif ecs_single_entity["orientation"] == south then
+        if {ecs_single_entity["x_location"], ecs_single_entity["y_location"] + 2} then
           relocate_opponent_to_dragon()
         end
       end
@@ -1575,24 +1578,24 @@ fight_system = ecs_system({"actor", "x_location", "y_location"},
 
 
 relocate_opponent_to_dragon = function()
-  ecs_single_entity.x_location = dragon_location[1]
-  ecs_single_entity.y_location = dragon_location[2]
+  ecs_single_entity["x_location"] = dragon_location[1]
+  ecs_single_entity["y_location"] = dragon_location[2]
 end
 
 
 arrow_system = ecs_system({"actor", "touched_who", "has_collided"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == arrow
-    and ecs_single_entity.has_collided == true then
-      if ecs_single_entity.touched_who == flag_solidity
+    if ecs_single_entity["actor"] == arrow
+    and ecs_single_entity["has_collided"] == true then
+      if ecs_single_entity["touched_who"] == flag_solidity
       or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
         sfx(sound_effect_bump, 3)
-      elseif ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
+      elseif ecs_single_entity["touched_who"] == flag_solidity + flag_hurts_dragon
       or flag_solidity + flag_hurts_subordinate then
         sfx(sound_effect_pierce, 3)
       end
 
-      del(world, {location == ecs_single_entity.location})
+      del(world, {location == ecs_single_entity["location"]})
       arrow_count = arrow_count - 1
     end
   end)
@@ -1600,16 +1603,16 @@ arrow_system = ecs_system({"actor", "touched_who", "has_collided"},
 
 dynamite_system = ecs_system({"fuse_count", "touched_who", "has_collided"},
   function(ecs_single_entity)
-    if ecs_single_entity.fuse_count > 0 then
-      ecs_single_entity.fuse_count = ecs_single_entity.fuse_count - 1
+    if ecs_single_entity["fuse_count"] > 0 then
+      ecs_single_entity["fuse_count"] = ecs_single_entity["fuse_count"] - 1
     elseif fuse_count <= 0 then
-      ecs_single_entity.sprite = sprite_dynamite_on
+      ecs_single_entity["sprite"] = sprite_dynamite_on
       sfx(sound_effect_explode, 3)
       for iterator = 1, 3 do
         --nothing
       end
 
-      del(world, {location == ecs_single_entity.location})
+      del(world, {location == ecs_single_entity["location"]})
       dynamite_count = dynamite_count - 1
     end
   end)
@@ -1617,19 +1620,19 @@ dynamite_system = ecs_system({"fuse_count", "touched_who", "has_collided"},
 
 did_that_hurt_system = ecs_system({"touched_who", "actor", "is_hurt"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == dragon then
-      if ecs_single_entity.touched_who == flag_solidity + flag_hurts_dragon
+    if ecs_single_entity["actor"] == dragon then
+      if ecs_single_entity["touched_who"] == flag_solidity + flag_hurts_dragon
       or flag_solidity + flag_hurts_dragon + flag_is_fireproof then
-        ecs_single_entity.is_hurt = true
+        ecs_single_entity["is_hurt"] = true
       end
-    elseif ecs_single_entity.actor == joy
+    elseif ecs_single_entity["actor"] == joy
                                     or sadness
                                     or fear
                                     or disgust
                                     or anger
                                     or surprise then
-      if ecs_single_entity.touched_who == flag_solidity + flag_hurts_subordinate then
-        ecs_single_entity.is_hurt = true
+      if ecs_single_entity["touched_who"] == flag_solidity + flag_hurts_subordinate then
+        ecs_single_entity["is_hurt"] = true
       end
     end
   end)
@@ -1637,32 +1640,32 @@ did_that_hurt_system = ecs_system({"touched_who", "actor", "is_hurt"},
 
 attack_dragon_system = ecs_system({"location", "actor", "sprite", "total_frames", "orientation"},
   function(ecs_single_entity)
-    if ecs_single_entity.location == dragon_location then
+    if ecs_single_entity["location"] == dragon_location then
       ecs_single_entity,total_frames = 1
-      if ecs_single_entity.actor == joy then
-        ecs_single_entity.sprite = sprite_joy_attack
+      if ecs_single_entity["actor"] == joy then
+        ecs_single_entity["sprite"] = sprite_joy_attack
         sfx(sound_effect_bump, 3)
-      elseif ecs_single_entity.actor == sadness then
-        ecs_single_entity.sprite = sprite_sadness_attack
+      elseif ecs_single_entity["actor"] == sadness then
+        ecs_single_entity["sprite"] = sprite_sadness_attack
         sfx(sound_effect_slice, 3)
-      elseif ecs_single_entity.actor == fear then
-        ecs_single_entity.sprite = sprite_fear_attack
+      elseif ecs_single_entity["actor"] == fear then
+        ecs_single_entity["sprite"] = sprite_fear_attack
         sfx(sound_effect_explode, 3)
-      elseif ecs_single_entity.actor == disgust then
-        if ecs_single_entity.orientation == north or south then
-          ecs_single_entity.sprite = sprite_disgust_attack_vertical
+      elseif ecs_single_entity["actor"] == disgust then
+        if ecs_single_entity["orientation"] == north or south then
+          ecs_single_entity["sprite"] = sprite_disgust_attack_vertical
         else
-          ecs_single_entity.sprite = sprite_disgust_attack_horizontal
+          ecs_single_entity["sprite"] = sprite_disgust_attack_horizontal
         end
         sfx(sound_effect_pierce, 3)
-      elseif ecs_single_entity.actor == anger then
-        ecs_single_entity.sprite = sprite_anger_attack
+      elseif ecs_single_entity["actor"] == anger then
+        ecs_single_entity["sprite"] = sprite_anger_attack
         sfx(sound_effect_slice, 3)
-      elseif ecs_single_entity.actor == surprise then
-        ecs_single_entity.sprite = sprite_surprise_attack
+      elseif ecs_single_entity["actor"] == surprise then
+        ecs_single_entity["sprite"] = sprite_surprise_attack
         sfx(sound_effect_explode, 3)
-      elseif ecs_single_entity.actor == knight then
-        ecs_single_entity.sprite = sprite_knight_attack
+      elseif ecs_single_entity["actor"] == knight then
+        ecs_single_entity["sprite"] = sprite_knight_attack
         sfx(sound_effect_slice, 3)
       end
 
@@ -1672,17 +1675,17 @@ attack_dragon_system = ecs_system({"location", "actor", "sprite", "total_frames"
 
 lance_system = ecs_system({"sprite", "orientation", "x_location", "y_location"},
   function(ecs_single_entity)
-    if ecs_single_entity.sprite == sprite_disgust_attack_horizontal then
-      if ecs_single_entity.orientation == west then
-        spr(sprite_lance_up, (ecs_single_entity.x_location - 1) * 8, ecs_single_entity.y_location * 8)
-      elseif ecs_single_entity.orientation == east then
-        spr(sprite_lance_up, (ecs_single_entity.x_location + 1) * 8, ecs_single_entity.y_location * 8)
+    if ecs_single_entity["sprite"] == sprite_disgust_attack_horizontal then
+      if ecs_single_entity["orientation"] == west then
+        spr(sprite_lance_up, (ecs_single_entity["x_location"] - 1) * 8, ecs_single_entity["y_location"] * 8)
+      elseif ecs_single_entity["orientation"] == east then
+        spr(sprite_lance_up, (ecs_single_entity["x_location"] + 1) * 8, ecs_single_entity["y_location"] * 8)
       end
-    elseif ecs_single_entity.sprite == sprite_disgust_attack_vertical then
-      if ecs_single_entity.orientation == north then
-        spr(sprite_lance_up, ecs_single_entity.x_location * 8, (ecs_single_entity.y_location - 1) * 8)
-      elseif ecs_single_entity.orientation == south then
-        spr(sprite_lance_up, ecs_single_entity.x_location * 8, (ecs_single_entity.y_location + 1) * 8)
+    elseif ecs_single_entity["sprite"] == sprite_disgust_attack_vertical then
+      if ecs_single_entity["orientation"] == north then
+        spr(sprite_lance_up, ecs_single_entity["x_location"] * 8, (ecs_single_entity["y_location"] - 1) * 8)
+      elseif ecs_single_entity["orientation"] == south then
+        spr(sprite_lance_up, ecs_single_entity["x_location"] * 8, (ecs_single_entity["y_location"] + 1) * 8)
       end
     end
   end)
@@ -1690,23 +1693,23 @@ lance_system = ecs_system({"sprite", "orientation", "x_location", "y_location"},
 
 embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite", "total_frames"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == dragon and ecs_single_entity.is_hurt == true then
+    if ecs_single_entity["actor"] == dragon and ecs_single_entity["is_hurt"] == true then
       normal_phase = false
       panic_phase = false
       music_stop()
 
-      ecs_single_entity.total_frames = 1
-      if ecs_single_entity.orientation == west then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_left
+      ecs_single_entity["total_frames"] = 1
+      if ecs_single_entity["orientation"] == west then
+        ecs_single_entity["sprite"] = sprite_dragon_embarrassed_left
       end
-      if ecs_single_entity.orientation == east then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_right
+      if ecs_single_entity["orientation"] == east then
+        ecs_single_entity["sprite"] = sprite_dragon_embarrassed_right
       end
-      if ecs_single_entity.orientation == north then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_up
+      if ecs_single_entity["orientation"] == north then
+        ecs_single_entity["sprite"] = sprite_dragon_embarrassed_up
       end
-      if ecs_single_entity.orientation == south then
-        ecs_single_entity.sprite = sprite_dragon_embarrassed_down
+      if ecs_single_entity["orientation"] == south then
+        ecs_single_entity["sprite"] = sprite_dragon_embarrassed_down
       end
 
       music_start(music_failure)
@@ -1715,10 +1718,10 @@ embarrass_dragon_system = ecs_system({"actor", "is_hurt", "orientation", "sprite
       until stat(16) == nil
 
       repeat
-        ecs_single_entity.location[1] = ecs_single_entity.location[1] - 1
-        ecs_single_entity.location[2] = ecs_single_entity.location[2] - 1
+        ecs_single_entity["location"][1] = ecs_single_entity["location"][1] - 1
+        ecs_single_entity["location"][2] = ecs_single_entity["location"][2] - 1
         sfx(sound_effect_retreat, 3)
-      until ecs_single_entity.location[1] < 0 and ecs_single_entity.location[2] < 0
+      until ecs_single_entity["location"][1] < 0 and ecs_single_entity["location"][2] < 0
 
       if opportunities < 1 then
         lost_game()
@@ -1748,26 +1751,26 @@ end
 hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite", "total_frames",
                                   "x_location", "y_location", "location"},
   function(ecs_single_entity)
-    if ecs_single_entity.is_hurt == true and ecs_single_entity.actor == joy
+    if ecs_single_entity["is_hurt"] == true and ecs_single_entity["actor"] == joy
                                                                       or sadness
                                                                       or fear
                                                                       or disgust
                                                                       or anger
                                                                       or surprise then
 
-      ecs_single_entity.total_frames = 1
-      if ecs_single_entity.actor == joy then
-        ecs_single_entity.sprite = sprite_joy_got_hurt
-      elseif ecs_single_entity.actor == sadness then
-        ecs_single_entity.sprite = sprite_sadness_got_hurt
-      elseif ecs_single_entity.actor == fear then
-        ecs_single_entity.sprite = sprite_fear_got_hurt
-      elseif ecs_single_entity.actor == disgust then
-        ecs_single_entity.sprite = sprite_disgust_got_hurt
-      elseif ecs_single_entity.actor == anger then
-        ecs_single_entity.sprite = sprite_anger_got_hurt
-      elseif ecs_single_entity.actor == surprise then
-        ecs_single_entity.sprite = sprite_surprise_got_hurt
+      ecs_single_entity["total_frames"] = 1
+      if ecs_single_entity["actor"] == joy then
+        ecs_single_entity["sprite"] = sprite_joy_got_hurt
+      elseif ecs_single_entity["actor"] == sadness then
+        ecs_single_entity["sprite"] = sprite_sadness_got_hurt
+      elseif ecs_single_entity["actor"] == fear then
+        ecs_single_entity["sprite"] = sprite_fear_got_hurt
+      elseif ecs_single_entity["actor"] == disgust then
+        ecs_single_entity["sprite"] = sprite_disgust_got_hurt
+      elseif ecs_single_entity["actor"] == anger then
+        ecs_single_entity["sprite"] = sprite_anger_got_hurt
+      elseif ecs_single_entity["actor"] == surprise then
+        ecs_single_entity["sprite"] = sprite_surprise_got_hurt
       end
 
       for frame = 1, 4 do
@@ -1777,16 +1780,16 @@ hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite", "total_frame
       sfx(sound_effect_warp, 3)
       for frame = 1, 8 do
         if frame % 2 == 1 then
-          ecs_single_entity.sprite = sprite_warp1
+          ecs_single_entity["sprite"] = sprite_warp1
         else
-          ecs_single_entity.sprite = sprite_warp2
+          ecs_single_entity["sprite"] = sprite_warp2
         end
       end
 
-      del(world, {location == ecs_single_entity.location})
-      if ecs_single_entity.actor == fear then
+      del(world, {location == ecs_single_entity["location"]})
+      if ecs_single_entity["actor"] == fear then
         fear_count = fear_count - 1
-      elseif ecs_single_entity.actor == surprise then
+      elseif ecs_single_entity["actor"] == surprise then
         surprise_count = surprise_count - 1
       end
     end
@@ -1795,8 +1798,8 @@ hurt_subordinate_system = ecs_system({"is_hurt", "actor", "sprite", "total_frame
 
 treasure_system = ecs_system({"actor", "touched_who"},
   function(ecs_single_entity)
-    if ecs_single_entity.actor == dragon
-    and ecs_single_entity.touched_who == flag_solidity + flag_is_fireproof then
+    if ecs_single_entity["actor"] == dragon
+    and ecs_single_entity["touched_who"] == flag_solidity + flag_is_fireproof then
       got_treasure = true
 			mset(1, 0, sprite_open_door)
       sfx(sound_effect_treasure, 3)
@@ -2191,7 +2194,7 @@ __sfx__
 010f0000243302433024330243351f3301f3352033020335223302233022330223351d3301d3351f3301f335203302033020330203351b3301b3351d3301d3301f3301f33520330203351f3301f3352233022335
 010f00003061503330073300c3300c3350f3300f3350c3300a3300a3350e3300a33005330023300033000335003300033003330083300c3300e330083300833507330073350733008330073300b3300e33011330
 010f0000243402434024340243402434024340243402434024345243002430024300223002230022300223000f3300f3300f3300f3300f3300f3300f3350e3000e3300e3300e3300e33022340223402234022345
-010f00002434024340243402434024340243402434024340243450e3000e3000000000000000000e3300e3350f3300f3300f3300f3300f3300f33010330103350e3300e3300e3300e3300e3300e3300e33522300
+010f00002434024340243402434024340243402434024340243450e3000e3000000000000000000e3300e3350f3300f3300f3300f3300f3300f33510330103350e3300e3300e3300e3300e3300e3300e33522300
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
