@@ -486,26 +486,26 @@ populate = function()
 	  ["touched_who"] = nil
 	}
 
-  for iterator = 3, (flr (current_dungeon_size / 3) + 1) do
-    world[iterator] = {
-	    ["actor"] = generate_emotion(),
-	    ["sprite"] = sprite_knight_walk1,
-	    ["current_frame"] = 0,
-	    ["total_frames"] = 2,
-	    ["location"] = place_subordinate(),
-	    ["orientation"] = "north",
-	    ["cross_of_sight"] = {},
-	    ["target"] = {},
-	    ["is_patrolling"] = false,
-	    ["is_hunting"] = false,
-	    ["is_hurt"] = false,
-	    ["x_movement"] = 0,
-	    ["y_movement"] = 0,
-	    ["solidity"] = false,
-	    ["has_collided"] = false,
-	    ["touched_who"] = nil
-		}
-  end
+  --for iterator = 3, (flr (current_dungeon_size / 3) + 1) do
+    --world[iterator] = {
+	    --["actor"] = generate_emotion(),
+	    --["sprite"] = sprite_knight_walk1,
+	    --["current_frame"] = 0,
+	    --["total_frames"] = 2,
+	    --["location"] = place_subordinate(),
+	    --["orientation"] = "north",
+	    --["cross_of_sight"] = {},
+	    --["target"] = {},
+	    --["is_patrolling"] = false,
+	    --["is_hunting"] = false,
+	    --["is_hurt"] = false,
+	    --["x_movement"] = 0,
+	    --["y_movement"] = 0,
+	    --["solidity"] = false,
+	    --["has_collided"] = false,
+	    --["touched_who"] = nil
+		--}
+  --end
 
 end
 
@@ -1111,25 +1111,27 @@ remove_hazards_from_safe_locations_system = ecs_system({"actor", "location", "sp
         end
       end
 
-      if ecs_single_entity["actor"] == "fireball" or "arrow" then
-        if ecs_single_entity["sprite"] == sprite_fireball_up or sprite_arrow_up then
-          if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1} == value then
-            ecs_single_entity[key] = nil
-          end
-        elseif ecs_single_entity["sprite"] == sprite_fireball_down or sprite_arrow_down then
-          if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1} == value then
-            ecs_single_entity[key] = nil
-          end
-        elseif ecs_single_entity["sprite"] == sprite_fireball_left or sprite_arrow_left then
-          if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]} == value then
-            ecs_single_entity[key] = nil
-          end
-        elseif ecs_single_entity["sprite"] == sprite_fireball_right or sprite_arrow_right then
-          if {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]} == value then
-            ecs_single_entity[key] = nil
-          end
-        end
-      end
+      if ecs_single_entity["actor"] == "fireball" or "arrow" and ecs_single_entity["location"] ~= nil then
+				if ecs_single_entity["location"][1] > 1 and ecs_single_entity["location"][2] > 1 then
+        	if ecs_single_entity["sprite"] == sprite_fireball_up or sprite_arrow_up then
+	          if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1} == value then --the location is nil
+	            ecs_single_entity[key] = nil
+	          end
+	        elseif ecs_single_entity["sprite"] == sprite_fireball_down or sprite_arrow_down then
+	          if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1} == value then
+	            ecs_single_entity[key] = nil
+	          end
+	        elseif ecs_single_entity["sprite"] == sprite_fireball_left or sprite_arrow_left then
+	          if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]} == value then
+	            ecs_single_entity[key] = nil
+	          end
+	        elseif ecs_single_entity["sprite"] == sprite_fireball_right or sprite_arrow_right then
+	          if {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]} == value then
+	            ecs_single_entity[key] = nil
+	          end
+	        end
+	      end
+			end
 
       if ecs_single_entity["actor"] == "dynamite" then
         if value == {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
@@ -1502,74 +1504,85 @@ end
 
 fight_system = ecs_system({"actor", "location"},
   function(ecs_single_entity)
-    if ecs_single_entity["orientation"] == "north" then
-      if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] - 1}
-      or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
-      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] - 1} == dragon_location then
-        relocate_opponent_to_dragon()
-      end
-    elseif ecs_single_entity["orientation"] == "south" then
-      if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] + 1}
-      or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
-      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] + 1} == dragon_location then
-        relocate_opponent_to_dragon()
-      end
-    elseif ecs_single_entity["orientation"] == "west" then
-      if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] - 1}
-      or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
-      or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] + 1} == dragon_location then
-        relocate_opponent_to_dragon()
-      end
-    elseif ecs_single_entity["orientation"] == "east" then
-      if {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] - 1}
-      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
-      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] + 1} == dragon_location then
-        relocate_opponent_to_dragon()
-      end
-    end
+		if ecs_single_entity["actor"] == "joy"
+																	or "sadness"
+																	or "fear"
+																	or "disgust"
+																	or "anger"
+																	or "surprise"
+																	or "knight" then
+	    if ecs_single_entity["orientation"] == "north" then
+	      if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] - 1}
+	      or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
+	      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] - 1} == dragon_location then
+					ecs_single_entity["location"][1] = dragon_location[1]
+				  ecs_single_entity["location"][2] = dragon_location[2]
+	      end
+	    elseif ecs_single_entity["orientation"] == "south" then
+	      if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] + 1}
+	      or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1}
+	      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] + 1} == dragon_location then
+					ecs_single_entity["location"][1] = dragon_location[1]
+				  ecs_single_entity["location"][2] = dragon_location[2]
+	      end
+	    elseif ecs_single_entity["orientation"] == "west" then
+	      if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] - 1}
+	      or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
+	      or {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2] + 1} == dragon_location then
+					ecs_single_entity["location"][1] = dragon_location[1]
+				  ecs_single_entity["location"][2] = dragon_location[2]
+	      end
+	    elseif ecs_single_entity["orientation"] == "east" then
+	      if {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] - 1}
+	      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]}
+	      or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2] + 1} == dragon_location then
+					ecs_single_entity["location"][1] = dragon_location[1]
+				  ecs_single_entity["location"][2] = dragon_location[2]
+	      end
+	    end
 
-    if ecs_single_entity["actor"] == "sadness" then
-      if ecs_single_entity["orientation"] == "west" or "east" then
-        if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
-        or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1} == dragon_location then
-          relocate_opponent_to_dragon()
-        end
-      elseif ecs_single_entity["orientation"] == "north" or "south" then
-        if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
-        or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]} == dragon_location then
-          relocate_opponent_to_dragon()
-        end
-      end
+	    if ecs_single_entity["actor"] == "sadness" then
+	      if ecs_single_entity["orientation"] == "west" or "east" then
+	        if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 1}
+	        or {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 1} == dragon_location then
+						ecs_single_entity["location"][1] = dragon_location[1]
+					  ecs_single_entity["location"][2] = dragon_location[2]
+	        end
+	      elseif ecs_single_entity["orientation"] == "north" or "south" then
+	        if {ecs_single_entity["location"][1] - 1, ecs_single_entity["location"][2]}
+	        or {ecs_single_entity["location"][1] + 1, ecs_single_entity["location"][2]} == dragon_location then
+						ecs_single_entity["location"][1] = dragon_location[1]
+					  ecs_single_entity["location"][2] = dragon_location[2]
+	        end
+	      end
 
-    elseif ecs_single_entity["actor"] == "disgust" then
-      if ecs_single_entity["orientation"] == "west" then
-        if {ecs_single_entity["location"][1] - 2, ecs_single_entity["location"][2]} then
-          relocate_opponent_to_dragon()
-          -- actually, disgust should stay in place with the lance touching the dragon.
-        end
-      elseif ecs_single_entity["orientation"] == "east" then
-        if {ecs_single_entity["location"][1] + 2, ecs_single_entity["location"][2]} then
-          relocate_opponent_to_dragon()
-        end
-      elseif ecs_single_entity["orientation"] == "north" then
-        if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 2} then
-          relocate_opponent_to_dragon()
-        end
-      elseif ecs_single_entity["orientation"] == "south" then
-        if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 2} then
-          relocate_opponent_to_dragon()
-        end
-      end
+	    elseif ecs_single_entity["actor"] == "disgust" then
+	      if ecs_single_entity["orientation"] == "west" and ecs_single_entity["location"][1] ~= 2 then
+	        if {ecs_single_entity["location"][1] - 2, ecs_single_entity["location"][2]} then
+						ecs_single_entity["location"][1] = dragon_location[1]
+					  ecs_single_entity["location"][2] = dragon_location[2]
+	          -- actually, disgust should stay in place with the lance touching the dragon.
+	        end
+	      elseif ecs_single_entity["orientation"] == "east" and ecs_single_entity["location"][1] ~= (current_dungeon_size - 1) then
+	        if {ecs_single_entity["location"][1] + 2, ecs_single_entity["location"][2]} then
+						ecs_single_entity["location"][1] = dragon_location[1]
+					  ecs_single_entity["location"][2] = dragon_location[2]
+	        end
+	      elseif ecs_single_entity["orientation"] == "north" and ecs_single_entity["location"][2] ~= 2 then
+	        if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] - 2} then
+						ecs_single_entity["location"][1] = dragon_location[1]
+					  ecs_single_entity["location"][2] = dragon_location[2]
+	        end
+	      elseif ecs_single_entity["orientation"] == "south" and ecs_single_entity["location"][2] ~= (current_dungeon_size - 1) then
+	        if {ecs_single_entity["location"][1], ecs_single_entity["location"][2] + 2} then
+						ecs_single_entity["location"][1] = dragon_location[1]
+					  ecs_single_entity["location"][2] = dragon_location[2]
+	        end
+	      end
 
-    end
-
+	    end
+		end
   end)
-
-
-relocate_opponent_to_dragon = function()
-  ecs_single_entity["location"][1] = dragon_location[1]
-  ecs_single_entity["location"][2] = dragon_location[2]
-end
 
 
 arrow_system = ecs_system({"actor", "touched_who", "has_collided"},
@@ -1858,12 +1871,12 @@ end
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009900000000000
-00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000998000000899000009900000088000
-00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000998000000899000008800000099000
-00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000099000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000017178888777333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700c88888881117888071717777737333330000000000000000000000000000000000000000000000000000000000000000000000000009900000000000
+00077000ccc777771117888017178888777333330000000000000000000000000000000000000000000000000000000000998000000899000009900000088000
+00077000c7cc88887773777077777777333333330000000000000000000000000000000000000000000000000000000000998000000899000008800000099000
+00700700ccc777778887111088888888333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000099000
+00000000c88888888887111077777777333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 22222200000000000000000000000000002222220000000000000000000000002220022200000000000000000000000022200222000000000000000000000000
 02222200000000ff000000000000000000222220ff0000000000000000000000002002000ffffff00f0220f000000000002002000ffffff00f0220f000000000
@@ -2116,7 +2129,7 @@ __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-00000000000000000000000005050505010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000010000000100090101010b0b0b0b0b0b030303030303030303030303070707070303030303030303030303030303030303030303030303030303030303000107
+000a0000000000000000000005050505010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000010000000100090101010b0b0b0b0b0b030303030303030303030303070707070303030303030303030303030303030303030303030303030303030303000107
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2281,3 +2294,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
